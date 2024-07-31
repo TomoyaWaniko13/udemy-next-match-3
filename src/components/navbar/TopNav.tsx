@@ -24,8 +24,12 @@ const TopNav = () => {
         </NavbarItem>
       </NavbarContent>
       <NavbarContent justify={'end'}>
-        <Button variant={'bordered'}>Login</Button>
-        <Button variant={'bordered'}>Register</Button>
+        <Button as={Link} href={'/login'} variant={'bordered'}>
+          Login
+        </Button>
+        <Button as={Link} href={'/register'} variant={'bordered'}>
+          Register
+        </Button>
       </NavbarContent>
     </Navbar>
   );
