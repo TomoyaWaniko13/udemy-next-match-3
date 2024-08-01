@@ -6,6 +6,8 @@ import { prisma } from '@/lib/prisma';
 import { ActionResult } from '@/types';
 import { User } from '@prisma/client';
 
+// RegisterForm.tsxで使用される。
+// 新しいuserをregisterする。
 export async function registerUser(
   data: RegisterSchema
 ): Promise<ActionResult<User>> {
@@ -38,4 +40,13 @@ export async function registerUser(
     // string
     return { status: 'error', error: 'Something went wrong' };
   }
+}
+
+// used in auth.config.ts
+export async function getUserByEmail(email: string) {
+  return prisma.user.findUnique({ where: { email } });
+}
+
+export async function getUserById(id: string) {
+  return prisma.user.findUnique({ where: { id } });
 }
