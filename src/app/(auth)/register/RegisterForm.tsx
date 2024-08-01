@@ -6,6 +6,7 @@ import { Button, Input } from '@nextui-org/react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { RegisterSchema, registerSchema } from '@/lib/schemas/registerSchema';
+import { registerUser } from '@/app/actions/authActions';
 
 const RegisterForm = () => {
   const {
@@ -17,8 +18,10 @@ const RegisterForm = () => {
     mode: 'onTouched',
   });
 
-  const onSubmit = (data: RegisterSchema) => {
-    console.log(data);
+  const onSubmit = async (data: RegisterSchema) => {
+    // registerUser() は　server action.
+    const result = await registerUser(data);
+    console.log(result);
   };
 
   return (
@@ -36,7 +39,6 @@ const RegisterForm = () => {
             <Input
               label={'Name'}
               variant={'bordered'}
-              type={'password'}
               {...register('name')}
               isInvalid={!!errors.name}
               errorMessage={errors.name?.message as string}
