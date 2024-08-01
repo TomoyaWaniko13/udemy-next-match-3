@@ -7,6 +7,7 @@ import { compare } from 'bcryptjs';
 export default {
   providers: [
     Credentials({
+      // 29 (Signing in users)
       // emailとpasswordを使ってloginする。
       name: 'credentials',
       async authorize(creds) {

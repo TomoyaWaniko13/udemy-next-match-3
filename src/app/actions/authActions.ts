@@ -5,12 +5,38 @@ import bcrypt from 'bcryptjs';
 import { prisma } from '@/lib/prisma';
 import { ActionResult } from '@/types';
 import { User } from '@prisma/client';
+import { LoginSchema } from '@/lib/schemas/loginSchema';
+
+import { AuthError } from 'next-auth';
+import { signIn } from '@/auth';
+
+// 30 (Signing in users Part 2)
+// サーバーサイドで、email, passwordをもとにloginする。
+export async function signInUser(data: LoginSchema): Promise<ActionResult<string>> {
+  try {
+    const result = await signIn('credential', {
+      email: data.email,
+      password: data.password,
+      redirect: false,
+    });
+
+    console.log(result);
+
+    return { status: 'success', data: 'Logged in' };
+  } catch (error) {
+    console.log(error);
+
+    if (error instanceof AuthError) {
+      return { status: 'error', error: error.type };
+    } else {
+      return { status: 'error', error: 'something　else went wrong' };
+    }
+  }
+}
 
 // RegisterForm.tsxで使用される。
-// 新しいuserをregisterする。
-export async function registerUser(
-  data: RegisterSchema
-): Promise<ActionResult<User>> {
+// name, email, passwordで新しいuserをregisterする。
+export async function registerUser(data: RegisterSchema): Promise<ActionResult<User>> {
   try {
     const validated = registerSchema.safeParse(data);
 

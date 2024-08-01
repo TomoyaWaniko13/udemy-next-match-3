@@ -6,19 +6,26 @@ import { Button, Input } from '@nextui-org/react';
 import { useForm } from 'react-hook-form';
 import { loginSchema, LoginSchema } from '@/lib/schemas/loginSchema';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { signInUser } from '@/app/actions/authActions';
+import { useRouter } from 'next/navigation';
 
 const LoginForm = () => {
+  const router = useRouter();
+
   const {
     register,
     handleSubmit,
-    formState: { errors, isValid },
-  } = useForm<LoginSchema>({
-    resolver: zodResolver(loginSchema),
-    mode: 'onTouched',
-  });
+    formState: { errors, isValid, isSubmitting },
+  } = useForm<LoginSchema>({ resolver: zodResolver(loginSchema), mode: 'onTouched' });
 
-  const onSubmit = (data: LoginSchema) => {
-    console.log(data);
+  const onSubmit = async (data: LoginSchema) => {
+    // 30 (Signing in users Part 2)
+    const result = await signInUser(data);
+    if (result.status === 'success') {
+      router.push('/members');
+    } else {
+      console.log(result.error);
+    }
   };
 
   return (
@@ -48,12 +55,7 @@ const LoginForm = () => {
               isInvalid={!!errors.password}
               errorMessage={errors.password?.message as string}
             />
-            <Button
-              isDisabled={!isValid}
-              fullWidth
-              color={'secondary'}
-              type={'submit'}
-            >
+            <Button isLoading={isSubmitting} isDisabled={!isValid} fullWidth color={'secondary'} type={'submit'}>
               Login
             </Button>
           </div>
