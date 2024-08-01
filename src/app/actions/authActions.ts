@@ -11,10 +11,11 @@ import { AuthError } from 'next-auth';
 import { signIn } from '@/auth';
 
 // 30 (Signing in users Part 2)
-// サーバーサイドで、email, passwordをもとにloginする。
+// signIn()を使って、サーバーサイドで、email, passwordをもとにloginする。
 export async function signInUser(data: LoginSchema): Promise<ActionResult<string>> {
+  console.log('signInUser() working!');
   try {
-    const result = await signIn('credential', {
+    const result = await signIn('credentials', {
       email: data.email,
       password: data.password,
       redirect: false,
@@ -27,9 +28,14 @@ export async function signInUser(data: LoginSchema): Promise<ActionResult<string
     console.log(error);
 
     if (error instanceof AuthError) {
-      return { status: 'error', error: error.type };
+      switch (error.type) {
+        case 'CredentialsSignin':
+          return { status: 'error', error: 'invalid credentials' };
+        default:
+          return { status: 'error', error: 'Something went wrong' };
+      }
     } else {
-      return { status: 'error', error: 'something　else went wrong' };
+      return { status: 'error', error: 'Something else went wrong' };
     }
   }
 }

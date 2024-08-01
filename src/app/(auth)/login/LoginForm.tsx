@@ -8,6 +8,7 @@ import { loginSchema, LoginSchema } from '@/lib/schemas/loginSchema';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { signInUser } from '@/app/actions/authActions';
 import { useRouter } from 'next/navigation';
+import { toast } from 'react-toastify';
 
 const LoginForm = () => {
   const router = useRouter();
@@ -24,7 +25,8 @@ const LoginForm = () => {
     if (result.status === 'success') {
       router.push('/members');
     } else {
-      console.log(result.error);
+      // 31 (Adding notification toasts to the app)
+      toast.error(result.error as string);
     }
   };
 
