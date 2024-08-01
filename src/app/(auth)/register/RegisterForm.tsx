@@ -12,7 +12,8 @@ const RegisterForm = () => {
   const {
     register,
     handleSubmit,
-    formState: { errors, isValid },
+    setError,
+    formState: { errors, isValid, isSubmitting },
   } = useForm<RegisterSchema>({
     resolver: zodResolver(registerSchema),
     mode: 'onTouched',
@@ -21,7 +22,20 @@ const RegisterForm = () => {
   const onSubmit = async (data: RegisterSchema) => {
     // registerUser() は　server action.
     const result = await registerUser(data);
-    console.log(result);
+
+    // 29(Handling errors in the form Part 2)
+    if (result.status === 'success') {
+      console.log('User registered successfully');
+    } else {
+      if (Array.isArray(result.error)) {
+        result.error.forEach((e: any) => {
+          const fieldName = e.path.join('.') as 'email' | 'name' | 'password';
+          setError(fieldName, { message: e.message });
+        });
+      } else {
+        setError('root.serverError', { message: result.error });
+      }
+    }
   };
 
   return (
@@ -58,13 +72,20 @@ const RegisterForm = () => {
               isInvalid={!!errors.password}
               errorMessage={errors.password?.message as string}
             />
+            {/* 29(Handling errors in the form Part 2) */}
+            {errors.root?.serverError && (
+              <p className={'text-danger text-sm'}>
+                {errors.root.serverError.message}
+              </p>
+            )}
             <Button
+              isLoading={isSubmitting}
               isDisabled={!isValid}
               fullWidth
               color={'secondary'}
               type={'submit'}
             >
-              Login
+              Register
             </Button>
           </div>
         </form>
