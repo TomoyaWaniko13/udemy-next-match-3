@@ -8,7 +8,10 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
   // 33 (Using Auth.js callbacks)
   callbacks: {
     async session({ token, session }) {
+      // token.subは userのid
+      // session.userはuserがloginしているかどうか確認
       if (token.sub && session.user) {
+        // session.user.idに token.sub(userのid)　をセット
         session.user.id = token.sub;
       }
       return session;
