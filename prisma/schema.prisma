@@ -12,3 +12,92 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+// model Account の主な役割は、ユーザーの認証情報を管理すること
+model Account {
+  id                String  @id @default(cuid())
+  // このアカウントが属するユーザーのID, User モデルの id フィールドを参照する外部キー
+  userId            String
+  // アカウントの種類（例：「oauth」、「email」など）
+  type              String
+  // 認証プロバイダーの名前（例：「google」、「facebook」など）
+  provider          String
+  // プロバイダーが割り当てた一意のアカウントID
+  providerAccountId String
+  // OAuth リフレッシュトークン(保護されたリソースにアクセスするための一時的な認証情報)
+  refresh_token     String? @db.Text
+  // OAuth アクセストークン(新しいアクセストークンを取得するための長期的な認証情報)
+  access_token      String? @db.Text
+  // トークンの有効期限（通常はUNIXタイムスタンプ）
+  expires_at        Int?
+  // トークンの種類（例：「Bearer」）
+  token_type        String?
+  // アクセストークンに付与されたスコープ（権限範囲）
+  scope             String?
+  // OpenID Connect IDトークン
+  id_token          String? @db.Text
+  // セッション状態情報（一部のプロバイダーで使用）
+  session_state     String?
+
+  // user User：
+  // これは、Account モデルが User モデルへの参照を持つことを示しています。
+  // user はこのリレーションシップの名前で、User はリレーションシップの対象となるモデルです。
+  // (各 Account は一人の User に属している。)
+
+  // fields: [userId]：
+  // この Account モデルの userId フィールドが、関係を表す外部キーであることを指定しています。
+  // (この関係は Account の userId フィールドによって表現される。)
+
+  // references: [id]：
+  // Account モデルの userId が、User モデルの id フィールドを参照することを示しています。
+  // (userId は User モデルの id を参照している。)
+
+  // onDelete: Cascade：
+  // これは削除時の挙動を指定しています。
+  // User レコードが削除された場合、それに関連する全ての Account レコードも自動的に削除されます（カスケード削除）。
+  // (User が削除されたら、関連する全ての Account も削除される。)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // @@unique はテーブルレベルの制約を指定するPrismaの構文
+  // ([provider, providerAccountId]) は、この制約が provider と providerAccountId の2つのフィールドの組み合わせに適用されることを示しています。
+  // provider と providerAccountId の組み合わせは、テーブル内で一意でなければなりません。
+  // 同じ組み合わせの値を持つ別のレコードを作成することはできません。
+  @@unique([provider, providerAccountId])
+}
+
+// model User の主な役割は、アプリケーションのユーザー情報を管理すること
+model User {
+  id             String    @id @default(cuid())
+  name           String?
+  email          String?   @unique
+  emailVertified DateTime?
+  passwordHash   String
+  image          String?
+
+  // 対多（one-to-many）の関係を表現しています：
+  // 1人のユーザー（User）が複数のアカウント（Account）を持つことができます。
+  // 逆に言えば、各アカウントは1人のユーザーにのみ属します。
+
+  // この定義により、以下のようなことが可能になります：
+  // ユーザーの全アカウントを簡単に取得できる
+  // ユーザーに新しいアカウントを追加できる
+  // ユーザーに関連するアカウントを一括で操作できる
+
+  // // ユーザーとその全アカウントを取得
+  // const userWithAccounts = await prisma.user.findUnique({
+  //   where: { id: userId },
+  //   include: { accounts: true }
+  // });
+
+  // // ユーザーに新しいアカウントを追加
+  // const updatedUser = await prisma.user.update({
+  //   where: { id: userId },
+  //   data: {
+  //     accounts: {
+  //       create: { /* 新しいアカウントのデータ */ }
+  //     }
+  //   }
+  // });
+
+  accounts Account[]
+}
