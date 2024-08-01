@@ -8,7 +8,7 @@ import { User } from '@prisma/client';
 import { LoginSchema } from '@/lib/schemas/loginSchema';
 
 import { AuthError } from 'next-auth';
-import { signIn } from '@/auth';
+import { signIn, signOut } from '@/auth';
 
 // 30 (Signing in users Part 2)
 // signIn()を使って、サーバーサイドで、email, passwordをもとにloginする。
@@ -38,6 +38,13 @@ export async function signInUser(data: LoginSchema): Promise<ActionResult<string
       return { status: 'error', error: 'Something else went wrong' };
     }
   }
+}
+
+// 35 (Adding a dropdown menu to the Nav bar Part 2)
+// signOut()はserver sideであり、client sideのcomponent（UserMenu.tsx) では呼び出せないので、
+// server actionとして設定する。
+export async function signOutUser() {
+  await signOut({ redirectTo: '/' });
 }
 
 // RegisterForm.tsxで使用される。

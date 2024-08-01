@@ -24,6 +24,7 @@ const LoginForm = () => {
     const result = await signInUser(data);
     if (result.status === 'success') {
       router.push('/members');
+      router.refresh();
     } else {
       // 31 (Adding notification toasts to the app)
       toast.error(result.error as string);
