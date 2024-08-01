@@ -16,7 +16,7 @@ const TopNav = async () => {
         item: ['text-xl', 'uppercase', 'data-[active=true]:text-blue-600'],
       }}
     >
-      <NavbarBrand>
+      <NavbarBrand as={Link} href={'/'}>
         <span className={'font-bold font-mono text-3xl'}>NM</span>
       </NavbarBrand>
       <NavbarContent justify={'center'}>
