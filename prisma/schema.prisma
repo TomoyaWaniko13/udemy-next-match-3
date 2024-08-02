@@ -66,6 +66,8 @@ model Account {
 }
 
 // model User の主な役割は、アプリケーションのユーザー情報を管理すること
+// name, email, passwordHashは registerに使われる。
+// emailとpasswordHashは loginに使われる。
 model User {
   id             String    @id @default(cuid())
   name           String?
@@ -100,4 +102,38 @@ model User {
   // });
 
   accounts Account[]
+  Member   Member?
+}
+
+// 40 (Updating the prisma schema)
+// Memberはprofile情報(gender, dateOfBrith, city, Photo[]など)を含むmodel
+// 1つのMemberは1つのUserとrelationshipを持つ。
+model Member {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  name        String
+  gender      String
+  dateOfBirth DateTime
+  created     DateTime @default(now())
+  updated     DateTime @default(now())
+  description String
+  city        String
+  country     String
+  image       String?
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // 対多（one-to-many）の関係を表現しています：
+  // 1人のMember が複数のPhoto を持つことができます。
+  // 逆に言えば、各Photo は1人のMember にのみ属します。
+  Photo       Photo[]
+}
+
+// 40 (Updating the prisma schema)
+// Photo modelは　Member modelに含まれる。
+model Photo {
+  id       String  @id @default(cuid())
+  url      String
+  publicId String?
+
+  memberId String
+  member   Member @relation(fields: [memberId], references: [id], onDelete: Cascade)
 }
