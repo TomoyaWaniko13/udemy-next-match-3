@@ -69,6 +69,8 @@ model Account {
 // name, email, passwordHashは registerに使われる。
 // emailとpasswordHashは loginに使われる。
 model User {
+  // 33 (Usign NextAuth callbacks)
+  // tokenのsub fieldがこのidの値と同じである。
   id             String    @id @default(cuid())
   name           String?
   email          String?   @unique
