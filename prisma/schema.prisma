@@ -111,6 +111,7 @@ model User {
 // 1つのMemberは1つのUserとrelationshipを持つ。
 model Member {
   id          String   @id @default(cuid())
+  // foregin key
   userId      String   @unique
   name        String
   gender      String
