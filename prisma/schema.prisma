@@ -100,9 +100,8 @@ model User {
   //     }
   //   }
   // });
-
   accounts Account[]
-  Member   Member?
+  member   Member?
 }
 
 // 40 (Updating the prisma schema)
@@ -124,11 +123,12 @@ model Member {
   // 対多（one-to-many）の関係を表現しています：
   // 1人のMember が複数のPhoto を持つことができます。
   // 逆に言えば、各Photo は1人のMember にのみ属します。
-  Photo       Photo[]
+  photo       Photo[]
 }
 
 // 40 (Updating the prisma schema)
 // Photo modelは　Member modelに含まれる。
+// 具体的には、、Memberがプロフィール情報としてPhoto[]を持つ。
 model Photo {
   id       String  @id @default(cuid())
   url      String
