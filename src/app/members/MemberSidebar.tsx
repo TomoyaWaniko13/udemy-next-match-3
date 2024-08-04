@@ -1,3 +1,5 @@
+'use client';
+
 import { Member } from '@prisma/client';
 import { Button, Card, Divider, Image } from '@nextui-org/react';
 import { CardBody, CardFooter } from '@nextui-org/card';
