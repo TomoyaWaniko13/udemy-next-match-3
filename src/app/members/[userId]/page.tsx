@@ -1,17 +1,22 @@
 import { getMemberByUserId } from '@/app/actions/memberActions';
 import { notFound } from 'next/navigation';
+import { CardBody, CardHeader } from '@nextui-org/card';
+import { Divider } from '@nextui-org/react';
 
 // 45 (Using dynamic routes in Next.js)
-// When we use a layout page, this member detailed page is effectively
-// going to be a child of this layout page.
-// So we cannot pass this member to our layout.tsx page, but we're going to use
-// our member sidebar on this, which needs access to the member. (47)
+// 48 (Creating the Member detailed content)
 const MemberDetailedPage = async ({ params }: { params: { userId: string } }) => {
   // getMemberByUserId()は server action
   const member = await getMemberByUserId(params.userId);
   if (!member) return notFound();
 
-  return <div>{member.name}</div>;
+  return (
+    <>
+      <CardHeader className={'text-2xl font-semibold text-secondary'}>Profile</CardHeader>
+      <Divider />
+      <CardBody>{member.description}</CardBody>
+    </>
+  );
 };
 
 export default MemberDetailedPage;

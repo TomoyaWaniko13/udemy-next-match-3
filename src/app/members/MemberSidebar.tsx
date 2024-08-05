@@ -19,7 +19,7 @@ const MemberSidebar = ({ member }: Props) => {
   const navLinks = [
     { name: 'Profile', href: `${basePath}` },
     { name: 'Photos', href: `${basePath}/photos` },
-    { name: 'Chat', href: `${basePath}/chats` },
+    { name: 'Chat', href: `${basePath}/chat` },
   ];
 
   return (

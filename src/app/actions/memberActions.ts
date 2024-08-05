@@ -2,6 +2,7 @@
 
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/auth';
+import { Photo } from '@prisma/client';
 
 // 42(Fetching data from the Database using server actions)
 // Memberはプロフィール情報(gender, dateOfBrith, city, Photo[]など)を含むmodel
@@ -28,4 +29,19 @@ export async function getMemberByUserId(userId: string) {
   } catch (error) {
     console.log(error);
   }
+}
+
+// 48 (Creating the Member detailed content)
+// userIdをもとにMemberのPhotosを取得するserver action
+export async function getMemberPhotosByUserId(userId: string) {
+  // Memberのphotoだけをとってくる。
+  const member = await prisma.member.findUnique({
+    where: { userId },
+    select: { photo: true },
+  });
+
+  if (!member) return null;
+
+  // member objectの photo配列を抽出する。
+  return member.photo.map((p) => p) as Photo[];
 }
