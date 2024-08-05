@@ -1,6 +1,7 @@
 import { CardBody, CardHeader, Divider, Image } from '@nextui-org/react';
 import { getMemberPhotosByUserId } from '@/app/actions/memberActions';
 
+// 48 (Creating the member detailed content)
 const PhotosPage = async ({ params }: { params: { userId: string } }) => {
   const photos = await getMemberPhotosByUserId(params.userId);
 
