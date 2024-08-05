@@ -8,7 +8,7 @@ import { User } from '@prisma/client';
 import { LoginSchema } from '@/lib/schemas/loginSchema';
 
 import { AuthError } from 'next-auth';
-import { signIn, signOut } from '@/auth';
+import { auth, signIn, signOut } from '@/auth';
 
 // 30 (Signing in users Part 2)
 // signIn()を使って、サーバーサイドで、email, passwordをもとにloginする。
@@ -88,4 +88,16 @@ export async function getUserByEmail(email: string) {
 
 export async function getUserById(id: string) {
   return prisma.user.findUnique({ where: { id } });
+}
+
+// 54 (Adding the like toggle function)
+// likeActions.tsでuserIdが複数回必要になるので、method化する。
+export async function getAuthUserId() {
+  const session = await auth();
+  // auth.tsでidを設定しているので、session?.user?.idでログインしているユーザーのuserIdが取得できる。
+  const userId = session?.user?.id;
+
+  if (!userId) throw new Error('Unauthorized');
+
+  return userId;
 }

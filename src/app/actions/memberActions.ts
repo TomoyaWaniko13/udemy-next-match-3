@@ -34,7 +34,7 @@ export async function getMemberByUserId(userId: string) {
 // 48 (Creating the Member detailed content)
 // userIdをもとにMemberのPhotosを取得するserver action
 export async function getMemberPhotosByUserId(userId: string) {
-  // Memberのphotoだけをとってくる。
+  // Memberのphotoだけをselectする。
   const member = await prisma.member.findUnique({
     where: { userId },
     select: { photo: true },
