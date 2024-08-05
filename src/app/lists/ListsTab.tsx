@@ -46,7 +46,7 @@ const ListsTab = ({ members, likeIds }: Props) => {
   return (
     <div className={'flex w-full flex-col mt-10 gap-5'}>
       <Tabs aria-label={'Like tabs'} items={tabs} color={'secondary'} onSelectionChange={(key) => handleTabChange(key)}>
-        {/*item は 上で定めたtabs 配列の各要素を表します*/}
+        {/* item は 上で定めたtabs 配列の各要素を表します */}
         {(item) => (
           <Tab key={item.id} title={item.label}>
             {isPending ? (
