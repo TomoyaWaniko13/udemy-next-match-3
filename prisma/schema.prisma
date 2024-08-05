@@ -127,16 +127,41 @@ model Member {
   // 1人のMember が複数のPhoto を持つことができます。
   // 逆に言えば、各Photo は1人のMember にのみ属します。
   photo       Photo[]
+
+  // 53 (Updating the Prisma schema for a many to many relationship)
+
+  // このメンバーが「いいね」をした他のメンバーのリストを表します。
+  // つまり、このメンバーが「いいね」の送信元（source）となるケースです。
+  sourceLikes Like[] @relation("source")
+
+  // このメンバーが他のメンバーから「いいね」をされたリストを表します。
+  // つまり、このメンバーが「いいね」の対象（target）となるケースです。
+  targetLikes Like[] @relation("target")
 }
 
 // 40 (Updating the prisma schema)
 // Photo modelは　Member modelに含まれる。
 // 具体的には、、Memberがプロフィール情報としてPhoto[]を持つ。
 model Photo {
-  id       String  @id @default(cuid())
-  url      String
+  id       String     @id @default(cuid())
+  url      Stringsour
   publicId String?
 
   memberId String
   member   Member @relation(fields: [memberId], references: [id], onDelete: Cascade)
+}
+
+// 53 (Updating the Prisma schema for a many to many relationship)
+// One user can like many other users and many other users can like the one user.
+// many-to-many relationship
+model Like {
+  // 「いいね」を送信したユーザー
+  sourceUserId String
+  sourceMember Member @relation("source", fields: [sourceUserId], references: [userId], onDelete: Cascade)
+
+  // 「いいね」を受け取ったユーザー
+  targetUserId String
+  targetMember Member @relation("target", fields: [targetUserId], references: [userId], onDelete: Cascade)
+
+  @@id([sourceUserId, targetUserId])
 }
