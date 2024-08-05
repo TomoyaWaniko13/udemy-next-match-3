@@ -143,8 +143,8 @@ model Member {
 // Photo modelは　Member modelに含まれる。
 // 具体的には、、Memberがプロフィール情報としてPhoto[]を持つ。
 model Photo {
-  id       String     @id @default(cuid())
-  url      Stringsour
+  id       String  @id @default(cuid())
+  url      String
   publicId String?
 
   memberId String
