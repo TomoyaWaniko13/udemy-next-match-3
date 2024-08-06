@@ -6,6 +6,10 @@ import { MemberEditSchema, memberEditSchema } from '@/lib/schemas/memberEditSche
 import { useForm } from 'react-hook-form';
 import { Button, Input, Textarea } from '@nextui-org/react';
 import { useEffect } from 'react';
+import { updateMemberProfile } from '@/app/actions/userActions';
+import { toast } from 'react-toastify';
+import { useRouter } from 'next/navigation';
+import { handleFormServerErrors } from '@/lib/util';
 
 type Props = {
   member: Member;
@@ -13,13 +17,20 @@ type Props = {
 
 // 63 (Adding the edit member form)
 // 64 (Adding the edit member form Part 2)
+// 65 (Adding the server action to update the member)
 const EditForm = ({ member }: Props) => {
+  const router = useRouter();
+
   const {
     register,
     handleSubmit,
     reset,
+    setError,
     formState: { isValid, isDirty, isSubmitting, errors },
-  } = useForm<MemberEditSchema>({ resolver: zodResolver(memberEditSchema), mode: 'onTouched' });
+  } = useForm<MemberEditSchema>({
+    resolver: zodResolver(memberEditSchema),
+    mode: 'onTouched',
+  });
 
   // コンポーネントが最初にマウントされたとき、またはmemberプロップが変更されたときに、フォームのフィールドをmemberオブジェクトの現在の値で初期化します。
   useEffect(() => {
@@ -37,8 +48,19 @@ const EditForm = ({ member }: Props) => {
     // これにより、不要な再レンダリングを防ぎ、パフォーマンスを最適化しています。
   }, [member, reset]);
 
-  const onSubmit = (data: MemberEditSchema) => {
-    console.log(data);
+  // 65 (Adding the server action to update the member)
+  const onSubmit = async (data: MemberEditSchema) => {
+    // EditForm.tsxからのデータをvalidateしてMemberの情報を更新するserver action.
+    const result = await updateMemberProfile(data);
+
+    if (result.status === 'success') {
+      toast.success('Profile updated');
+      router.refresh();
+      // databaseでprofileをアップデートした後、formに入力されているデータの値もアップデートしたdataの値にする。
+      reset({ ...data });
+    } else {
+      handleFormServerErrors(result, setError);
+    }
   };
 
   return (
