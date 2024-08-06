@@ -9,18 +9,14 @@ import { usePathname } from 'next/navigation';
 
 type Props = {
   member: Member;
+  // edit/layout.tsxと[userId]/layout.tsxにでは、異なるnavLinksを使う。
+  navLinks: { name: string; href: string }[];
 };
 
 // 46 (Adding a Sidebar for the Member detailed page)
-const MemberSidebar = ({ member }: Props) => {
+// 62 (Adding the edit member route)
+const MemberSidebar = ({ member, navLinks }: Props) => {
   const pathname = usePathname();
-  const basePath = `/members/${member.userId}`;
-
-  const navLinks = [
-    { name: 'Profile', href: `${basePath}` },
-    { name: 'Photos', href: `${basePath}/photos` },
-    { name: 'Chat', href: `${basePath}/chat` },
-  ];
 
   return (
     <Card className={'w-full mt-10 items-center h-[80vh]'}>

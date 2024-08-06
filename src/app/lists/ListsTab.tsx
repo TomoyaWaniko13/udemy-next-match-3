@@ -49,6 +49,7 @@ const ListsTab = ({ members, likeIds }: Props) => {
         {/* item は 上で定めたtabs 配列の各要素を表します */}
         {(item) => (
           <Tab key={item.id} title={item.label}>
+            {/* isPending は真偽値で、トランジションが進行中かどうかを示します. true の場合、トランジションがまだ完了していないことを意味します。*/}
             {isPending ? (
               <LoadingComponent />
             ) : (

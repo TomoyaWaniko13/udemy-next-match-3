@@ -3,18 +3,19 @@ import { ReactNode } from 'react';
 import MemberSidebar from '@/app/members/MemberSidebar';
 import { notFound } from 'next/navigation';
 import { Card } from '@nextui-org/card';
+import { getAuthUserId } from '@/app/actions/authActions';
 
-// 47 (Using Next.js Layout pages)
 // 62 (Adding the edit member route)
 const Layout = async ({ children, params }: { children: ReactNode; params: { userId: string } }) => {
-  const member = await getMemberByUserId(params.userId);
+  const userId = await getAuthUserId();
+  // userIdをもとに Memberを取得する server action
+  const member = await getMemberByUserId(userId);
   if (!member) return notFound();
 
-  const basePath = `/members/${member.userId}`;
+  const basePath = `/members/edit`;
   const navLinks = [
-    { name: 'Profile', href: `${basePath}` },
-    { name: 'Photos', href: `${basePath}/photos` },
-    { name: 'Chat', href: `${basePath}/chat` },
+    { name: 'Edit profile', href: `${basePath}` },
+    { name: 'Update Photos', href: `${basePath}/photos` },
   ];
 
   return (
