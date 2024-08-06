@@ -1,11 +1,10 @@
-// 62 (Adding the edit member route)
 import { getAuthUserId } from '@/app/actions/authActions';
 import { getMemberByUserId } from '@/app/actions/memberActions';
 import { notFound } from 'next/navigation';
-import { CardBody, CardHeader } from '@nextui-org/card';
-import { Divider } from '@nextui-org/react';
+import { CardBody, CardHeader, Divider } from '@nextui-org/react';
 import EditForm from '@/app/members/edit/EditForm';
 
+// 62 (Adding the edit member route)
 // 63 (Adding the edit member form)
 const MemberEditPage = async () => {
   const userId = await getAuthUserId();

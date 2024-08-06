@@ -144,6 +144,7 @@ model Member {
 // 具体的には、、Memberがプロフィール情報としてPhoto[]を持つ。
 model Photo {
   id       String  @id @default(cuid())
+  // urlを <Image />のsrcに入力すると画像を表示できる。
   url      String
   publicId String?
 

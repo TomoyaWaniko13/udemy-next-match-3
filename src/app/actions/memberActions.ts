@@ -32,6 +32,7 @@ export async function getMemberByUserId(userId: string) {
 }
 
 // 48 (Creating the Member detailed content)
+// 66 (Displaying the images in the member edit component)
 // userIdをもとにMemberのPhotosを取得するserver action
 export async function getMemberPhotosByUserId(userId: string) {
   // Memberのphotoだけをselectする。
