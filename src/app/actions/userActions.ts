@@ -30,3 +30,19 @@ export async function updateMemberProfile(data: MemberEditSchema): Promise<Actio
     return { status: 'error', error: 'Something went wrong' };
   }
 }
+
+// 71 (Adding the image upload server actions)
+// what we're doing here is nothing to do with Cloudinary.
+// We're going to call this function after the image has been successfully uploaded into Cloudinary.
+export async function addImage(url: string, publicId: string) {
+  try {
+    const userId = await getAuthUserId();
+    return prisma.member.update({
+      where: { userId },
+      data: { photo: { create: [{ url, publicId }] } },
+    });
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+}
