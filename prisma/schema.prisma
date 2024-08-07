@@ -76,6 +76,7 @@ model User {
   email          String?   @unique
   emailVertified DateTime?
   passwordHash   String
+  // main imageのurl
   image          String?
 
   // 対多（one-to-many）の関係を表現しています：
@@ -121,6 +122,7 @@ model Member {
   description String
   city        String
   country     String
+  // main imageのurl
   image       String?
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   // 対多（one-to-many）の関係を表現しています：

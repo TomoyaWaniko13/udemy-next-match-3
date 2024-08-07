@@ -2,7 +2,7 @@
 
 import { memberEditSchema, MemberEditSchema } from '@/lib/schemas/memberEditSchema';
 import { ActionResult } from '@/types';
-import { Member } from '@prisma/client';
+import { Member, Photo } from '@prisma/client';
 import { getAuthUserId } from '@/app/actions/authActions';
 import { prisma } from '@/lib/prisma';
 
@@ -40,6 +40,30 @@ export async function addImage(url: string, publicId: string) {
     return prisma.member.update({
       where: { userId },
       data: { photo: { create: [{ url, publicId }] } },
+    });
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+}
+
+// 73 (Setting the main image)
+// 画像の<StarButton/>を押した時に、その画像をMainにする。
+export async function setMainImage(photo: Photo) {
+  try {
+    const userId = await getAuthUserId();
+
+    //  we've got two places we need to update the image here.
+    //  So inside the User we have an image property.
+    //  And also we've got the image property inside the Member.
+    await prisma.user.update({
+      where: { id: userId },
+      data: { image: photo.url },
+    });
+
+    return prisma.member.update({
+      where: { userId },
+      data: { image: photo.url },
     });
   } catch (error) {
     console.log(error);

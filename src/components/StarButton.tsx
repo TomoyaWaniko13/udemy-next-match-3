@@ -7,6 +7,7 @@ type Props = {
 };
 
 // 67 (Adding the buttons for the image actions)
+// selectedがtrueなら黄色いstarを表示する。
 const StarButton = ({ selected, loading }: Props) => {
   return (
     <div className={'relative hover:opacity-80 transition cursor-pointer'}>

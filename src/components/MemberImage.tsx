@@ -5,6 +5,7 @@ import { CldImage } from 'next-cloudinary';
 import { Image } from '@nextui-org/react';
 
 type Props = {
+  // Photo from Prisma client.
   photo: Photo | null;
 };
 
@@ -13,7 +14,7 @@ const MemberImage = ({ photo }: Props) => {
   return (
     <div>
       {photo?.publicId ? (
-        // Cloudinaryの写真の時, CldImageを使う。
+        // Cloudinaryからの写真の時, CldImageを使う。
         // CldImageはnext-cloudinaryのcomponent.
         <CldImage
           alt={'Image of member'}
@@ -25,7 +26,7 @@ const MemberImage = ({ photo }: Props) => {
           className={'rounded-2xl'}
         />
       ) : (
-        // file systemの写真の時, <Image />を使う。
+        // file systemからの写真の時, <Image />を使う。
         // <Image />はNextUIのcomponent.
         <Image width={220} height={220} src={photo?.url || '/images/user.png'} alt={'Image of user'} />
       )}

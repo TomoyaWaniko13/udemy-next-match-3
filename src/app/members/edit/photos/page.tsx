@@ -1,19 +1,18 @@
-import { CardBody, CardHeader, Divider, Image } from '@nextui-org/react';
+import { CardBody, CardHeader, Divider } from '@nextui-org/react';
 import { getAuthUserId } from '@/app/actions/authActions';
-import { getMemberPhotosByUserId } from '@/app/actions/memberActions';
-import StarButton from '@/components/StarButton';
-import DeleteButton from '@/components/DeleteButton';
-import ImageUploadButton from '@/components/ImageUploadButton';
+import { getMemberByUserId, getMemberPhotosByUserId } from '@/app/actions/memberActions';
 import MemberPhotoUpload from '@/app/members/edit/photos/MemberPhotoUpload';
-import MemberImage from '@/components/MemberImage';
+import MemberPhotos from '@/components/MemberPhotos';
 
 // 66 (Displaying the images in the member edit component)
 // 67 (Adding the buttons for the image actions)
 // 70 (Adding an image upload button)
 // 71 (Adding the image upload server actions)
 // 72 (Using the Cloudinary image component)
+// 73 (Setting the main image)
 const PhotosPage = async () => {
   const userId = await getAuthUserId();
+  const member = await getMemberByUserId(userId);
   const photos = await getMemberPhotosByUserId(userId);
 
   return (
@@ -23,22 +22,8 @@ const PhotosPage = async () => {
       <CardBody>
         {/* 71 (Adding the image upload server actions) */}
         <MemberPhotoUpload />
-        <div className={'grid grid-cols-4 gap-3 p-5'}>
-          {photos &&
-            photos.map((photo) => (
-              // <Image />の上に <StarButton/>と＜DeleteButton/>を配置したいので relativeを使う。
-              <div key={photo.id} className={'w-[220px] h-[220px] relative'}>
-                {/* 72 (Using the Cloudinary image component) */}
-                <MemberImage photo={photo} />
-                <div className={'absolute top-3 left-3 z-50'}>
-                  <StarButton selected={true} loading={false} />
-                </div>
-                <div className={'absolute top-3 right-3 z-50'}>
-                  <DeleteButton loading={false} />
-                </div>
-              </div>
-            ))}
-        </div>
+        {/* 73 (Setting the main image) */}
+        <MemberPhotos photos={photos} editing={true} mainImageUrl={member?.image} />
       </CardBody>
     </>
   );
