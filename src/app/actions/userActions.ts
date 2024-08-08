@@ -7,8 +7,10 @@ import { getAuthUserId } from '@/app/actions/authActions';
 import { prisma } from '@/lib/prisma';
 
 // 65 (Adding the server action to update the member)
+// 75 (Challenge solution)
 // EditForm.tsxからのデータをvalidateしてMemberの情報を更新するserver action.
-export async function updateMemberProfile(data: MemberEditSchema): Promise<ActionResult<Member>> {
+// 75でnameUpdatedを追加。user Profileをアップデートした時にnameがアップデートされる。
+export async function updateMemberProfile(data: MemberEditSchema, nameUpdated: boolean): Promise<ActionResult<Member>> {
   try {
     const userId = await getAuthUserId();
     const validated = memberEditSchema.safeParse(data);
@@ -16,6 +18,14 @@ export async function updateMemberProfile(data: MemberEditSchema): Promise<Actio
     if (!validated.success) return { status: 'error', error: validated.error.errors };
 
     const { name, description, city, country } = validated.data;
+
+    // 75で追加。
+    if (nameUpdated) {
+      await prisma.user.update({
+        where: { id: userId },
+        data: { name },
+      });
+    }
 
     // Member modelの全てのpropertiesを更新しなくても良い。
     const member = await prisma.member.update({
@@ -64,6 +74,23 @@ export async function setMainImage(photo: Photo) {
     return prisma.member.update({
       where: { userId },
       data: { image: photo.url },
+    });
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+}
+
+// 75 (Challenge solution)
+// mainの写真を変更した時、<TopNav/>で写真の表示を変更するために使う。
+export async function getUserInfoForNav() {
+  try {
+    const userId = await getAuthUserId();
+
+    // アップデートされたuserのnameとimageをreturnする。
+    return prisma.user.findUnique({
+      where: { id: userId },
+      select: { name: true, image: true },
     });
   } catch (error) {
     console.log(error);

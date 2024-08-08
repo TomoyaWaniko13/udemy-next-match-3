@@ -4,9 +4,12 @@ import { Button, NavbarItem } from '@nextui-org/react';
 import NavLink from '@/components/navbar/NavLink';
 import { auth } from '@/auth';
 import UserMenu from '@/components/navbar/UserMenu';
+import { getUserInfoForNav } from '@/app/actions/userActions';
 
 const TopNav = async () => {
   const session = await auth();
+  // 75 (Challenge Solution)
+  const userInfo = session?.user && (await getUserInfoForNav());
 
   return (
     <Navbar
@@ -26,8 +29,9 @@ const TopNav = async () => {
       </NavbarContent>
       <NavbarContent justify={'end'}>
         {/* 34 (Adding a dropdown menu to the Nav bar) */}
-        {session?.user ? (
-          <UserMenu user={session.user} />
+        {/* 75 (Challenge Solution) */}
+        {userInfo ? (
+          <UserMenu userInfo={userInfo} />
         ) : (
           <>
             <Button as={Link} href={'/login'} variant={'bordered'}>

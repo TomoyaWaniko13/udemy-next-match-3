@@ -18,6 +18,7 @@ type Props = {
 // 63 (Adding the edit member form)
 // 64 (Adding the edit member form Part 2)
 // 65 (Adding the server action to update the member)
+// 75 (Challenge solution)
 const EditForm = ({ member }: Props) => {
   const router = useRouter();
 
@@ -49,9 +50,13 @@ const EditForm = ({ member }: Props) => {
   }, [member, reset]);
 
   // 65 (Adding the server action to update the member)
+  // 75 (Challenge Solution)
   const onSubmit = async (data: MemberEditSchema) => {
-    // EditForm.tsxからのデータをvalidateしてMemberの情報を更新するserver action.
-    const result = await updateMemberProfile(data);
+    // formのname fieldの入力情報(data.name)がformのname fieldに設定されるmemberの情報(data.name)と違うか,
+    // つまりnameがupdateされたかをbooleanで表す。
+    const nameUpdated = data.name !== member.name;
+    // updateMemberProfile()はEditForm.tsxからのデータをvalidateしてMemberの情報を更新するserver action.
+    const result = await updateMemberProfile(data, nameUpdated);
 
     if (result.status === 'success') {
       toast.success('Profile updated');
