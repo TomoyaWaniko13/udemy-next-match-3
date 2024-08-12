@@ -5,6 +5,7 @@ import { ActionResult } from '@/types';
 import { Member, Photo } from '@prisma/client';
 import { getAuthUserId } from '@/app/actions/authActions';
 import { prisma } from '@/lib/prisma';
+import { cloudinary } from '@/lib/cloudinary';
 
 // 65 (Adding the server action to update the member)
 // 75 (Challenge solution)
@@ -74,6 +75,28 @@ export async function setMainImage(photo: Photo) {
     return prisma.member.update({
       where: { userId },
       data: { image: photo.url },
+    });
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+}
+
+// 76 (Deleting an image)
+export async function deleteImage(photo: Photo) {
+  try {
+    const userId = await getAuthUserId();
+
+    // photo.publicIdが存在すれば、Cloudinaryのphotoであるということ。
+    // そうであれば、Cloudinaryからphotoを削除する必要がある。
+    if (photo.publicId) {
+      await cloudinary.v2.uploader.destroy(photo.publicId);
+    }
+
+    // databaseからphotoをdeleteする。
+    return prisma.member.update({
+      where: { userId },
+      data: { photo: { delete: { id: photo.id } } },
     });
   } catch (error) {
     console.log(error);
