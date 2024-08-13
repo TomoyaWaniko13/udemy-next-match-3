@@ -5,6 +5,7 @@ import { Avatar, Dropdown, DropdownItem, DropdownMenu, DropdownSection, Dropdown
 import Link from 'next/link';
 import { signOut } from '@/auth';
 import { signOutUser } from '@/app/actions/authActions';
+import { transformImageUrl } from '@/lib/util';
 
 type Props = {
   // userは name, email, idなどを含んでいる。（prismaのUser modelではない。）
@@ -17,6 +18,7 @@ type Props = {
 
 // 34 (Adding a dropdown menu to the Nav bar)
 // 75 (Challenge solution)
+// 77 (Tidying up the images)
 const UserMenu = ({ userInfo }: Props) => {
   return (
     <Dropdown placement={'bottom-end'}>
@@ -28,7 +30,7 @@ const UserMenu = ({ userInfo }: Props) => {
           color={'secondary'}
           name={userInfo?.name || 'user avatar'}
           size={'sm'}
-          src={userInfo?.image || '/images/user.png'}
+          src={transformImageUrl(userInfo?.image) || '/images/user.png'}
         />
       </DropdownTrigger>
       <DropdownMenu variant={'flat'} aria-label={'user actions menu'}>

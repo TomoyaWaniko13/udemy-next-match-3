@@ -3,7 +3,7 @@
 import { Member } from '@prisma/client';
 import { Button, Card, Divider, Image } from '@nextui-org/react';
 import { CardBody, CardFooter } from '@nextui-org/card';
-import { calculateAge } from '@/lib/util';
+import { calculateAge, transformImageUrl } from '@/lib/util';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
@@ -15,6 +15,7 @@ type Props = {
 
 // 46 (Adding a Sidebar for the Member detailed page)
 // 62 (Adding the edit member route)
+// 77 (Tidying up the images)
 const MemberSidebar = ({ member, navLinks }: Props) => {
   const pathname = usePathname();
 
@@ -23,7 +24,7 @@ const MemberSidebar = ({ member, navLinks }: Props) => {
       <Image
         height={200}
         width={200}
-        src={member.image || '/images/user.png'}
+        src={transformImageUrl(member.image) || '/images/user.png'}
         alt={'User profile main image'}
         className={'rounded-full mt-6 aspect-square object-cover'}
       />

@@ -37,3 +37,19 @@ export function handleFormServerErrors<TFieldValues extends FieldValues>(
     setError('root.serverError', { message: errorResponse.error });
   }
 }
+
+// 77 (Tidying up the images)
+export function transformImageUrl(imageUrl?: string | null) {
+  if (!imageUrl) return null;
+
+  // cloudinaryのimageならURLを変更する必要はない。
+  if (!imageUrl.includes('cloudinary')) return imageUrl;
+
+  // indexOf() メソッドは、指定された部分文字列（この場合 '/upload/'）が最初に出現する位置のインデックスを返します。
+  // + '/upload/'.length　で '/upload/' の長さ（7文字）を加算しています。これにより、実際の uploadIndex は '/upload/' の直後の文字を指すことになります。
+  const uploadIndex = imageUrl.indexOf('/upload/') + '/upload/'.length;
+  const transformation = 'c_fill,w_300,h_300,g_faces/';
+  // 最初の slice(0, uploadIndex) は、URL の先頭（インデックス0）から uploadIndex の位置まで（uploadIndex は含まない）の部分を切り出します。
+  // 2つ目の imageUrl.slice(uploadIndex) は、uploadIndex の位置から('/upload/' の直後から) URL の末尾までの部分を切り出します。
+  return `${imageUrl.slice(0, uploadIndex)}${transformation}${imageUrl.slice(uploadIndex)}`;
+}

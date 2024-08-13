@@ -10,6 +10,7 @@ import MemberPhotos from '@/components/MemberPhotos';
 // 71 (Adding the image upload server actions)
 // 72 (Using the Cloudinary image component)
 // 73 (Setting the main image)
+// 77 (Tidying up the images)
 const PhotosPage = async () => {
   const userId = await getAuthUserId();
   const member = await getMemberByUserId(userId);
@@ -17,11 +18,12 @@ const PhotosPage = async () => {
 
   return (
     <>
-      <CardHeader className={'text-2xl font-semibold text-secondary'}>Edit Profile</CardHeader>
+      <CardHeader className={'flex flex-row justify-between items-center'}>
+        <div className={'text-2xl font-semibold text-secondary'}>Edit Profile</div>
+        <MemberPhotoUpload />
+      </CardHeader>
       <Divider />
       <CardBody>
-        {/* 71 (Adding the image upload server actions) */}
-        <MemberPhotoUpload />
         {/* 73 (Setting the main image) */}
         <MemberPhotos photos={photos} editing={true} mainImageUrl={member?.image} />
       </CardBody>
