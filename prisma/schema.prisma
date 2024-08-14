@@ -194,9 +194,11 @@ model Message {
   // sender と recipient は多対多の関係を示しているので、一人のメンバーが多くのメッセージを送信でき、また多くのメッセージを受信できる。
   sender           Member?   @relation("sender", fields: [senderId], references: [userId], onDelete: SetNull)
   recipient        Member?   @relation("recipient", fields: [recipientId], references: [userId], onDelete: SetNull)
-  // メッセージが読まれた日時。
+  // メッセージが読まれた日時。これにより、メッセージが既読か未読かを簡単に判断できます。
   dateRead         DateTime?
-  // 送信者がメッセージを削除したかどうか。これにより、メッセージが既読か未読かを簡単に判断できます。
+  // メッセージを物理的に削除せずに、senderDeleted または recipientDeleted を true に設定することで、各ユーザーの視点でメッセージを
+  // 「削除」できます。クエリ時にこれらのフラグを確認することで、「削除された」メッセージを表示から除外できます。
+  // 送信者がメッセージを削除したかどうか。
   senderDeleted    Boolean   @default(false)
   //  受信者がメッセージを削除したかどうか。
   recipientDeleted Boolean   @default(false)
