@@ -103,13 +103,12 @@ async function fetchMutualLikes(userId: string) {
   });
   const likeIds = likedUsers.map((x) => x.targetUserId);
 
+  // sourceUserId: { in: likeIds }という部分は、「sourceUserIdがlikeIds配列の中のいずれかの値と一致する」という条件を表しています。
   // ログインしているuserのidをtargetUserIdとして、
   // ログインしているuserがいいねをしたuserのidをsourceUserIdとする。
   // そうすることで、ログインしているuserがいいねをして、尚且つログインしているuserに対していいねをしたuserを取得できる。
   const mutualList = await prisma.like.findMany({
-    where: {
-      AND: [{ targetUserId: userId }, { sourceUserId: { in: likeIds } }],
-    },
+    where: { AND: [{ targetUserId: userId }, { sourceUserId: { in: likeIds } }] },
     select: { sourceMember: true },
   });
 
