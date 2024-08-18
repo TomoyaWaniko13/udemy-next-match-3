@@ -12,7 +12,8 @@ import { handleFormServerErrors } from '@/lib/util';
 // 82 (Creating the send message action)
 const ChatForm = () => {
   const router = useRouter();
-  // userIdはdirectoryの名前と一致している必要がある。
+  // useParams は Next.js のフックの1つです。このフックを使用すると、現在のURLのダイナミックルートパラメータにアクセスできます。
+  // userIdはdirectoryの名前と一致している必要があります。
   const params = useParams<{ userId: string }>();
 
   const {
@@ -24,6 +25,7 @@ const ChatForm = () => {
   } = useForm<MessageSchema>();
 
   const onSubmit = async (data: MessageSchema) => {
+    //formに入力されたメッセージをparams.userIdが示すuserに送る。
     const result = await createMessage(params.userId, data);
     if (result.status === 'error') {
       handleFormServerErrors(result, setError);

@@ -17,6 +17,7 @@ export function calculateAge(dateOfBirth: Date) {
 export function handleFormServerErrors<TFieldValues extends FieldValues>(
   // サーバーからのエラーレスポンス。
   errorResponse: { error: string | ZodIssue[] },
+  // UseFormSetErrorは React Hook Form が提供する型で、setError 関数の型を定義します。この関数を使用して、フォームフィールドにエラーを設定できます。
   setError: UseFormSetError<TFieldValues>,
 ) {
   // まず、errorResponse.error が配列かどうか(formのvalidationが失敗したかどうか)をチェックします。
@@ -27,6 +28,21 @@ export function handleFormServerErrors<TFieldValues extends FieldValues>(
       // .join('.'): この配列の要素を . で結合して文字列にします。例えば、 ['address', 'city'] は 'address.city' になります。
       // as Path<TFieldValues>: これは TypeScript の型アサーションです。結果の文字列を Path<TFieldValues> 型として扱うよう TypeScript に指示しています。
       // Path<TFieldValues>: これは React Hook Form の型で、フォームのフィールドパスを表します。TFieldValues はフォームの値の型です。
+
+      // フォームは、ネストされたオブジェクト構造を持つことがあります。例えば：
+      // {
+      //   name: string,
+      //   address: {
+      //     street: string,
+      //     city: string
+      //   }
+      // }
+      // サーバーサイドのバリデーションエラーは通常、このネスト構造を配列として表現します。
+      // 例: address.city のエラーは ['address', 'city'] として返される可能性があります。
+      // React Hook Form は、ネストされたフィールドを表すのにドット記法を使用します。
+      // つまり、address.city のようなフォーマットを期待しています。
+      // サーバーから返された配列形式のパス（例：['address', 'city']）を、
+      // React Hook Form が理解できるドット記法の文字列（例：'address.city'）に変換する必要があります。
       const fieldName = e.path.join('.') as Path<TFieldValues>;
       // setError を使用して、該当するフィールドにエラーメッセージを設定します。
       setError(fieldName, { message: e.message });
