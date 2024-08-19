@@ -5,6 +5,7 @@ import { ActionResult } from '@/types';
 import { Message } from '@prisma/client';
 import { getAuthUserId } from '@/app/actions/authActions';
 import { prisma } from '@/lib/prisma';
+import { mapMessageToMessageDto } from '@/lib/mappings';
 
 // 82 (Creating the send message action)
 // validationがsuccessならば、データベースにメッセージを記録する。
@@ -30,6 +31,7 @@ export async function createMessage(recipientUserId: string, data: MessageSchema
 }
 
 // 83 (Getting the message thread)
+// 84 (Creating a message DTO)
 // 特定の2人のユーザー間のメッセージスレッドを取得するためのserver action.
 // recipientIdは送信先のuserのidです。
 export async function getMessageThread(recipientId: string) {
@@ -37,7 +39,7 @@ export async function getMessageThread(recipientId: string) {
     // 現在ログインしているuserのidを取得。
     const userId = await getAuthUserId();
 
-    return prisma.message.findMany({
+    const messages = await prisma.message.findMany({
       where: {
         OR: [
           // 現在のユーザー（userId）が送信者で、指定された相手（recipientId）が受信者であるメッセージ
@@ -56,6 +58,8 @@ export async function getMessageThread(recipientId: string) {
         recipient: { select: { userId: true, name: true, image: true } },
       },
     });
+
+    return messages.map((message) => mapMessageToMessageDto(message));
   } catch (error) {
     console.log(error);
     throw error;
