@@ -4,7 +4,7 @@ import { MessageWithSenderRecipient } from '@/types';
 
 // 84 (Creating a message DTO)
 // mapMessageToMessageDto() 関数の主な目的は、データベースから取得したメッセージオブジェクト（MessageWithSenderRecipient型）を、
-// フロントエンドで使用しやすい形式（MessageDto型）に変換することです。
+// フロントエンドで使用しやすい形式（MessageDto型),　つまりネストされたオブジェクトを持たない、フラットな構造に変換することです。
 // 例えば、この関数によって以下のような変換が行われます
 // // 変換前
 // {

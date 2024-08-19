@@ -59,6 +59,37 @@ export async function getMessageThread(recipientId: string) {
       },
     });
 
+    // データベースから取得したメッセージの配列を、mapMessageToMessageDto()でフロントエンドで使用しやすい形式に変換しています。
+    // 例えば、以下のような変換が行われます：
+    // 変換前の配列（MessageWithSenderRecipient型）
+    // [
+    //   {
+    //     id: "1",
+    //     text: "Hello",
+    //     created: Date(2023-08-18T15:30:00),
+    //     dateRead: null,
+    //     sender: { userId: "user1", name: "Alice", image: "alice.jpg" },
+    //     recipient: { userId: "user2", name: "Bob", image: "bob.jpg" }
+    //   },
+    //   // ...他のメッセージオブジェクト
+    // ]
+    //
+    // // 変換後の配列（MessageDto型）
+    // [
+    //   {
+    //     id: "1",
+    //     text: "Hello",
+    //     created: "18 Aug 23 3:30:PM",
+    //     dateRead: null,
+    //     senderId: "user1",
+    //     senderName: "Alice",
+    //     senderImage: "alice.jpg",
+    //     recipientId: "user2",
+    //     recipientName: "Bob",
+    //     recipientImage: "bob.jpg"
+    //   },
+    //   // ...変換された他のメッセージオブジェクト
+    // ]
     return messages.map((message) => mapMessageToMessageDto(message));
   } catch (error) {
     console.log(error);

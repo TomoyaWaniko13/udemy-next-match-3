@@ -15,6 +15,8 @@ type ActionResult<T> =
 // 84 (Creating a message DTO)
 // MessageWithSenderRecipient 型は、Prismaの型生成機能を利用して作成された型です。
 // Messageモデルに対して特定の選択（select）を行った結果の型を生成します。
+// MessageWithSenderRecipient 型の主な目的は、メッセージデータと関連するユーザー（送信者と受信者）の情報を含む、
+// 詳細なメッセージオブジェクトの構造を定義することです。
 // この型定義により、以下のような構造を持つオブジェクトの型が生成されます：
 // {
 //   id: string;
