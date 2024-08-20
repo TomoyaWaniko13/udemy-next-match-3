@@ -6,7 +6,7 @@ import { MessageWithSenderRecipient } from '@/types';
 // mapMessageToMessageDto() 関数の主な目的は、データベースから取得したメッセージオブジェクト（MessageWithSenderRecipient型）を、
 // フロントエンドで使用しやすい形式（MessageDto型),　つまりネストされたオブジェクトを持たない、フラットな構造に変換することです。
 // 例えば、この関数によって以下のような変換が行われます
-// // 変換前
+// // 変換前(ネストされたobjectを持つ)
 // {
 //   id: "1",
 //   text: "Hello",
@@ -16,7 +16,7 @@ import { MessageWithSenderRecipient } from '@/types';
 //   recipient: { userId: "user2", name: "Bob", image: "bob.jpg" }
 // }
 //
-// // 変換後
+// // 変換後(ネストされたobjectを持たない)
 // {
 //   id: "1",
 //   text: "Hello",
@@ -33,11 +33,14 @@ export function mapMessageToMessageDto(message: MessageWithSenderRecipient) {
   return {
     id: message.id,
     text: message.text,
+    // 18 Aug 24 3:30:PM　というふうにformatされる。
     created: formatShortDateTime(message.created),
     dateRead: message.dateRead ? formatShortDateTime(message.dateRead) : null,
+    // sender objectにアクセスする。
     senderId: message.sender?.userId,
     senderName: message.sender?.name,
     senderImage: message.sender?.image,
+    // recipient objectにアクセスする。
     recipientId: message.recipient?.userId,
     recipientImage: message.recipient?.image,
     recipientName: message.recipient?.name,

@@ -54,7 +54,9 @@ export async function getMessageThread(recipientId: string) {
         text: true,
         created: true,
         dateRead: true,
+        // selectが使われているので、senderはobjectとして扱われる。
         sender: { select: { userId: true, name: true, image: true } },
+        // selectが使われているので、recipientはobjectとして扱われる。
         recipient: { select: { userId: true, name: true, image: true } },
       },
     });
