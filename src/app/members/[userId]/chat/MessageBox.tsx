@@ -1,7 +1,10 @@
+'use client';
+
 import { MessageDto } from '@/types';
 import clsx from 'clsx';
 import { Avatar, divider } from '@nextui-org/react';
 import { transformImageUrl } from '@/lib/util';
+import { useEffect, useRef } from 'react';
 
 type Props = {
   message: MessageDto;
@@ -10,10 +13,24 @@ type Props = {
 
 // 85 (Displaying the messages )
 // 86 (Displaying the messages Part 2)
+// 87 (Improving the message box)
 const MessageBox = ({ message, currentUserId }: Props) => {
   // message.senderIdがログインしているユーザーのidかどうか、つまり
   // ログインしているユーザーがmessageの送信者かチェックする。
   const isCurrentUserSender = message.senderId === currentUserId;
+
+  // messageEndRefは、メッセージリストの最後に配置された空のdiv要素を参照します。
+  const messageEndRef = useRef<HTMLDivElement>(null);
+
+  // レンダリングプロセス中にDOMを直接操作すると、Reactの差分計算や更新プロセスと競合する可能性があります。
+  // これにより、予期しない動作や、パフォーマンスの低下、さらにはエラーが発生する可能性があります。
+  // なので、DOMの操作（ここではスクロール）はレンダリング完了後に行う必要があります。
+  // useEffectは、コンポーネントがレンダリングされた後に実行されます.
+  // 非同期の性質：メッセージの追加やDOMの更新が非同期で行われる可能性があるため、それらが完了した後にスクロールを調整する必要があります。
+  useEffect(() => {
+    // scrollIntoView()メソッドは、参照された要素（この場合はメッセージリストの最後）が画面内に表示されるようにスクロールします。
+    if (messageEndRef.current) messageEndRef.current.scrollIntoView({ behavior: 'smooth' });
+  }, [messageEndRef]);
 
   const renderAvatar = () => {
     // returnをつける必要がある。
@@ -83,6 +100,7 @@ const MessageBox = ({ message, currentUserId }: Props) => {
         {/* messageを送ったのが、ログインしているユーザーである場合, メッセージの右側にアバターを表示 */}
         {isCurrentUserSender && renderAvatar()}
       </div>
+      <div ref={messageEndRef} />
     </div>
   );
 };
