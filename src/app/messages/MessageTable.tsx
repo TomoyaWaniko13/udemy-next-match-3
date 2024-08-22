@@ -66,7 +66,13 @@ const MessageTable = ({ messages }: Props) => {
               2列目（columnKey が 'text' の場合）: getKeyValue(message, 'text') は "Hello!" を返します。
               3列目（columnKey が 'created' の場合）: getKeyValue(message, 'created') は "2024-08-21" を返します。
               */}
-              {(columnKey) => <TableCell>{getKeyValue(item, columnKey)}</TableCell>}
+              {(columnKey) => (
+                <TableCell>
+                  <div className={`${!item.dateRead && !isOutbox}` ? 'font-semibold' : ''}>
+                    {getKeyValue(item, columnKey)}
+                  </div>
+                </TableCell>
+              )}
             </TableRow>
           )}
         </TableBody>

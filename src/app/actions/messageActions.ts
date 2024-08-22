@@ -32,6 +32,7 @@ export async function createMessage(recipientUserId: string, data: MessageSchema
 
 // 83 (Getting the message thread)
 // 84 (Creating a message DTO)
+// 91 (Adding the message read functionality)
 // 特定の2人のユーザー間のメッセージスレッドを取得するためのserver action.
 // recipientIdは送信先のuserのidです。
 export async function getMessageThread(recipientId: string) {
@@ -60,6 +61,22 @@ export async function getMessageThread(recipientId: string) {
         recipient: { select: { userId: true, name: true, image: true } },
       },
     });
+
+    // 「現在のユーザーが受け取った、まだ既読になっていないメッセージを全て既読にする」という処理を行っています。
+    // これにより、ユーザーがメッセージスレッドを開いたときに、相手からの未読メッセージが自動的に既読状態になります。
+    if (messages.length > 0) {
+      await prisma.message.updateMany({
+        // senderId: recipientId : 送信者が、会話の相手（recipientId）であるメッセージ
+        // recipientId: userId : 受信者がログインしている現在のユーザー（userId）であるメッセージ
+        // dateRead: null : まだ既読になっていない（dateReadがnullの）メッセージ
+        where: {
+          senderId: recipientId,
+          recipientId: userId,
+          dateRead: null,
+        },
+        data: { dateRead: new Date() },
+      });
+    }
 
     // データベースから取得したメッセージの配列を、mapMessageToMessageDto()でフロントエンドで使用しやすい形式に変換しています。
     // 例えば、以下のような変換が行われます：
