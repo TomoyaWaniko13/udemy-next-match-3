@@ -60,9 +60,7 @@ const MessageTable = ({ messages }: Props) => {
         case 'recipientName':
         case 'senderName':
           return (
-            <div
-              className={`flex items-center gap-2 cursor-pointer ${!item.dateRead && !isOutbox ? 'font-semibold' : ''}`}
-            >
+            <div className={`flex items-center gap-2 cursor-pointer `}>
               <Avatar
                 alt={'Image of member'}
                 src={(isOutbox ? item.recipientImage : item.senderImage) || '/images/user.png'}
@@ -108,7 +106,11 @@ const MessageTable = ({ messages }: Props) => {
             <TableRow key={item.id} className={'cursor-pointer'}>
               {/* 外側の関数：{(columnKey) => (...)} この関数は各列（columns 配列で定義された各要素）に対して呼び出されます。
                   columnKey は列(column)の識別子で、'recipientName'（または 'senderName'）、'text'、'created'、'actions' のいずれかです。*/}
-              {(columnKey) => <TableCell>{renderCell(item, columnKey as keyof MessageDto)}</TableCell>}
+              {(columnKey) => (
+                <TableCell className={`${!item.dateRead && !isOutbox ? 'font-semibold' : ''}`}>
+                  {renderCell(item, columnKey as keyof MessageDto)}
+                </TableCell>
+              )}
             </TableRow>
           )}
         </TableBody>
