@@ -144,6 +144,7 @@ export async function getMessagesByContainer(container: string) {
     //   recipientId: userId,
     //   recipientDeleted: false
     // }
+
     const conditions = {
       // [] 内に式を記述することで、その式の評価結果がプロパティ名として使用されます。
       // 'outbox'(送信箱)が選択されている場合、ログインしているユーザーが送信したmessageを取得するので、'senderId'を使う。
@@ -193,6 +194,19 @@ export async function getMessagesByContainer(container: string) {
 }
 
 // 93 (Adding the delete message action)
+// deleteMessage() は、メッセージの「論理削除」と「物理削除」を組み合わせて実装しています。
+
+// 論理削除の実装:
+// ユーザーがメッセージを「削除」した時、即座にデータベースから完全に削除するのではなく、まず「削除済み」としてマークします。
+// これにより、ユーザーの視点からはメッセージが削除されたように見えますが、実際にはデータベースに残っています
+//
+//　双方向の削除管理:
+// メッセージの送信者と受信者それぞれが独立して「削除」操作を行えるようにします。
+// 一方のユーザーが削除しても、もう一方のユーザーにはまだメッセージが見えるようになっています。
+
+//　完全削除（物理削除）の実行:
+// 送信者と受信者の両方が削除したと判断されたメッセージのみを、データベースから完全に削除します。
+
 // messageId: 削除するメッセージのID
 // isOutbox: 送信箱（outbox）からの削除かどうかを示すブール値
 export async function deleteMessage(messageId: string, isOutbox: boolean) {
@@ -206,6 +220,8 @@ export async function deleteMessage(messageId: string, isOutbox: boolean) {
       // 指定されたメッセージのIDに対して、senderDeleted または recipientDeleted フラグを true に設定します。
       // これにより、メッセージは該当するユーザーの視点からは「削除された」ように見えますが、データベースには依然として存在します。
       where: { id: messageId },
+      // この部分は、動的に決定されたプロパティ名（selectorの値）を持つオブジェクトを作成しています。
+      // [] 内の selector は変数として評価され、その値がプロパティ名になります。
       data: { [selector]: true },
     });
 
@@ -247,6 +263,8 @@ export async function deleteMessage(messageId: string, isOutbox: boolean) {
 
           // このOR条件は、生成された id のリストのいずれかに一致するメッセージを削除することを指示します。
           // 実質的に、「これらのIDのいずれかを持つメッセージを削除せよ」という命令になります。
+
+          // この方法により、複数のメッセージを1回のクエリで効率的に削除することができます。
           OR: messagesToDelete.map((m) => ({ id: m.id })),
         },
       });

@@ -75,3 +75,14 @@ export function transformImageUrl(imageUrl?: string | null) {
   // 2つ目の imageUrl.slice(uploadIndex) は、uploadIndex の位置から('/upload/' の直後から) URL の末尾までの部分を切り出します。
   return `${imageUrl.slice(0, uploadIndex)}${transformation}${imageUrl.slice(uploadIndex)}`;
 }
+
+// 94 (Finishing up the message table)
+export function truncateString(text?: string | null, num = 50) {
+  if (!text) return null;
+
+  if (text.length <= num) {
+    return text;
+  }
+
+  return text.slice(0, num) + '...';
+}
