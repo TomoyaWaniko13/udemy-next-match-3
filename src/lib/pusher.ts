@@ -11,7 +11,8 @@ declare global {
 }
 
 // if (!global.pusherServerInstance) は、グローバル変数 pusherServerInstance がまだ存在しないかどうかをチェックします。
-// これにより、アプリケーションの生存期間中に一度だけインスタンスが作成されることを保証します。
+// これにより、アプリケーションの生存期間
+// 中に一度だけインスタンスが作成されることを保証します。
 if (!global.pusherServerInstance) {
   global.pusherServerInstance = new PusherServer({
     //　Pusherアプリケーションの一意のID。
@@ -20,8 +21,8 @@ if (!global.pusherServerInstance) {
     key: process.env.NEXT_PUBLIC_PUSHER_APP_KEY,
     //　Pusherアプリケーションの秘密キー。
     secret: process.env.PUSHER_SECRET,
-    //　Pusherのデータセンターの地理的位置。ここでは 'ap1' (おそらくAsia Pacific 1) を指定しています。
-    cluster: 'ap1',
+    //　Pusherのデータセンターの地理的位置。ここでは 'ap3' (おそらくAsia Pacific 3) を指定しています。
+    cluster: 'ap3',
     // セキュアな接続（HTTPS）を使用するかどうか。true に設定されているので、セキュアな接続を使用します。
     useTLS: true,
   });
@@ -32,7 +33,7 @@ if (!global.pusherServerInstance) {
 if (!global.pusherClientInstance) {
   // new PusherClient(...) で、新しいPusherクライアントインスタンスを作成しています。
   global.pusherClientInstance = new PusherClient(process.env.NEXT_PUBLIC_PUSHER_APP_KEY!, {
-    cluster: 'ap1',
+    cluster: 'ap3',
   });
 }
 

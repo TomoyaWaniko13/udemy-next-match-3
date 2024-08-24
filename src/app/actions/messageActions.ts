@@ -1,16 +1,18 @@
 'use server';
 
 import { messageSchema, MessageSchema } from '@/lib/schemas/messageSchema';
-import { ActionResult } from '@/types';
-import { Message } from '@prisma/client';
+import { ActionResult, MessageDto } from '@/types';
 import { getAuthUserId } from '@/app/actions/authActions';
 import { prisma } from '@/lib/prisma';
 import { mapMessageToMessageDto } from '@/lib/mappings';
+import { pusherServer } from '@/lib/pusher';
+import { createChatId } from '@/lib/util';
 
 // 82 (Creating the send message action)
+// 98 (Adding the live chat functionality)
 // validationがsuccessならば、データベースにメッセージを記録する。
 // throw errorだとerror pageが表示されるが、formのvalidation errorを表示したいので、ActionResultを使う。
-export async function createMessage(recipientUserId: string, data: MessageSchema): Promise<ActionResult<Message>> {
+export async function createMessage(recipientUserId: string, data: MessageSchema): Promise<ActionResult<MessageDto>> {
   try {
     // 現在ログインしているuserのidを取得。
     const userId = await getAuthUserId();
@@ -19,11 +21,22 @@ export async function createMessage(recipientUserId: string, data: MessageSchema
     if (!validated.success) return { status: 'error', error: validated.error.errors };
 
     const { text } = validated.data;
+
     const message = await prisma.message.create({
-      data: { text, recipientId: recipientUserId, senderId: userId },
+      data: {
+        text,
+        recipientId: recipientUserId,
+        senderId: userId,
+      },
+      select: messageSelect,
     });
 
-    return { status: 'success', data: message };
+    const messageDto = mapMessageToMessageDto(message);
+
+    // createChatIdはuserIdとrecipientUserIdを組み合わせてにchannelのIDを作る。
+    await pusherServer.trigger(createChatId(userId, recipientUserId), 'message:new', messageDto);
+
+    return { status: 'success', data: messageDto };
   } catch (error) {
     console.log(error);
     return { status: 'error', error: 'Something went wrong' };
@@ -59,16 +72,7 @@ export async function getMessageThread(recipientId: string) {
         ],
       },
       orderBy: { created: 'asc' },
-      select: {
-        id: true,
-        text: true,
-        created: true,
-        dateRead: true,
-        // selectが使われているので、senderはobjectとして扱われる。
-        sender: { select: { userId: true, name: true, image: true } },
-        // selectが使われているので、recipientはobjectとして扱われる。
-        recipient: { select: { userId: true, name: true, image: true } },
-      },
+      select: messageSelect,
     });
 
     // 「現在のユーザーが受け取った、まだ既読になっていないメッセージを全て既読にする」という処理を行っています。
@@ -174,16 +178,7 @@ export async function getMessagesByContainer(container: string) {
       where: conditions,
       // メッセージを作成日時の降順（最新のものから）でソートします。
       orderBy: { created: 'desc' },
-      select: {
-        id: true,
-        text: true,
-        created: true,
-        dateRead: true,
-        // selectが使われているので、senderはobjectとして扱われる。
-        sender: { select: { userId: true, name: true, image: true } },
-        // selectが使われているので、recipientはobjectとして扱われる。
-        recipient: { select: { userId: true, name: true, image: true } },
-      },
+      select: messageSelect,
     });
 
     return messages.map((message) => mapMessageToMessageDto(message));
@@ -274,3 +269,15 @@ export async function deleteMessage(messageId: string, isOutbox: boolean) {
     throw error;
   }
 }
+
+// 98 (Adding the live chat functionality)
+const messageSelect = {
+  id: true,
+  text: true,
+  created: true,
+  dateRead: true,
+  // selectが使われているので、senderはobjectとして扱われる。
+  sender: { select: { userId: true, name: true, image: true } },
+  // selectが使われているので、recipientはobjectとして扱われる。
+  recipient: { select: { userId: true, name: true, image: true } },
+};
