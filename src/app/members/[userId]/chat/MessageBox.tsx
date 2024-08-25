@@ -3,7 +3,7 @@
 import { MessageDto } from '@/types';
 import clsx from 'clsx';
 import { Avatar, divider } from '@nextui-org/react';
-import { transformImageUrl } from '@/lib/util';
+import { timeAgo, transformImageUrl } from '@/lib/util';
 import { useEffect, useRef } from 'react';
 
 type Props = {
@@ -14,11 +14,15 @@ type Props = {
 // 85 (Displaying the messages )
 // 86 (Displaying the messages Part 2)
 // 87 (Improving the message box)
+// 101 (Adding the read message feature)
 const MessageBox = ({ message, currentUserId }: Props) => {
   // message.senderIdがログインしているユーザーのidかどうか、つまり
   // ログインしているユーザーがmessageの送信者かチェックする。
   const isCurrentUserSender = message.senderId === currentUserId;
 
+  // React の useRef フックを使用して、DOM 要素への参照を作成しています。
+  // <HTMLDivElement> は TypeScript の型注釈で、この ref が HTML の <div> 要素を参照することを指定しています。
+  // null を初期値として渡しています。これは、コンポーネントが最初にレンダリングされる時点では、まだ DOM 要素が存在しないためです。
   // messageEndRefは、メッセージリストの最後に配置された空のdiv要素を参照します。
   const messageEndRef = useRef<HTMLDivElement>(null);
 
@@ -28,7 +32,11 @@ const MessageBox = ({ message, currentUserId }: Props) => {
   // useEffectは、コンポーネントがレンダリングされた後に実行されます.
   // 非同期の性質：メッセージの追加やDOMの更新が非同期で行われる可能性があるため、それらが完了した後にスクロールを調整する必要があります。
   useEffect(() => {
-    // scrollIntoView()メソッドは、参照された要素（この場合はメッセージリストの最後）が画面内に表示されるようにスクロールします。
+    // useRef によって作成された ref オブジェクトの current プロパティは、その ref が参照している実際の DOM 要素を指します。
+    //　if (messageEndRef.current) のチェックは、DOM 要素が実際に存在することを確認しています。
+
+    // scrollIntoView() メソッドは DOM API の一部で指定された要素が表示されるように、コンテナ（この場合はブラウザウィンドウ）をスクロールします。
+    // { behavior: 'smooth' } オプションは、スクロールをスムーズなアニメーションで行うように指定しています。
     if (messageEndRef.current) messageEndRef.current.scrollIntoView({ behavior: 'smooth' });
   }, [messageEndRef]);
 
@@ -59,7 +67,7 @@ const MessageBox = ({ message, currentUserId }: Props) => {
       <div className={clsx('flex items-center w-full', { 'justify-between': isCurrentUserSender })}>
         {/* messageが既読で,ログインしているuserがmessageの受信者でない場合、いつmessageが読まれたか表示する。 */}
         {message.dateRead && message.recipientId !== currentUserId ? (
-          <span className={'text-xs text-black text-italic'}>(Read 4 mins ago)</span>
+          <span className={'text-xs text-black text-italic'}>(Read {timeAgo(message.dateRead)})</span>
         ) : (
           <div></div>
         )}

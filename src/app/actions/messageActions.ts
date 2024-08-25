@@ -47,6 +47,7 @@ export async function createMessage(recipientUserId: string, data: MessageSchema
 // 84 (Creating a message DTO)
 // 91 (Adding the message read functionality)
 // 93 (Adding the delete message action)
+// 101 (Adding the read message feature)
 // 特定の2人のユーザー間のメッセージスレッドを取得するためのserver action.
 // recipientIdは送信先のuserのidです。
 export async function getMessageThread(recipientId: string) {
@@ -71,24 +72,47 @@ export async function getMessageThread(recipientId: string) {
           },
         ],
       },
+      // メッセージは作成日時の昇順で並べられます。
       orderBy: { created: 'asc' },
       select: messageSelect,
     });
 
-    // 「現在のユーザーが受け取った、まだ既読になっていないメッセージを全て既読にする」という処理を行っています。
-    // これにより、ユーザーがメッセージスレッドを開いたときに、相手からの未読メッセージが自動的に既読状態になります。
+    // ここでは、取得したメッセージの中で未読のものを特定し、それらを既読にします。
+    // また、Pusherを使って、メッセージが既読になったことをリアルタイムで通知します。
     if (messages.length > 0) {
+      // filter()とmap()で未読メッセージの特定をしています。
+      const readMessagesIds = messages
+        .filter(
+          (m) =>
+            // まだ既読になっていない（dateReadがnull）
+            // この条件により、既に読まれたメッセージを再度「既読」にする無駄な処理を避けられます。
+            m.dateRead === null &&
+            // 受信者が現在のユーザー
+            // ユーザーは自分宛てのメッセージのみを「既読」にすべきです。他人宛てのメッセージを既読にすることは適切ではありません。
+            m.recipient?.userId === userId &&
+            // 送信者がrecipientIdで指定された相手
+            // ユーザーが特定の相手とのチャットを見ているときに、そのチャットとは関係のない他の相手からのメッセージの状態が変わることを防ぎます。
+            m.sender?.userId === recipientId,
+        )
+        .map((m) => m.id);
+
+      // 特定した未読メッセージのIDを使用して、データベース内のそれらのメッセージを一括で更新します。
+      // dateReadフィールドに現在の日時を設定することで、これらのメッセージを既読にマークします。
       await prisma.message.updateMany({
-        // senderId: recipientId : 送信者が、会話の相手（recipientId）であるメッセージ
-        // recipientId: userId : 受信者がログインしている現在のユーザー（userId）であるメッセージ
-        // dateRead: null : まだ既読になっていない（dateReadがnullの）メッセージ
-        where: {
-          senderId: recipientId,
-          recipientId: userId,
-          dateRead: null,
-        },
+        //  'id' が readMessagesIds 配列の中のいずれかの値と一致することを条件としています。
+        where: { id: { in: readMessagesIds } },
         data: { dateRead: new Date() },
       });
+
+      //　Pusherを使用して、メッセージが既読になったことをリアルタイムで通知します。
+      await pusherServer.trigger(
+        // これは通知を送信するチャンネルのIDを生成します。
+        createChatId(recipientId, userId),
+        // これはイベント名で、クライアント側でこのイベントをリッスンすることで、どのメッセージが既読になったかを知ることができます。
+        'message:read',
+        // 既読になったメッセージのID一覧が送信されます。
+        readMessagesIds,
+      );
     }
 
     // データベースから取得したメッセージの配列を、mapMessageToMessageDto()でフロントエンドで使用しやすい形式に変換しています。

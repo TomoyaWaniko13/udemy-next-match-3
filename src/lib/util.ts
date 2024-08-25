@@ -1,4 +1,4 @@
-import { differenceInYears, format } from 'date-fns';
+import { differenceInYears, format, formatDistance } from 'date-fns';
 import { FieldValues, UseFormSetError, Path } from 'react-hook-form';
 import { ZodIssue } from 'zod';
 
@@ -11,6 +11,11 @@ export function calculateAge(dateOfBirth: Date) {
 export function formatShortDateTime(date: Date) {
   // 18 Aug 24 3:30:PM　というふうにformatされる。
   return format(date, 'dd MMM yy h:mm:a');
+}
+
+// 101 (Adding the read message feature)
+export function timeAgo(date: string) {
+  return formatDistance(new Date(date), new Date()) + ' ago';
 }
 
 // 65 (Adding the server action to update the member)
