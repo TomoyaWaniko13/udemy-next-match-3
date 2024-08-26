@@ -33,6 +33,14 @@ if (!global.pusherServerInstance) {
 if (!global.pusherClientInstance) {
   // new PusherClient(...) で、新しいPusherクライアントインスタンスを作成しています。
   global.pusherClientInstance = new PusherClient(process.env.NEXT_PUBLIC_PUSHER_APP_KEY!, {
+    // 102 (Setting up presence)
+    channelAuthorization: {
+      // これは認証リクエストを送信するサーバーエンドポイントのURLを指定しています。
+      endpoint: '/api/pusher-auth',
+      // これは認証リクエストの送信方法を指定しています。
+      // ajaxは、非同期のJavaScriptとXMLを使用してサーバーとデータをやり取りする方法を指します。
+      transport: 'ajax',
+    },
     cluster: 'ap3',
   });
 }

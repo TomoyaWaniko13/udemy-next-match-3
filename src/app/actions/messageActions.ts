@@ -33,7 +33,13 @@ export async function createMessage(recipientUserId: string, data: MessageSchema
 
     const messageDto = mapMessageToMessageDto(message);
 
-    // createChatIdはuserIdとrecipientUserIdを組み合わせてにchannelのIDを作る。
+    // createChatId()はuserIdとrecipientUserIdを組み合わせてにchannelのIDを作っています。
+
+    // サーバーがこの関数を実行してメッセージを作成すると、Pusherを通じて'message:new'イベントが発火されます。
+    // これは、クライアントサイド(MessageList.tsx)で以下のように監視されているイベントです：
+    // channelRef.current.bind('message:new', handleNewMessage);
+
+    // この仕組みにより、メッセージの送信者だけでなく、受信者のUIも即座に更新されます。
     await pusherServer.trigger(createChatId(userId, recipientUserId), 'message:new', messageDto);
 
     return { status: 'success', data: messageDto };
@@ -104,15 +110,12 @@ export async function getMessageThread(recipientId: string) {
         data: { dateRead: new Date() },
       });
 
-      //　Pusherを使用して、メッセージが既読になったことをリアルタイムで通知します。
-      await pusherServer.trigger(
-        // これは通知を送信するチャンネルのIDを生成します。
-        createChatId(recipientId, userId),
-        // これはイベント名で、クライアント側でこのイベントをリッスンすることで、どのメッセージが既読になったかを知ることができます。
-        'message:read',
-        // 既読になったメッセージのID一覧が送信されます。
-        readMessagesIds,
-      );
+      // 'message:read' イベントを発火させ、既読になったメッセージのID配列を送信します。
+      // クライアントサイド(MessageList.tsx)では、このイベントを以下のように監視しています：
+      // channelRef.current.bind('message:read', handleReadMessages);
+      // handleReadMessages 関数が、サーバーから送られた readMessagesIds を受け取り、対応するメッセージの既読状態を更新します。
+      // これにより、メッセージの送信者のUIでも、メッセージが既読になったことがリアルタイムで反映されます。
+      await pusherServer.trigger(createChatId(recipientId, userId), 'message:read', readMessagesIds);
     }
 
     // データベースから取得したメッセージの配列を、mapMessageToMessageDto()でフロントエンドで使用しやすい形式に変換しています。
