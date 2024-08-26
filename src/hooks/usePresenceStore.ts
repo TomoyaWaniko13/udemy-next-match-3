@@ -2,6 +2,11 @@ import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 
 // 103 (Adding a presence store)
+// usePresenceChannelフックはusePresenceStoreを使用して、Pusherから受け取ったリアルタイムの更新をグローバルステートに反映させます。
+// usePresenceStoreで定義されたset、add、removeメソッドは、usePresenceChannel内でそれぞれhandleSetMembers、
+// handleAddMember、handleRemoveMember関数として使用されます。
+// Pusherのイベント（メンバーの追加・削除）が発生すると、usePresenceChannelがそれをキャッチし、
+// 対応するusePresenceStoreのメソッドを呼び出してグローバルステートを更新します。
 type PresenceState = {
   // メンバーのIDを文字列として保存する配列を定義しています。
   members: string[];
