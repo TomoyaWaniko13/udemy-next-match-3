@@ -91,7 +91,7 @@ export async function getUserById(id: string) {
 }
 
 // 54 (Adding the like toggle function)
-// likeActions.tsでuserIdが複数回必要になるので、method化する。
+// userIdが複数回必要になるので、method化する。
 export async function getAuthUserId() {
   const session = await auth();
   // auth.tsでidを設定しているので、session?.user?.idでログインしているユーザーのuserIdが取得できる。

@@ -100,6 +100,7 @@ export async function getMessageThread(recipientId: string) {
             // ユーザーが特定の相手とのチャットを見ているときに、そのチャットとは関係のない他の相手からのメッセージの状態が変わることを防ぎます。
             m.sender?.userId === recipientId,
         )
+        // フィルタリングされたメッセージから id のみを取り出して新しい配列を作成しています。
         .map((m) => m.id);
 
       // 特定した未読メッセージのIDを使用して、データベース内のそれらのメッセージを一括で更新します。

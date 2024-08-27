@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef } from 'react';
 import { pusherClient } from '@/lib/pusher';
 
 // 104 (Creating a presence channel hook)
-// Pusherを使用してリアルタイムのユーザープレゼンス（オンライン状態）を管理するためのカスタムフック usePresenceChannel を定義しています。
+// Pusher を使用してリアルタイムのユーザープレゼンス（オンライン状態）を管理するためのカスタムフック usePresenceChannel を定義しています。
 // user の状態管理：
 // 誰がオンラインなのか
 // 新しくオンラインになった人
@@ -17,7 +17,7 @@ import { pusherClient } from '@/lib/pusher';
 // これらの情報に基づいたUI更新
 // などが可能になります。
 export const usePresenceChannel = () => {
-  // usePresenceStore から必要な関数を取得
+  // usePresenceStore() から必要な関数を取得
   // これらの関数は、ストア内のメンバーリストを操作するために使用されます。
   // state は、Zustandというステート管理ライブラリのコンテキストにおいて、ストア（store）の現在の状態を表します。
   // state はオブジェクトで、ストアに保存されているすべてのデータと関数を含んでいます。
@@ -68,6 +68,8 @@ export const usePresenceChannel = () => {
       channelRef.current = pusherClient.subscribe('presence-nm');
 
       // 購読が成功したときに呼ばれ、現在のメンバーリストをセットします。
+      // Members は Pusher.js ライブラリで提供されるオブジェクトで、プレゼンスチャンネルに接続されているメンバー（ユーザー）
+      // の情報を管理するために使用されます。
       channelRef.current.bind('pusher:subscription_succeeded', (members: Members) => {
         handleSetMembers(Object.keys(members.members));
       });

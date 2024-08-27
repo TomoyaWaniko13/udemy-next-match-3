@@ -2,10 +2,10 @@ import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 
 // 103 (Adding a presence store)
-// usePresenceChannelフックはusePresenceStoreを使用して、Pusherから受け取ったリアルタイムの更新をグローバルステートに反映させます。
-// usePresenceStoreで定義されたset、add、removeメソッドは、usePresenceChannel内でそれぞれhandleSetMembers、
-// handleAddMember、handleRemoveMember関数として使用されます。
-// Pusherのイベント（メンバーの追加・削除）が発生すると、usePresenceChannelがそれをキャッチし、
+// usePresenceChannel() フックは usePresenceStore() を使用して、Pusher から受け取ったリアルタイムの更新をグローバルステートに反映させます。
+// usePresenceStore() で定義された set、add、remove メソッドは、usePresenceChannel 内でそれぞれ
+// handleSetMembers()、handleAddMember()、handleRemoveMember() 関数として使用されます。
+// Pusherのイベント（メンバーの追加・削除）が発生すると、usePresenceChannel() がそれをキャッチし、
 // 対応するusePresenceStoreのメソッドを呼び出してグローバルステートを更新します。
 type PresenceState = {
   // メンバーのIDを文字列として保存する配列を定義しています。
@@ -19,10 +19,10 @@ type PresenceState = {
 };
 
 const usePresenceStore = create<PresenceState>()(
-  // devtools()はデバッグ用のミドルウェアです。
+  // devtools() はデバッグ用のミドルウェアです。
   devtools(
     // これは、ストアの初期状態と更新関数を定義しています。
-    // set(は状態を更新するための関数で、Zustandによって提供されます。
+    // set(は状態を更新するための関数で、Zustand によって提供されます。
     (set) => ({
       // メンバーリストの初期状態を空の配列に設定しています。
       members: [],
@@ -33,7 +33,7 @@ const usePresenceStore = create<PresenceState>()(
       // メンバーリスト全体を設定する関数です。 これは単純にmembersを新しい配列で置き換えます。
       set: (ids) => set({ members: ids }),
     }),
-    // これはdevtoolsミドルウェアの設定で、DevToolsでこのストアを識別するための名前を設定しています。
+    // これは devtools ミドルウェアの設定で、DevToolsでこのストアを識別するための名前を設定しています。
     { name: 'PresenceStore' },
   ),
 );
