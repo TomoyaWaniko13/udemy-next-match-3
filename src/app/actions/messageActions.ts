@@ -10,6 +10,7 @@ import { createChatId } from '@/lib/util';
 
 // 82 (Creating the send message action)
 // 98 (Adding the live chat functionality)
+// 109 (Creating a message store)
 // validationがsuccessならば、データベースにメッセージを記録する。
 // throw errorだとerror pageが表示されるが、formのvalidation errorを表示したいので、ActionResultを使う。
 export async function createMessage(recipientUserId: string, data: MessageSchema): Promise<ActionResult<MessageDto>> {
@@ -34,13 +35,14 @@ export async function createMessage(recipientUserId: string, data: MessageSchema
     const messageDto = mapMessageToMessageDto(message);
 
     // createChatId()はuserIdとrecipientUserIdを組み合わせてにchannelのIDを作っています。
-
     // サーバーがこの関数を実行してメッセージを作成すると、Pusherを通じて'message:new'イベントが発火されます。
     // これは、クライアントサイド(MessageList.tsx)で以下のように監視されているイベントです：
     // channelRef.current.bind('message:new', handleNewMessage);
-
     // この仕組みにより、メッセージの送信者だけでなく、受信者のUIも即座に更新されます。
     await pusherServer.trigger(createChatId(userId, recipientUserId), 'message:new', messageDto);
+    // メッセージの受信者(recipient)に対して「新しいメッセージが届きました」という通知をリアルタイムで送ることができます。
+    // これにより、受信者はアプリを再読み込みしたり、手動で更新したりすることなく、新しいメッセージをすぐに確認できるようになります。
+    await pusherServer.trigger(`private-${recipientUserId}`, 'message:new', messageDto);
 
     return { status: 'success', data: messageDto };
   } catch (error) {
