@@ -17,6 +17,7 @@ import { Card } from '@nextui-org/card';
 import { AiFillDelete } from 'react-icons/ai';
 import { deleteMessage } from '@/app/actions/messageActions';
 import { truncateString } from '@/lib/util';
+import PresenceAvatar from '@/components/PresenceAvatar';
 
 type Props = {
   messages: MessageDto[];
@@ -26,6 +27,7 @@ type Props = {
 // 91 (Adding the message read functionality)
 // 92 (Using custom cells in the NextUI table)
 // 94 (Finishing up the message table)
+// 107 (Displaying presence in other components)
 const MessageTable = ({ messages }: Props) => {
   // parameterは<MessageSidebar />で設定されるので、それを取得する。
   const searchParams = useSearchParams();
@@ -112,9 +114,10 @@ const MessageTable = ({ messages }: Props) => {
         case 'senderName':
           return (
             <div className={`flex items-center gap-2 cursor-pointer `}>
-              <Avatar
-                alt={'Image of member'}
-                src={(isOutbox ? item.recipientImage : item.senderImage) || '/images/user.png'}
+              {/* 107 (Displaying presence in other components) */}
+              <PresenceAvatar
+                src={isOutbox ? item.recipientImage : item.senderImage}
+                userId={isOutbox ? item.recipientId : item.senderId}
               />
               <span>{cellValue}</span>
             </div>

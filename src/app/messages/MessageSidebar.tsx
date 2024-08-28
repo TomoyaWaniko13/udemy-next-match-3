@@ -8,6 +8,7 @@ import { Chip } from '@nextui-org/chip';
 import { useState } from 'react';
 
 // 88 (Adding the message sidebar)
+// 107 (Displaying presence in other components)
 const MessageSidebar = () => {
   const searchParams = useSearchParams();
   const pathname = usePathname();

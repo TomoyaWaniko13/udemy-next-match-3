@@ -5,6 +5,7 @@ import clsx from 'clsx';
 import { Avatar, divider } from '@nextui-org/react';
 import { timeAgo, transformImageUrl } from '@/lib/util';
 import { useEffect, useRef } from 'react';
+import PresenceAvatar from '@/components/PresenceAvatar';
 
 type Props = {
   message: MessageDto;
@@ -15,6 +16,7 @@ type Props = {
 // 86 (Displaying the messages Part 2)
 // 87 (Improving the message box)
 // 101 (Adding the read message feature)
+// 107 (Displaying presence in other components)
 const MessageBox = ({ message, currentUserId }: Props) => {
   // message.senderIdがログインしているユーザーのidかどうか、つまり
   // ログインしているユーザーがmessageの送信者かチェックする。
@@ -41,13 +43,11 @@ const MessageBox = ({ message, currentUserId }: Props) => {
   }, [messageEndRef]);
 
   const renderAvatar = () => {
-    // returnをつける必要がある。
+    // 107 (Displaying presence in other components)
     return (
-      <Avatar
-        name={message.senderName}
-        className={'self-end'}
-        src={transformImageUrl(message.senderImage) || '/images/user.png'}
-      />
+      <div className={'self-end'}>
+        <PresenceAvatar src={transformImageUrl(message.senderImage) || '/images/user.png'} userId={message.senderId} />
+      </div>
     );
   };
 
