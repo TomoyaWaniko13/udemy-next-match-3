@@ -86,7 +86,7 @@ export const usePresenceChannel = () => {
     // コンポーネントがアンマウントされるとき、またはエフェクトが再実行される前に呼ばれます。
     // チャンネルの購読を解除し、バインドしたイベントを解除します。
     return () => {
-      if (channelRef.current) {
+      if (channelRef.current && channelRef.current?.subscribed) {
         channelRef.current.unsubscribe();
         channelRef.current.unbind('pusher:subscription_succeeded', handleSetMembers);
         channelRef.current.unbind('pusher:member_added', handleAddMember);
