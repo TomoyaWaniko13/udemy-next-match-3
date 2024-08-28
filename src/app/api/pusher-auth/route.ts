@@ -10,7 +10,7 @@ export async function POST(request: Request) {
     // これはユーザーが認証されているかを確認するために使用されます。
     const session = await auth();
 
-    // セッションやユーザーID(session?.user?.id)が存在しない場合、つまり認証されていない場合、
+    // セッション や ユーザーID (session?.user?.id) が存在しない場合、つまり認証されていない場合、
     // 401 Unauthorizedレスポンスを返します。
     if (!session?.user?.id) {
       return new Response('Unauthorized', { status: 401 });
@@ -27,7 +27,7 @@ export async function POST(request: Request) {
     const socketId = body.get('socket_id') as string;
     const channel = body.get('channel_name') as string;
     // ユーザーIDを含むデータオブジェクトを作成します。これは"チャンネル認証"
-    // (= 特定のユーザーが特定のチャンネル（特にプライベートチャンネルやプレゼンスチャンネル）にアクセスする権限があるかを確認するプロセス)
+    // ( = 特定のユーザーが特定のチャンネル（特にプライベートチャンネルやプレゼンスチャンネル）にアクセスする権限があるかを確認するプロセス)
     // に使用されます。
     // チャンネル認証に必要な要素：
     // a. クライアントサイド：

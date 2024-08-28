@@ -34,6 +34,10 @@ if (!global.pusherClientInstance) {
   // new PusherClient(...) で、新しいPusherクライアントインスタンスを作成しています。
   global.pusherClientInstance = new PusherClient(process.env.NEXT_PUBLIC_PUSHER_APP_KEY!, {
     // 102 (Setting up presence)
+    // クライアントがプライベートまたはプレゼンスチャンネルに接続しようとすると、Pusherは自動的に認証プロセスを開始します。
+    // クライアントは指定されたエンドポイント（この場合は'/api/pusher-auth'）に認証リクエストを送信します。
+    // サーバーサイドでこのリクエストを処理し、ユーザーの認証状態を確認します。
+    // 認証が成功すれば、クライアントはチャンネルに接続できます。
     channelAuthorization: {
       // これは認証リクエストを送信するサーバーエンドポイントのURLを指定しています。
       endpoint: '/api/pusher-auth',
