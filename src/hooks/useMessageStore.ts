@@ -15,6 +15,7 @@ type MessageState = {
 };
 
 // create<MessageState>() で新しいストアを作成します。
+// useMessageStore は Zustand を使用して作成されたカスタムフックです。これにより、アプリケーション全体で一貫したメッセージの状態を管理できます。
 const useMessageStore = create<MessageState>()(
   // ミドルウェアを使用して、開発ツールでのデバッグを可能にしています。
   devtools(
@@ -33,3 +34,5 @@ const useMessageStore = create<MessageState>()(
     { name: 'messageStoreDemo' },
   ),
 );
+
+export default useMessageStore;

@@ -1,4 +1,5 @@
 'use client';
+
 import { Table, TableBody, TableCell, TableColumn, TableHeader, TableRow } from '@nextui-org/react';
 import { MessageDto } from '@/types';
 import { Card } from '@nextui-org/card';
@@ -6,7 +7,7 @@ import MessageTableCell from '@/app/messages/MessageTableCell';
 import useMessages from '@/hooks/useMessages';
 
 type Props = {
-  messages: MessageDto[];
+  initialMessages: MessageDto[];
 };
 
 // 90 (Creating the message table)
@@ -15,8 +16,11 @@ type Props = {
 // 94 (Finishing up the message table)
 // 107 (Displaying presence in other components)
 // 110 (Refactoring the message table)
-const MessageTable = ({ messages }: Props) => {
-  const { columns, isOutbox, isDeleting, deleteMessage, selectRow } = useMessages(messages);
+// 111 (Adding the realtime functionality to the message table)
+const MessageTable = ({ initialMessages }: Props) => {
+  // Zustand ストアの状態が変更されると、その状態を使用しているコンポーネント
+  // （この場合は MessageTable）が自動的に再レンダリングされ、新しいメッセージが表示されます。
+  const { columns, isOutbox, isDeleting, deleteMessage, selectRow, messages } = useMessages(initialMessages);
 
   // NextUIのTableについて:
   // https://nextui.org/docs/components/table
