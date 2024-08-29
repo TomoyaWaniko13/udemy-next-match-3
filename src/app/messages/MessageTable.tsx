@@ -35,7 +35,8 @@ const MessageTable = ({ messages }: Props) => {
             </TableColumn>
           )}
         </TableHeader>
-        {/* TableBody は items prop として messages 配列を受け取り、その各要素（item）に対して関数を適用してテーブルの行を生成します。 */}
+        {/* TableBody は items prop として messages 配列を受け取り、
+        　　その各要素（item）に対して関数を適用してテーブルの行を生成します。 */}
         <TableBody items={messages} emptyContent={'No messages for this container'}>
           {/* item は messages 配列の各要素を表します.
               外側の関数：{(item) => (...)}　は messages 配列の各要素（各メッセージ）に対して呼び出されます。
