@@ -4,7 +4,7 @@ import { pusherClient } from '@/lib/pusher';
 import { MessageDto } from '@/types';
 import { usePathname, useSearchParams } from 'next/navigation';
 import useMessageStore from '@/hooks/useMessageStore';
-import { toast } from 'react-toastify';
+import { newMessageToast } from '@/components/NewMessageToast';
 
 // 108 (Setting up a private channel)
 // 111 (Adding the realtime functionality to the message table)
@@ -71,7 +71,7 @@ export const useNotificationChannel = (userId: string | null) => {
   const handleNewMessage = useCallback(
     (message: MessageDto) => {
       // ユーザーが '/messages' ページにいて、かつ 'outbox' （送信済みメッセージ）を表示していない場合、
-      // 新しいメッセージをリストに追加します。
+      // つまり 'inbox'(受信済みメッセージ)を表示している場合、新しいメッセージをリストに追加します。
       // これにより、ユーザーがメッセージ一覧画面にいる場合、リロードなしで新しいメッセージがリアルタイムで表示されます。
       if (pathname === '/messages' && searchParams.get('container') !== 'outbox') {
         add(message);
@@ -79,7 +79,7 @@ export const useNotificationChannel = (userId: string | null) => {
         // ユーザーが送信者とのチャットページにいない場合、トースト通知で新しいメッセージの到着を知らせます。
         // これにより、ユーザーが関連するチャット画面を見ていない場合、新しいメッセージの到着を通知で知らせます。
       } else if (pathname !== `/members/${message.senderId}/chat`) {
-        toast.info(`New message from ${message.senderName}`);
+        newMessageToast(message);
       }
     },
     [add, pathname, searchParams],
@@ -93,7 +93,8 @@ export const useNotificationChannel = (userId: string | null) => {
       // https://pusher.com/docs/channels/using_channels/private-channels/
       // private channel の名前は private- で始める必要があります。
       // これにより、サーバーからクライアントへ即座にデータを送信できます。
-      // private-${userId} という形式のプライベートチャンネルを使用することで、特定のユーザーにのみメッセージを送信できます。
+      // private-${userId} という形式のプライベートチャンネルを使用することで、
+      // 特定のユーザーにのみメッセージを送信できます。
       channelRef.current = pusherClient.subscribe(`private-${userId}`);
       channelRef.current.bind('message:new', handleNewMessage);
     }
