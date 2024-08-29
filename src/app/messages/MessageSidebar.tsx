@@ -6,10 +6,17 @@ import { MdOutlineOutbox } from 'react-icons/md';
 import clsx from 'clsx';
 import { Chip } from '@nextui-org/chip';
 import { useState } from 'react';
+import useMessageStore from '@/hooks/useMessageStore';
 
 // 88 (Adding the message sidebar)
 // 107 (Displaying presence in other components)
+// 113 (Getting the unread message count)
+
 const MessageSidebar = () => {
+  const { unreadCount } = useMessageStore((state) => ({
+    unreadCount: state.unreadCount,
+  }));
+
   // Next.js の useSearchParams フックを使用しています。
   // 現在のURLのクエリパラメータ（URLの?以降の部分）を取得します。
   // URLが/messages?container=inboxの場合、searchParams.get('container')で'inbox'を取得できます。
@@ -30,7 +37,7 @@ const MessageSidebar = () => {
   // items配列で、サイドバーに表示するアイテム（Inbox と Outbox）を定義しています。
   const items = [
     { key: 'inbox', label: 'Inbox', icon: GoInbox, chip: true },
-    { key: 'outbox', label: 'Outbox', icon: MdOutlineOutbox, chip: true },
+    { key: 'outbox', label: 'Outbox', icon: MdOutlineOutbox, chip: false },
   ];
 
   // key は inbox か outbox です。
@@ -82,7 +89,7 @@ const MessageSidebar = () => {
           <Icon size={24} />
           <div className={'flex justify-between flex-grow'}>
             <span>{label}</span>
-            {chip && <Chip>5</Chip>}
+            {chip && <Chip>{unreadCount}</Chip>}
           </div>
         </div>
       ))}

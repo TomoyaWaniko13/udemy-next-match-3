@@ -300,6 +300,28 @@ export async function deleteMessage(messageId: string, isOutbox: boolean) {
   }
 }
 
+// 113 (Getting the unread message count)
+export async function getUnreadMessageCount() {
+  try {
+    const userId = await getAuthUserId();
+
+    // 未読のmessageの個数を取得します。
+    return prisma.message.count({
+      where: {
+        // 現在のユーザーが受け取ったmessageを取得します。
+        recipientId: userId,
+        // 未読のmessageを取得します。
+        dateRead: null,
+        // 現在のユーザーが消去してないmessageを取得します。
+        recipientDeleted: false,
+      },
+    });
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+}
+
 // 98 (Adding the live chat functionality)
 const messageSelect = {
   id: true,
