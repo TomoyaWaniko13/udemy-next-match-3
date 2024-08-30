@@ -6,12 +6,20 @@ import useMessageStore from '@/hooks/useMessageStore';
 
 // 110 (Refactoring the message table)
 // 111 (Adding the realtime functionality to the message table)
-const UseMessages = (initialMessages: MessageDto[]) => {
-  const { set, remove, messages } = useMessageStore((state) => ({
-    set: state.set,
-    remove: state.remove,
-    messages: state.messages,
-  }));
+// 114 (Updating the count based on the event)
+
+// MessageTable.tsxで使用されるlogicなどをuseMessages() hook内に記述しています。
+const useMessages = (initialMessages: MessageDto[]) => {
+  // (state) => { ... } はアロー関数の定義です。
+  const { set, remove, messages, updateUnreadCount } = useMessageStore((state) => {
+    // 新しいオブジェクトを作成しています。
+    return {
+      set: state.set,
+      remove: state.remove,
+      messages: state.messages,
+      updateUnreadCount: state.updateUnreadCount,
+    };
+  });
 
   // Next.js の useSearchParams フックを使用しています。
   // 現在のURLのクエリパラメータ（URLの?以降の部分）を取得します。
@@ -52,15 +60,16 @@ const UseMessages = (initialMessages: MessageDto[]) => {
       // deleteMessage() server actionで messageをdeleteします。
       // isOutboxは、送信者と受信者のどちらの視点から削除するかを決定しています。
       await deleteMessage(message.id, isOutbox);
-      //
-      router.refresh();
+
+      // useMessageStore()のremove() methodです。指定されたIDのメッセージを配列から削除します。
+      remove(message.id);
+      // inbox(受信箱)の"未読"のメッセージを消去した場合、未読件数を-1します。
+      if (!isOutbox && !message.dateRead) updateUnreadCount(-1);
+
       // deleteButtonをロード中と表示するのを終了します。
       setDeleting({ id: '', loading: false });
     },
-    // isOutboxが変更された場合（例：ユーザーが送信箱と受信箱を切り替えた場合）、
-    // handleDeleteMessage関数が再作成されます。
-    // routerが変更された場合、新しいrouterインスタンスを使用して関数が再作成されます。
-    [isOutbox, router],
+    [isOutbox, remove, updateUnreadCount],
   );
 
   // keyはmessageのidを受け取ります。
@@ -77,4 +86,4 @@ const UseMessages = (initialMessages: MessageDto[]) => {
   return { isOutbox, columns, deleteMessage: handleDeleteMessage, selectRow: handleRowSelect, isDeleting, messages };
 };
 
-export default UseMessages;
+export default useMessages;

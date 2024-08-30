@@ -11,6 +11,8 @@ import { createChatId } from '@/lib/util';
 // 83 (Getting the message thread)
 // 85 (Displaying the messages )
 // 99 (Receiving the live messages)
+// 114 (Updating the count based on the event)
+
 const ChatPage = async ({ params }: { params: { userId: string } }) => {
   // getAuthUserId()で現在ログインしているユーザーのIDを取得します。
   const userId = await getAuthUserId();

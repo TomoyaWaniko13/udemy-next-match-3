@@ -6,17 +6,27 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { pusherClient } from '@/lib/pusher';
 import { formatShortDateTime } from '@/lib/util';
 import { Channel } from 'pusher-js';
+import useMessageStore from '@/hooks/useMessageStore';
 
 type Props = {
-  initialMessages: MessageDto[];
+  // readCountは既読になったメッセージの件数を表します。
+  initialMessages: { messages: MessageDto[]; readCount: number };
   currentUserId: string;
   chatId: string;
 };
 
 // 99 (Receiving the live messages)
 // 101 (Adding the read message feature)
+// 114 (Updating the count based on the event)
 const MessageList = ({ initialMessages, currentUserId, chatId }: Props) => {
+  // useEffect()をstrict modeで2回実行させないためのlogicです。
   const setReadCount = useRef(false);
+  const [messages, setMessages] = useState(initialMessages.messages);
+  // updateUnreadCount()で未読のメッセージの件数を更新します。それにより、画面にその更新を反映できます。
+  const { updateUnreadCount } = useMessageStore((state) => ({
+    updateUnreadCount: state.updateUnreadCount,
+  }));
+
   // 1. useRefが使われているので、channelRef は、コンポーネントが再レンダリングされても、
   //    その中身（Pusherのチャンネル）を保持し続けます。
   //    通常の変数だと再レンダリングのたびに初期化されてしまいますが、useRefはその値を維持します。
@@ -24,7 +34,18 @@ const MessageList = ({ initialMessages, currentUserId, chatId }: Props) => {
   //    これは、UIに影響を与えない値（この場合はPusherチャンネル）を保存するのに適しています。
   //    UIに影響を与えない値とは、画面上に表示されるないものや、レンダリングに直接関係しないものです。
   const channelRef = useRef<Channel | null>(null);
-  const [messages, setMessages] = useState(initialMessages);
+
+  // 114 (Updating the count based on the event)
+  // 既読になったメッセージの件数だけ、現在未読のメッセージの件数から引きます。
+  useEffect(() => {
+    // useEffect()をstrict modeで2回実行させないためのlogicです。
+    if (!setReadCount.current) {
+      // 既読になったメッセージの件数だけ、現在未読のメッセージの件数から引きます。
+      updateUnreadCount(-initialMessages.readCount);
+      // useEffect()をstrict modeで2回実行させないためのlogicです。
+      setReadCount.current = true;
+    }
+  }, [initialMessages.readCount, updateUnreadCount]);
 
   // handleNewMessage() は、サーバー側で messageActions.ts の createMessage() server actionで
   // message:read イベントを 発火させる際に作られた message を messageDto 型として受け取ります。
@@ -43,6 +64,7 @@ const MessageList = ({ initialMessages, currentUserId, chatId }: Props) => {
   const handleReadMessages = useCallback((messageIds: string[]) => {
     setMessages((prevState) =>
       prevState.map((message) =>
+        // includes()は true もしくは false をreturnします。
         messageIds.includes(message.id)
           ? // 既読の場合、message オブジェクトのコピーを作成し、dateRead プロパティを現在の日時で更新します。
             { ...message, dateRead: formatShortDateTime(new Date()) }

@@ -56,6 +56,7 @@ export async function createMessage(recipientUserId: string, data: MessageSchema
 // 91 (Adding the message read functionality)
 // 93 (Adding the delete message action)
 // 101 (Adding the read message feature)
+// 114 (Updating the count based on the event)
 // 特定の2人のユーザー間のメッセージスレッドを取得するためのserver action.
 // recipientIdは送信先のuserのidです。
 export async function getMessageThread(recipientId: string) {
@@ -85,11 +86,15 @@ export async function getMessageThread(recipientId: string) {
       select: messageSelect,
     });
 
+    // 114 (Updating the count based on the event)
+    // 既読のメッセージの件数を表します。その件数を、未読メッセージの表示の件数から引きます。
+    let readCount = 0;
+
     // ここでは、取得したメッセージの中で未読のものを特定し、それらを既読にします。
     // また、Pusherを使って、メッセージが既読になったことをリアルタイムで通知します。
     if (messages.length > 0) {
-      // filter()とmap()で未読メッセージの特定をしています。
       const readMessagesIds = messages
+        // filter()で未読メッセージの特定をしています。
         .filter(
           (m) =>
             // まだ既読になっていない（dateReadがnull）
@@ -112,6 +117,10 @@ export async function getMessageThread(recipientId: string) {
         where: { id: { in: readMessagesIds } },
         data: { dateRead: new Date() },
       });
+
+      // 114 (Updating the count based on the event)
+      // 既読のメッセージの件数を表します。その件数を、未読メッセージの表示の件数から引きます。
+      readCount = readMessagesIds.length;
 
       // 'message:read' イベントを発火させ、既読になったメッセージのID配列を送信します。
       // クライアントサイド(MessageList.tsx)では、このイベントを以下のように監視しています：
@@ -153,7 +162,8 @@ export async function getMessageThread(recipientId: string) {
     //   // ...変換された他のメッセージオブジェクト
     // ]
 
-    return messages.map((message) => mapMessageToMessageDto(message));
+    const messagesToReturn = messages.map((message) => mapMessageToMessageDto(message));
+    return { messages: messagesToReturn, readCount };
   } catch (error) {
     console.log(error);
     throw error;

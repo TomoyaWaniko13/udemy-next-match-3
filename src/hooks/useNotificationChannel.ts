@@ -8,40 +8,7 @@ import { newMessageToast } from '@/components/NewMessageToast';
 
 // 108 (Setting up a private channel)
 // 111 (Adding the realtime functionality to the message table)
-
-// リアルタイムでリロードなしでメッセージを更新できる仕組みは、いくつかの重要な要素が組み合わさって実現されています。以下に主な理由を説明します：
-// 1. Pusherを使用したリアルタイム通信:
-//    `useNotificationChannel` フックでは、Pusherクライアントを使用してリアルタイムの通信チャンネルを確立しています。
-//    これにより、サーバーからクライアントへ即座にデータを送信できます。
-//
-// 2. プライベートチャンネルの使用:
-//    `private-${userId}` という形式のプライベートチャンネルを使用することで、特定のユーザーにのみメッセージを送信できます。
-//
-// 3. Zustandを使用した状態管理:
-//    `useMessageStore` は Zustand を使用して作成されたカスタムフックです。これにより、
-//     アプリケーション全体で一貫したメッセージの状態を管理できます。
-//
-// 4. リアルタイムイベントの処理:
-//    `useNotificationChannel` 内の `handleNewMessage` 関数は、新しいメッセージを受信したときに呼び出されます。
-//     この関数は、現在のページやパラメータに応じて適切なアクションを実行します。
-//
-// 5. 状態の即時更新:
-//    新しいメッセージを受信すると、`useMessageStore` の `add` 関数を使用して即座に状態を更新します。
-//    これにより、UIが自動的に再レンダリングされ、新しいメッセージが表示されます。
-//
-// 6. 条件付きの更新:
-//    ユーザーが `/messages` ページにいて、かつ送信済みメッセージ（outbox）を表示していない場合にのみ、
-//    新しいメッセージをリストに追加します。これにより、適切なコンテキストでのみ更新が行われます。
-//
-// 7. Reactの状態と副作用の利用:
-//    `useEffect` と `useCallback` を使用して、コンポーネントのライフサイクルに応じてチャンネルの購読と解除を管理しています。
-//
-// 8. コンポーネントの自動再レンダリング:
-//    Zustand ストアの状態が変更されると、その状態を使用しているコンポーネント（この場合は `MessageTable`）
-//    が自動的に再レンダリングされ、新しいメッセージが表示されます。
-//
-// これらの要素が組み合わさることで、ユーザーがページをリロードすることなく、リアルタイムでメッセージの更新を見ることができるのです。
-// サーバーからの新しいメッセージは即座にクライアントに送信され、アプリケーションの状態が更新され、それに応じてUIが自動的に更新されます。
+// 114 (Updating the count based on the event)
 
 // ユーザーIDを引数として受け取ります。
 // このIDを使用して、private-{userId}という形式のプライベートチャンネルを作成します。
@@ -61,7 +28,10 @@ export const useNotificationChannel = (userId: string | null) => {
   // クエリパラメータの変更を監視し、変更があった場合にコンポーネントを再レンダリングします。
   const searchParams = useSearchParams();
 
-  const { add } = useMessageStore((state) => ({ add: state.add }));
+  const { add, updateUnreadCount } = useMessageStore((state) => ({
+    add: state.add,
+    updateUnreadCount: state.updateUnreadCount,
+  }));
 
   // handleNewMessage() 関数は、新しいメッセージを受信したときに呼び出されます。
   // 新しいメッセージを受信すると、useMessageStore の add 関数を使用して即座に状態を更新します。
@@ -72,17 +42,21 @@ export const useNotificationChannel = (userId: string | null) => {
     (message: MessageDto) => {
       // ユーザーが '/messages' ページにいて、かつ 'outbox' （送信済みメッセージ）を表示していない場合、
       // つまり 'inbox'(受信済みメッセージ)を表示している場合、新しいメッセージをリストに追加します。
+      // さらに、messageStoreのupdateUnreadCount()で未読のメッセージの件数を+1します。
       // これにより、ユーザーがメッセージ一覧画面にいる場合、リロードなしで新しいメッセージがリアルタイムで表示されます。
       if (pathname === '/messages' && searchParams.get('container') !== 'outbox') {
         add(message);
+        updateUnreadCount(1);
 
         // ユーザーが送信者とのチャットページにいない場合、トースト通知で新しいメッセージの到着を知らせます。
+        // さらに、messageStoreのupdateUnreadCount()で未読のメッセージの件数を+1します。
         // これにより、ユーザーが関連するチャット画面を見ていない場合、新しいメッセージの到着を通知で知らせます。
       } else if (pathname !== `/members/${message.senderId}/chat`) {
         newMessageToast(message);
+        updateUnreadCount(1);
       }
     },
-    [add, pathname, searchParams],
+    [add, pathname, searchParams, updateUnreadCount],
   );
 
   useEffect(() => {
@@ -101,7 +75,7 @@ export const useNotificationChannel = (userId: string | null) => {
 
     // コンポーネントがアンマウントされたときに、チャンネルの購読を解除します。
     return () => {
-      if (channelRef.current) {
+      if (channelRef.current && channelRef.current?.subscribed) {
         channelRef.current?.unsubscribe();
         channelRef.current.unbind('message:new', handleNewMessage);
 
