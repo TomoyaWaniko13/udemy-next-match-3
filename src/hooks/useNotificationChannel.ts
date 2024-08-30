@@ -4,11 +4,12 @@ import { pusherClient } from '@/lib/pusher';
 import { MessageDto } from '@/types';
 import { usePathname, useSearchParams } from 'next/navigation';
 import useMessageStore from '@/hooks/useMessageStore';
-import { newMessageToast } from '@/components/NewMessageToast';
+import { newLikeToast, newMessageToast } from '@/components/NotificationToast';
 
 // 108 (Setting up a private channel)
 // 111 (Adding the realtime functionality to the message table)
 // 114 (Updating the count based on the event)
+// 116 (Challenge solution)
 
 // ユーザーIDを引数として受け取ります。
 // このIDを使用して、private-{userId}という形式のプライベートチャンネルを作成します。
@@ -59,6 +60,10 @@ export const useNotificationChannel = (userId: string | null) => {
     [add, pathname, searchParams, updateUnreadCount],
   );
 
+  const handleNewLike = useCallback((data: { name: string; image: string | null; userId: string }) => {
+    newLikeToast(data.name, data.image, data.userId);
+  }, []);
+
   useEffect(() => {
     if (!userId) return;
 
@@ -71,6 +76,7 @@ export const useNotificationChannel = (userId: string | null) => {
       // 特定のユーザーにのみメッセージを送信できます。
       channelRef.current = pusherClient.subscribe(`private-${userId}`);
       channelRef.current.bind('message:new', handleNewMessage);
+      channelRef.current.bind('like:new', handleNewLike);
     }
 
     // コンポーネントがアンマウントされたときに、チャンネルの購読を解除します。
@@ -78,7 +84,7 @@ export const useNotificationChannel = (userId: string | null) => {
       if (channelRef.current && channelRef.current?.subscribed) {
         channelRef.current?.unsubscribe();
         channelRef.current.unbind('message:new', handleNewMessage);
-
+        channelRef.current.unbind('like:new', handleNewLike);
         channelRef.current = null;
       }
     };
