@@ -167,7 +167,9 @@ async function fetchMutualLikes(userId: string) {
   // ログインしているuserがいいねをしたuserのidをsourceUserIdとする。
   // そうすることで、ログインしているuserがいいねをして、尚且つログインしているuserに対していいねをしたuserを取得できる。
   const mutualList = await prisma.like.findMany({
-    where: { AND: [{ targetUserId: userId }, { sourceUserId: { in: likeIds } }] },
+    where: {
+      AND: [{ targetUserId: userId }, { sourceUserId: { in: likeIds } }],
+    },
     select: { sourceMember: true },
   });
 

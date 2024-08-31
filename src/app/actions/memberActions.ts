@@ -8,7 +8,7 @@ import { addYears } from 'date-fns';
 
 // 42 (Fetching data from the Database using server actions)
 // 121 (Adding the age slider functionality)
-
+// 122 (Adding the sorting functionality)
 // Memberはプロフィール情報(gender, dateOfBrith, city, Photo[]など)を含むmodel
 // getMembers()はserver側で実行されるserver action
 // query stringを使うことで、server側でも状態の変化を検知して、それに基づいてmemberを取得できます。
@@ -16,11 +16,15 @@ export async function getMembers(searchParams: UserFilters) {
   const session = await auth();
   if (!session?.user) return null;
 
+  // 121 (Adding the age slider functionality)
   const ageRange = searchParams?.ageRange?.toString()?.split(',') || [18, 100];
   // データベースには年齢ではなく生年月日(DOB)を記録しているので、年齢ではなく生年月日を計算する必要があります。
   const currentDate = new Date();
   const minDob = addYears(currentDate, -ageRange[1] - 1);
   const maxDob = addYears(currentDate, -ageRange[0]);
+
+  // 122 (Adding the sorting functionality)
+  const orderBySelector = searchParams?.orderBy || 'updated';
 
   try {
     // get all members except for the loggedIn user
@@ -30,6 +34,9 @@ export async function getMembers(searchParams: UserFilters) {
         AND: [{ dateOfBirth: { gte: minDob } }, { dateOfBirth: { lte: maxDob } }],
         NOT: { userId: session.user.id },
       },
+      // [] (JavaScriptのComputed Property Names)を使うと、
+      // オブジェクトのプロパティ名を動的に設定することができます。
+      orderBy: { [orderBySelector]: 'desc' },
     });
   } catch (error) {
     console.log(error);

@@ -2,7 +2,7 @@
 
 import { FaFemale, FaMale } from 'react-icons/fa';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { Button, Select, SelectItem, Slider } from '@nextui-org/react';
+import { Button, Select, SelectItem, Slider, Selection } from '@nextui-org/react';
 
 // 119 (Adding the filters component)
 // 121 (Adding the age slider functionality)
@@ -21,10 +21,25 @@ const Filters = () => {
     { value: 'female', icon: FaFemale },
   ];
 
+  // query parameterを更新します。
   const handleAgeSelect = (value: number[]) => {
     const params = new URLSearchParams(searchParams);
     params.set('ageRange', value.join(','));
     router.replace(`${pathname}?${params}`);
+  };
+
+  // query parameterを更新します。
+  // NextUIのSelectionを引数にとります。
+  const handleOrderSelect = (value: Selection) => {
+    // Selection = 'all' | Set<Key>　ですが、今回は 'all' は関係ないです。
+    // なので、Set<Key>である場合に処理を開始します。
+    if (value instanceof Set) {
+      const params = new URLSearchParams(searchParams);
+      // 選択されている値をvalue.values().next().valueで取得します。
+      // その値をquery parameterに設定します。
+      params.set('orderBy', value.values().next().value);
+      router.replace(`${pathname}?${params}`);
+    }
   };
 
   if (pathname !== '/members') return null;
@@ -56,10 +71,12 @@ const Filters = () => {
           <Select
             size={'sm'}
             fullWidth={true}
-            placeholder={'Order by'}
+            label={'Order by'}
             variant={'bordered'}
             color={'secondary'}
             aria-label={'Order by selector'}
+            selectedKeys={new Set([searchParams.get('orderBy') || 'updated'])}
+            onSelectionChange={handleOrderSelect}
           >
             {orderByList.map((item) => (
               <SelectItem key={item.value} value={item.value}>
