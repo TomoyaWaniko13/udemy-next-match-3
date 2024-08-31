@@ -6,6 +6,7 @@ import { Button, Select, SelectItem, Slider, Selection } from '@nextui-org/react
 
 // 119 (Adding the filters component)
 // 121 (Adding the age slider functionality)
+// 124 (Adding the gender filter)
 const Filters = () => {
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -20,6 +21,10 @@ const Filters = () => {
     { value: 'male', icon: FaMale },
     { value: 'female', icon: FaFemale },
   ];
+
+  // URLに 'gender' パラメータがある場合：その値をカンマで分割した配列を使用
+  // URLに 'gender' パラメータがない場合：デフォルト値 ['male', 'female'] を使用
+  const selectedGender = searchParams.get('gender')?.split(',') || ['male', 'female'];
 
   // query parameterを更新します。
   const handleAgeSelect = (value: number[]) => {
@@ -42,6 +47,26 @@ const Filters = () => {
     }
   };
 
+  // ['man', 'woman'].filter((g) => g !== clickedValue));
+
+  const handleGenderSelect = (clickedValue: string) => {
+    // 現在のURLパラメータを取得します。
+    const params = new URLSearchParams(searchParams);
+
+    // 選択されたジェンダーが既に selectedGender 配列に含まれているかチェックします。
+    if (selectedGender.includes(clickedValue)) {
+      // そのジェンダーを除外した新しい配列を作成し、URLパラメータを更新します。
+      // filter()内の条件が true の場合（つまり、現在のジェンダー, g が、クリックされたジェンダー, value と異なる場合）、
+      // その要素は新しい配列に含まれます。
+      params.set('gender', selectedGender.filter((g) => g !== clickedValue).toString());
+    } else {
+      // そのジェンダーを既存の選択に追加し、URLパラメータを更新します。
+      params.set('gender', [...selectedGender, clickedValue].toString());
+    }
+    // 更新されたURLパラメータを使用してページをリロードせずにURLを更新します。
+    router.replace(`${pathname}?${params}`);
+  };
+
   if (pathname !== '/members') return null;
 
   return (
@@ -51,7 +76,12 @@ const Filters = () => {
         <div className={'flex gap-2 items-center'}>
           <div>Gender: </div>
           {genders.map(({ icon: Icon, value }) => (
-            <Button key={value} size={'sm'} color={'secondary'}>
+            <Button
+              key={value}
+              size={'sm'}
+              color={selectedGender.includes(value) ? 'secondary' : 'default'}
+              onClick={() => handleGenderSelect(value)}
+            >
               <Icon size={24} />
             </Button>
           ))}

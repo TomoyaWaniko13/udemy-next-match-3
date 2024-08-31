@@ -5,10 +5,12 @@ import { auth } from '@/auth';
 import { Photo } from '@prisma/client';
 import { UserFilters } from '@/types';
 import { addYears } from 'date-fns';
+import { getAuthUserId } from '@/app/actions/authActions';
 
 // 42 (Fetching data from the Database using server actions)
 // 121 (Adding the age slider functionality)
 // 122 (Adding the sorting functionality)
+// 124 (Adding the gender filter)
 // Memberはプロフィール情報(gender, dateOfBrith, city, Photo[]など)を含むmodel
 // getMembers()はserver側で実行されるserver action
 // query stringを使うことで、server側でも状態の変化を検知して、それに基づいてmemberを取得できます。
@@ -26,12 +28,21 @@ export async function getMembers(searchParams: UserFilters) {
   // 122 (Adding the sorting functionality)
   const orderBySelector = searchParams?.orderBy || 'updated';
 
+  // 124 (Adding the gender filter)
+  const selectedGender = searchParams?.gender?.toString()?.split(',') || ['male', 'female'];
+
   try {
     // get all members except for the loggedIn user
     return prisma.member.findMany({
       where: {
         // gte = greater than or equal to, lte = less than or equal to
-        AND: [{ dateOfBirth: { gte: minDob } }, { dateOfBirth: { lte: maxDob } }],
+        AND: [
+          // 121 (Adding the age slider functionality)
+          { dateOfBirth: { gte: minDob } },
+          { dateOfBirth: { lte: maxDob } },
+          // 124 (Adding the gender filter)
+          { gender: { in: selectedGender } },
+        ],
         NOT: { userId: session.user.id },
       },
       // [] (JavaScriptのComputed Property Names)を使うと、
@@ -67,4 +78,19 @@ export async function getMemberPhotosByUserId(userId: string) {
 
   // member objectの photo配列を抽出する。
   return member.photo.map((p) => p) as Photo[];
+}
+
+// 123 (Updating the last active property)
+export async function updateLastActive() {
+  const userId = await getAuthUserId();
+
+  try {
+    return prisma.member.update({
+      where: { userId },
+      data: { updated: new Date() },
+    });
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
 }
