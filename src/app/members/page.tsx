@@ -2,12 +2,15 @@ import { getMembers } from '@/app/actions/memberActions';
 import MemberCard from '@/app/members/MemberCard';
 import { fetchCurrentUserLikeIds } from '@/app/actions/likeActions';
 import PaginationComponent from '@/components/PaginationComponent';
+import { UserFilters } from '@/types';
 
 // 120 (Adding the UI for pagination)
-const MembersPage = async () => {
+// 121 (Adding the age slider functionality)
+// query stringを使うことで、server側でも状態の変化を検知して、それに基づいてgetMembers()でmembersを取得できます。
+const MembersPage = async ({ searchParams }: { searchParams: UserFilters }) => {
   // 42(Fetching data from the Database using server actions)
   // getMembers()はserver sideで実行されるserver action
-  const members = await getMembers();
+  const members = await getMembers(searchParams);
 
   // 56 (Fetching the likes)
   // ログインしているuserがいいねをした相手のIDのarray

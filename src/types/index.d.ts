@@ -59,3 +59,10 @@ type MessageDto = {
   recipientName?: string;
   recipientImage?: string | null;
 };
+
+// 121 (Adding the age slider functionality)
+type UserFilters = {
+  ageRange: number[];
+  orderBy: string;
+  gender: string[];
+};

@@ -14,6 +14,8 @@ export async function toggleLikeMember(targetUserId: string, isLiked: boolean) {
     const userId = await getAuthUserId();
 
     // いいねがすでにつけられていたら、いいねを取り消します。
+    // DELETE FROM likes
+    // WHERE source_user_id = :userId AND target_user_id = :targetUserId;
     if (isLiked) {
       await prisma.like.delete({
         where: {
@@ -26,6 +28,17 @@ export async function toggleLikeMember(targetUserId: string, isLiked: boolean) {
       //  いいねがまだつけられていなかったら、いいねをつけます。
       //  さらに、いいねを押された人にtoastで通知するために、いいねを押した人のpropertiesをselectで取得します。
     } else {
+      // INSERT INTO likes (source_user_id, target_user_id)
+      // VALUES (:userId, :targetUserId)
+      // RETURNING (
+      //     SELECT json_build_object(
+      //         'name', m.name,
+      //         'image', m.image,
+      //         'userId', m.user_id
+      //     )
+      //     FROM members m
+      //     WHERE m.user_id = :userId
+      // ) AS source_member;
       const like = await prisma.like.create({
         data: {
           sourceUserId: userId,
@@ -63,6 +76,9 @@ export async function fetchCurrentUserLikeIds() {
     const userId = await getAuthUserId();
 
     // loginしているユーザーがいいねしたユーザーのid(targetUserId)だけをselectする。
+    // SELECT target_user_id
+    // FROM likes
+    // WHERE source_user_id = :userId;
     const likeIds = await prisma.like.findMany({
       where: { sourceUserId: userId },
       select: { targetUserId: true },
@@ -102,6 +118,10 @@ export async function fetchLikedMembers(type = 'source') {
 
 // 57 (Adding the list actions)
 async function fetchSourceLikes(userId: string) {
+  // SELECT m.*
+  // FROM likes l
+  // JOIN members m ON l.target_user_id = m.user_id
+  // WHERE l.source_user_id = :userId;
   const sourceList = await prisma.like.findMany({
     where: { sourceUserId: userId },
     select: { targetMember: true },
@@ -124,6 +144,17 @@ async function fetchTargetLikes(userId: string) {
 
 // 57 (Adding the list actions)
 async function fetchMutualLikes(userId: string) {
+  // WITH liked_users AS (
+  //     SELECT target_user_id
+  //     FROM likes
+  //     WHERE source_user_id = :userId
+  // )
+  // SELECT m.*
+  // FROM likes l
+  // JOIN members m ON l.source_user_id = m.user_id
+  // WHERE l.target_user_id = :userId
+  //   AND l.source_user_id IN (SELECT target_user_id FROM liked_users);
+
   // ログインしているuserがいいねをしたuserのid(= targetUserId)を取得する。
   const likedUsers = await prisma.like.findMany({
     where: { sourceUserId: userId },
