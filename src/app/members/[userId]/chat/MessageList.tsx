@@ -18,6 +18,7 @@ type Props = {
 // 99 (Receiving the live messages)
 // 101 (Adding the read message feature)
 // 114 (Updating the count based on the event)
+// Pusherからの通知に応じて状態を変化させる必要があるので、client componentである必要があります。
 const MessageList = ({ initialMessages, currentUserId, chatId }: Props) => {
   // useEffect()をstrict modeで2回実行させないためのlogicです。
   const setReadCount = useRef(false);
@@ -50,7 +51,8 @@ const MessageList = ({ initialMessages, currentUserId, chatId }: Props) => {
   // handleNewMessage() は、サーバー側で messageActions.ts の createMessage() server actionで
   // message:read イベントを 発火させる際に作られた message を messageDto 型として受け取ります。
   // handleNewMessage()の目的は 新しいメッセージを受信したときに、メッセージリストを更新することです。
-  // handleNewMessage()により、このコンポーネントはリアルタイムでメッセージの追加を行い、常に最新のチャット状態をユーザーに表示することができます。
+  // handleNewMessage()により、このコンポーネントはリアルタイムでメッセージの追加を行い、
+  // 常に最新のチャット状態をユーザーに表示することができます。
   const handleNewMessage = useCallback((message: MessageDto) => {
     setMessages((prevState) => {
       return [...prevState, message];
@@ -63,12 +65,14 @@ const MessageList = ({ initialMessages, currentUserId, chatId }: Props) => {
   // handleReadMessages()により、このコンポーネントはリアルタイムで既読状態の更新を行い、常に最新のチャット状態をユーザーに表示することができます。
   const handleReadMessages = useCallback((messageIds: string[]) => {
     setMessages((prevState) =>
+      // 配列の各要素を加工したいのでmapを使います。
       prevState.map((message) =>
         // includes()は true もしくは false をreturnします。
+        // つまり, これは配列の各要素の message が既読になった message かを確かめる条件です。
         messageIds.includes(message.id)
-          ? // 既読の場合、message オブジェクトのコピーを作成し、dateRead プロパティを現在の日時で更新します。
+          ? // 既読になった message の場合、message オブジェクトのコピーを作成し、dateRead プロパティを現在の日時で更新します。
             { ...message, dateRead: formatShortDateTime(new Date()) }
-          : // 既読でない場合、元の message をそのまま返します
+          : // 既読でなってない message の場合、元の message をそのまま返します
             message,
       ),
     );
@@ -88,16 +92,16 @@ const MessageList = ({ initialMessages, currentUserId, chatId }: Props) => {
       // クライアントサイド(このcomponent)では、このイベントをhandleNewMessage関数で捉え、UIを更新します。
       channelRef.current.bind('message:new', handleNewMessage);
       // サーバーがmessageActions.tsのgetMessageThread() server actionを実行してメッセージを作成すると、
-      // Pusherを通じて'message:read'イベントが発火されます。
+      // Pusherを通じて'messages:read'イベントが発火されます。
       // クライアントサイド(このcomponent)では、このイベントをhandleReadMessages関数で捉え、UIを更新します。
-      channelRef.current.bind('message:read', handleReadMessages);
+      channelRef.current.bind('messages:read', handleReadMessages);
     }
 
     return () => {
       if (channelRef.current && channelRef.current.subscribed) {
         channelRef.current.unsubscribe();
         channelRef.current.unbind('message:new', handleNewMessage);
-        channelRef.current.unbind('message:read', handleReadMessages);
+        channelRef.current.unbind('messages:read', handleReadMessages);
       }
     };
     // useCallback()は、handleNewMessage()とhandleReadMessages()関数をメモ化（キャッシュ）します。

@@ -11,8 +11,7 @@ declare global {
 }
 
 // if (!global.pusherServerInstance) は、グローバル変数 pusherServerInstance がまだ存在しないかどうかをチェックします。
-// これにより、アプリケーションの生存期間
-// 中に一度だけインスタンスが作成されることを保証します。
+// これにより、アプリケーションの生存期間中に一度だけインスタンスが作成されることを保証します。
 if (!global.pusherServerInstance) {
   global.pusherServerInstance = new PusherServer({
     //　Pusherアプリケーションの一意のID。

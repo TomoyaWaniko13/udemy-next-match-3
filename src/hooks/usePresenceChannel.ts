@@ -76,10 +76,12 @@ export const usePresenceChannel = () => {
         handleSetMembers(Object.keys(members.members));
         await updateLastActive();
       });
+
       // 新しいメンバーが追加されたときに呼ばれ、そのメンバーを追加します。
       channelRef.current.bind('pusher:member_added', (member: Record<string, any>) => {
         handleAddMember(member.id);
       });
+
       // メンバーが削除されたときに呼ばれ、そのメンバーを削除します。
       channelRef.current?.bind('pusher:member_removed', (member: Record<string, any>) => {
         handleRemoveMember(member.id);

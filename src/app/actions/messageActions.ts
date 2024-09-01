@@ -90,25 +90,26 @@ export async function getMessageThread(recipientId: string) {
     // 既読のメッセージの件数を表します。その件数を、未読メッセージの表示の件数から引きます。
     let readCount = 0;
 
-    // ここでは、取得したメッセージの中で未読のものを特定し、それらを既読にします。
+    // 取得したメッセージの中で、現在のユーザーが受信者、recipientIdで指定された相手が送信者、
+    // 尚且つ未読のものを特定し、それらを既読にします。
     // また、Pusherを使って、メッセージが既読になったことをリアルタイムで通知します。
     if (messages.length > 0) {
       const readMessagesIds = messages
-        // filter()で未読メッセージの特定をしています。
+        // filter() で未読メッセージのarrayを作ります。
         .filter(
-          (m) =>
+          (message) =>
             // まだ既読になっていない（dateReadがnull）
             // この条件により、既に読まれたメッセージを再度「既読」にする無駄な処理を避けられます。
-            m.dateRead === null &&
+            message.dateRead === null &&
             // 受信者が現在のユーザー
             // ユーザーは自分宛てのメッセージのみを「既読」にすべきです。他人宛てのメッセージを既読にすることは適切ではありません。
-            m.recipient?.userId === userId &&
+            message.recipient?.userId === userId &&
             // 送信者がrecipientIdで指定された相手
             // ユーザーが特定の相手とのチャットを見ているときに、そのチャットとは関係のない他の相手からのメッセージの状態が変わることを防ぎます。
-            m.sender?.userId === recipientId,
+            message.sender?.userId === recipientId,
         )
-        // フィルタリングされたメッセージから id のみを取り出して新しい配列を作成しています。
-        .map((m) => m.id);
+        // 未読メッセージの配列から id のみを取り出して新しい配列を作成しています。
+        .map((unreadMessage) => unreadMessage.id);
 
       // 特定した未読メッセージのIDを使用して、データベース内のそれらのメッセージを一括で更新します。
       // dateReadフィールドに現在の日時を設定することで、これらのメッセージを既読にマークします。
@@ -119,7 +120,7 @@ export async function getMessageThread(recipientId: string) {
       });
 
       // 114 (Updating the count based on the event)
-      // 既読のメッセージの件数を表します。その件数を、未読メッセージの表示の件数から引きます。
+      // 既読になったのメッセージの件数を表します。その件数を、未読メッセージの表示の件数から引きます。
       readCount = readMessagesIds.length;
 
       // 'message:read' イベントを発火させ、既読になったメッセージのID配列を送信します。
@@ -127,7 +128,7 @@ export async function getMessageThread(recipientId: string) {
       // channelRef.current.bind('message:read', handleReadMessages);
       // handleReadMessages 関数が、サーバーから送られた readMessagesIds を受け取り、対応するメッセージの既読状態を更新します。
       // これにより、メッセージの送信者のUIでも、メッセージが既読になったことがリアルタイムで反映されます。
-      await pusherServer.trigger(createChatId(recipientId, userId), 'message:read', readMessagesIds);
+      await pusherServer.trigger(createChatId(recipientId, userId), 'messages:read', readMessagesIds);
     }
 
     // データベースから取得したメッセージの配列を、mapMessageToMessageDto()でフロントエンドで使用しやすい形式に変換しています。

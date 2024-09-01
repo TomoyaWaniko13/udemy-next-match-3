@@ -20,7 +20,8 @@ const ChatPage = async ({ params }: { params: { userId: string } }) => {
   const messages = await getMessageThread(params.userId);
   // 1つ目のuserIdはloginしているユーザーのuerId.
   // 2つ目のparams.userIdはメッセージを送信する相手のuserId.
-  // createChatId()で一意のチャットIDを生成します。
+  // createChatId()で一意のIDを生成します。
+  // このIDはchannelの名前を表します。
   const chatId = createChatId(userId, params.userId);
 
   return (

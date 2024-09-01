@@ -2,7 +2,6 @@
 
 import { MessageDto } from '@/types';
 import clsx from 'clsx';
-import { Avatar, divider } from '@nextui-org/react';
 import { timeAgo, transformImageUrl } from '@/lib/util';
 import { useEffect, useRef } from 'react';
 import PresenceAvatar from '@/components/PresenceAvatar';
