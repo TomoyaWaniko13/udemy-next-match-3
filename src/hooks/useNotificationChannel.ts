@@ -14,7 +14,7 @@ import { newLikeToast, newMessageToast } from '@/components/NotificationToast';
 // ユーザーIDを引数として受け取ります。
 // このIDを使用して、private-{userId}という形式のプライベートチャンネルを作成します。
 export const useNotificationChannel = (userId: string | null) => {
-  // useRefを使用して、チャンネルのインスタンスを保持します。
+  // useRef を使用して、チャンネルのインスタンスを保持します。
   // これにより、不必要な再購読を避け、パフォーマンスを向上させます。
   const channelRef = useRef<Channel | null>(null);
 
@@ -65,9 +65,15 @@ export const useNotificationChannel = (userId: string | null) => {
   }, []);
 
   useEffect(() => {
+    // https://react.dev/reference/react/useEffect
+    // useEffect () は conditionの中で呼び出せないので、
+    // if (!userId) return; は useEffect()の中で使う必要があります。
     if (!userId) return;
 
-    // コンポーネントがマウントされたときに、指定されたプライベートチャンネルを購読します。
+    // コンポーネントがマウントされたときに、指定されたプライベートチャンネルをsubscribe()します。
+    // そのsubscribe()の後で、/api/pusher-auth/route.tsのauthorizationが発生します。
+    // 下のURLのwebpageの図に実行順が書かれています。
+    // https://pusher.com/docs/channels/server_api/authorizing-users/
     if (!channelRef.current) {
       // https://pusher.com/docs/channels/using_channels/private-channels/
       // private channel の名前は private- で始める必要があります。

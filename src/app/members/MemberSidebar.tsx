@@ -17,6 +17,7 @@ type Props = {
 // 46 (Adding a Sidebar for the Member detailed page)
 // 62 (Adding the edit member route)
 // 77 (Tidying up the images)
+// 107 (Displaying presence in other components)
 const MemberSidebar = ({ member, navLinks }: Props) => {
   const pathname = usePathname();
 
@@ -29,6 +30,7 @@ const MemberSidebar = ({ member, navLinks }: Props) => {
         alt={'User profile main image'}
         className={'rounded-full mt-6 aspect-square object-cover'}
       />
+      {/* scroll barを表示させないために、'overflow-hidden'　を使います。 */}
       <CardBody className={'overflow-hidden'}>
         <div className={'flex flex-col items-center'}>
           <div className={'flex'}>
@@ -36,6 +38,7 @@ const MemberSidebar = ({ member, navLinks }: Props) => {
               {member.name}, {calculateAge(member.dateOfBirth)}
             </div>
             <div>
+              {/* 107 (Displaying presence in other components) */}
               <PresenceDot member={member} />
             </div>
           </div>

@@ -28,7 +28,7 @@ const usePresenceStore = create<PresenceState>()(
       members: [],
       // これは現在の状態(state)を取得し、新しいidを追加した新しい配列を作成しています。
       add: (id) => set((state) => ({ members: [...state.members, id] })),
-      // これはfilterを使用して、指定されたid以外のメンバーだけを含む新しい配列を作成しています。
+      // filter() を使用して、指定された id 以外のメンバーだけを含む新しい配列を作成しています。
       remove: (id) => set((state) => ({ members: state.members.filter((member) => member !== id) })),
       // メンバーリスト全体を設定する関数です。 これは単純にmembersを新しい配列で置き換えます。
       set: (ids) => set({ members: ids }),

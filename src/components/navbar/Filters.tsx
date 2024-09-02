@@ -49,19 +49,19 @@ const Filters = () => {
 
   // ['man', 'woman'].filter((g) => g !== clickedValue));
 
-  const handleGenderSelect = (clickedValue: string) => {
+  const handleGenderSelect = (clickedGender: string) => {
     // 現在のURLパラメータを取得します。
     const params = new URLSearchParams(searchParams);
 
     // 選択されたジェンダーが既に selectedGender 配列に含まれているかチェックします。
-    if (selectedGender.includes(clickedValue)) {
+    if (selectedGender.includes(clickedGender)) {
       // そのジェンダーを除外した新しい配列を作成し、URLパラメータを更新します。
       // filter()内の条件が true の場合（つまり、現在のジェンダー, g が、クリックされたジェンダー, value と異なる場合）、
       // その要素は新しい配列に含まれます。
-      params.set('gender', selectedGender.filter((g) => g !== clickedValue).toString());
+      params.set('gender', selectedGender.filter((g) => g !== clickedGender).toString());
     } else {
       // そのジェンダーを既存の選択に追加し、URLパラメータを更新します。
-      params.set('gender', [...selectedGender, clickedValue].toString());
+      params.set('gender', [...selectedGender, clickedGender].toString());
     }
     // 更新されたURLパラメータを使用してページをリロードせずにURLを更新します。
     router.replace(`${pathname}?${params}`);

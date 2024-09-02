@@ -3,7 +3,14 @@ import { pusherServer } from '@/lib/pusher';
 import { NextResponse } from 'next/server';
 
 // 102 (Setting up presence)
-// クライアントがプライベートまたはプレゼンスチャンネルに接続しようとするたびに、この認証プロセスが実行されます。
+// https://pusher.com/docs/channels/server_api/authorizing-users/
+
+// プロセスの流れ:
+// a. クライアントがプライベート/プレゼンスチャンネルへの接続を試みる
+// b. Pusherライブラリがこの認証エンドポイントにリクエストを送信
+// c. サーバーが authorizeChannel() を呼び出して認証情報を生成
+// d. 生成された認証情報がクライアントに返される
+// e. クライアントが認証情報を使用してPusherサーバーに接続
 export async function POST(request: Request) {
   try {
     // 現在のセッションを非同期で取得します。
@@ -17,7 +24,8 @@ export async function POST(request: Request) {
     }
 
     // request.formData() メソッドは Request オブジェクトの標準メソッドです。
-    // リクエストボディの読み取りと解析には時間がかかる可能性があるので、formData() メソッドは非同期（Promise-based）です。
+    // リクエストボディの読み取りと解析には時間がかかる可能性があるので、
+    // formData() メソッドは非同期（Promise-based）です。
     const body = await request.formData();
 
     // フォームデータからsocket_idとchannel_nameを取得します。
@@ -33,7 +41,6 @@ export async function POST(request: Request) {
     // a. クライアントサイド：
     // socket_id：クライアントの一意の識別子
     // channel_name：アクセスしようとしているチャンネルの名前
-    //
     // b. サーバーサイド：
     // ユーザーの認証情報（この場合、session.user.id）
     // Pusherアプリケーションの秘密鍵
@@ -41,7 +48,15 @@ export async function POST(request: Request) {
       user_id: session.user.id,
     };
 
-    // Pusher サーバーの authorizeChannel メソッドを使用して、特定のユーザーが特定のチャンネルにアクセスする権限があるかを確認します。
+    // https://pusher.com/docs/channels/server_api/authorizing-users/
+    // authorizeChannel() メソッドの主な目的は、特定のユーザーが特定のチャンネル
+    // （プライベートチャンネルやプレゼンスチャンネル）にアクセスする権限があるかを確認し、必要な認証情報を生成することです。
+    // このメソッドは、与えられた情報を使用して認証トークンを生成します。
+    // 認証トークンは、Pusherのアプリケーションキーと秘密鍵を使用して作成される署名付きの文字列です。
+    // この署名プロセスにより、認証情報が改ざんされていないことが保証されます。
+    // このプロセスにより、クライアントは直接Pusherの秘密鍵にアクセスすることなく、安全に認証を行うことができます。
+    // サーバーサイドでこの処理を行うことで、不正なアクセスを防ぎ、チャンネルのセキュリティを確保します。
+
     const authResponse = pusherServer.authorizeChannel(socketId, channel, data);
 
     // 認証プロセスの結果を JSON 形式でクライアントに返します。

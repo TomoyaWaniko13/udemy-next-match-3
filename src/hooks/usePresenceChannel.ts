@@ -18,6 +18,7 @@ import { updateLastActive } from '@/app/actions/memberActions';
 // ユーザーがオンライン/オフラインになったときの通知
 // これらの情報に基づいたUI更新
 // などが可能になります。
+
 export const usePresenceChannel = () => {
   // usePresenceStore() から必要な関数を取得
   // これらの関数は、ストア内のメンバーリストを操作するために使用されます。
@@ -66,23 +67,46 @@ export const usePresenceChannel = () => {
   // また、メモリリークを防ぐためのクリーンアップも適切に行っています。
   useEffect(() => {
     if (!channelRef.current) {
+      // https://pusher.com/docs/channels/using_channels/presence-channels/#subscribe
+      // https://pusher.com/docs/static/img/private-channel-auth-process.png
       // チャンネルがまだ購読されていない場合、'presence-nm' という名前のプレゼンスチャンネルを購読します。
+      // When subscribing the user authorization process will be triggered.
+      // Since it is a presence channel the name must be prefixed with presence-.
       channelRef.current = pusherClient.subscribe('presence-nm');
 
-      // 購読が成功したときに呼ばれ、現在のメンバーリストをセットします。
+      // https://pusher.com/docs/channels/using_channels/presence-channels/#pusher-subscription-succeeded
+      // subscribe() が成功したときに呼ばれ、handleSetMembers()　で現在のメンバーリストをセットします。
       // Members は Pusher.js ライブラリで提供されるオブジェクトで、プレゼンスチャンネルに接続されているメンバー（ユーザー）
       // の情報を管理するために使用されます。
       channelRef.current.bind('pusher:subscription_succeeded', async (members: Members) => {
+        // members.membersにはsubscribeしているuserのIDが含まれています。console.log(members)で確認できます。
         handleSetMembers(Object.keys(members.members));
         await updateLastActive();
       });
 
+      // https://pusher.com/docs/channels/using_channels/presence-channels/#the-members-parameter
       // 新しいメンバーが追加されたときに呼ばれ、そのメンバーを追加します。
+      // The pusher:member_added event is triggered when a user joins a channel.
+
+      // When the event is triggered and member object is passed to the callback. The member object has the following properties:
+      // id (String)
+      // A unique identifier of the user. The value for this depends on the server authentication.
+      // info (Object)
+      // An object that can have any number of properties on it. The properties depend on the server authentication.
+      // pusher:member_removed
       channelRef.current.bind('pusher:member_added', (member: Record<string, any>) => {
         handleAddMember(member.id);
       });
 
-      // メンバーが削除されたときに呼ばれ、そのメンバーを削除します。
+      // https://pusher.com/docs/channels/using_channels/presence-channels/#the-members-parameter
+      // The pusher:member_removed is triggered when a user leaves a channel.
+      // When the event is triggered and member object is passed to the callback.
+      // The member object has the following properties:
+      // id (String)
+      // A unique identifier of the user. The value for this depends on the server authentication.
+      // info (Object)
+      // An object that can have any number of properties on it. The properties depend on the server authentication.
+      // pusher:member_removed
       channelRef.current?.bind('pusher:member_removed', (member: Record<string, any>) => {
         handleRemoveMember(member.id);
       });
