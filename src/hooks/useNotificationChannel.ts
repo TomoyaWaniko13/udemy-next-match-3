@@ -41,17 +41,12 @@ export const useNotificationChannel = (userId: string | null) => {
   // 新しいメッセージをリストに追加します。これにより、適切なコンテキストでのみ更新が行われます。
   const handleNewMessage = useCallback(
     (message: MessageDto) => {
-      // ユーザーが '/messages' ページにいて、かつ 'outbox' （送信済みメッセージ）を表示していない場合、
-      // つまり 'inbox'(受信済みメッセージ)を表示している場合、新しいメッセージをリストに追加します。
-      // さらに、messageStoreのupdateUnreadCount()で未読のメッセージの件数を+1します。
-      // これにより、ユーザーがメッセージ一覧画面にいる場合、リロードなしで新しいメッセージがリアルタイムで表示されます。
+      // ユーザーがメッセージ一覧画面にいる場合、リロードなしで新しいメッセージがリアルタイムで表示されます。
       if (pathname === '/messages' && searchParams.get('container') !== 'outbox') {
         add(message);
         updateUnreadCount(1);
 
-        // ユーザーが送信者とのチャットページにいない場合、トースト通知で新しいメッセージの到着を知らせます。
-        // さらに、messageStoreのupdateUnreadCount()で未読のメッセージの件数を+1します。
-        // これにより、ユーザーが関連するチャット画面を見ていない場合、新しいメッセージの到着を通知で知らせます。
+        // ユーザーが関連するチャット画面を見ていない場合、新しいメッセージの到着を通知で知らせます。
       } else if (pathname !== `/members/${message.senderId}/chat`) {
         newMessageToast(message);
         updateUnreadCount(1);
@@ -60,6 +55,8 @@ export const useNotificationChannel = (userId: string | null) => {
     [add, pathname, searchParams, updateUnreadCount],
   );
 
+  // 116 (Challenge solution)
+  // serverで
   const handleNewLike = useCallback((data: { name: string; image: string | null; userId: string }) => {
     newLikeToast(data.name, data.image, data.userId);
   }, []);

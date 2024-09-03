@@ -13,24 +13,28 @@ import { getUnreadMessageCount } from '@/app/actions/messageActions';
 // 108 (Setting up a private channel)
 // 113 (Getting the unread message count)
 const Providers = ({ children, userId }: { children: ReactNode; userId: string | null }) => {
+  // useEffect()が2回実行されるのを防ぐためのlogicです。
   const isUnreadCountSet = useRef(false);
 
+  // useMessageStore()からupdateUnreadCount()を取得します。
+  // updateUnreadCount()を使用して、unreadCountを更新します。
   const { updateUnreadCount } = useMessageStore((state) => ({
     updateUnreadCount: state.updateUnreadCount,
   }));
 
   const setUnreadCount = useCallback(
     (amount: number) => {
-      // 未読のメッセージの件数についてのstateを更新する。
+      // 未読のメッセージの件数についてのstateを更新します。
       updateUnreadCount(amount);
     },
     [updateUnreadCount],
   );
 
   useEffect(() => {
-    // これは、React Strictモードによる二重実行の問題を解決しています。
+    // useEffect()が2回実行されるのを防ぐためのlogicです。
     if (!isUnreadCountSet.current && userId) {
-      // 未読のメッセージの件数を取得する。
+      // 未読のメッセージの件数を取得します。
+      // getUnreadMessageCount()はserver actionです。
       getUnreadMessageCount().then((count) => {
         setUnreadCount(count);
       });

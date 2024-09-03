@@ -12,13 +12,6 @@ import { updateLastActive } from '@/app/actions/memberActions';
 // 新しくオンラインになった人
 // オフラインになった人
 // これらの情報をリアルタイムで把握し、アプリケーションの状態（ストア）に反映します。
-
-// このカスタムフック（usePresenceChannel）を使用することで、アプリケーションの他の部分で簡単に：
-// 現在オンラインのユーザーリストを取得
-// ユーザーがオンライン/オフラインになったときの通知
-// これらの情報に基づいたUI更新
-// などが可能になります。
-
 export const usePresenceChannel = () => {
   // usePresenceStore() から必要な関数を取得
   // これらの関数は、ストア内のメンバーリストを操作するために使用されます。
@@ -81,6 +74,8 @@ export const usePresenceChannel = () => {
       channelRef.current.bind('pusher:subscription_succeeded', async (members: Members) => {
         // members.membersにはsubscribeしているuserのIDが含まれています。console.log(members)で確認できます。
         handleSetMembers(Object.keys(members.members));
+        // この server action により、user がログインした時に member Modelの updated propertyが更新されます。
+        // これにより、誰が一番最近にログインしたのかを判別できます。
         await updateLastActive();
       });
 

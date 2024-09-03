@@ -30,9 +30,10 @@ const useMessages = (initialMessages: MessageDto[]) => {
   const router = useRouter();
   // outboxかinboxが選択されているかを取得します。
   const isOutbox = searchParams.get('container') === 'outbox';
-  // 1つ以上delete buttonがあるので、特定するためにidが必要。
+  // 1つ以上delete buttonがあるので、特定するためにidが必要です。
   const [isDeleting, setDeleting] = useState({ id: '', loading: false });
 
+  // initialMessagesをset()します。
   useEffect(() => {
     set(initialMessages);
 
@@ -63,7 +64,8 @@ const useMessages = (initialMessages: MessageDto[]) => {
 
       // useMessageStore()のremove() methodです。指定されたIDのメッセージを配列から削除します。
       remove(message.id);
-      // inbox(受信箱)の"未読"のメッセージを消去した場合、未読件数を-1します。
+      // useMessageStore()のupdateUnreadCount() methodです。
+      // "inbox(受信箱)"の"未読"のメッセージを消去した場合、未読件数を-1します。
       if (!isOutbox && !message.dateRead) updateUnreadCount(-1);
 
       // deleteButtonをロード中と表示するのを終了します。

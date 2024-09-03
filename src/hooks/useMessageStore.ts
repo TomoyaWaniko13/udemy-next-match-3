@@ -20,7 +20,8 @@ type MessageState = {
 };
 
 // create<MessageState>() で新しいストアを作成します。
-// useMessageStore は Zustand を使用して作成されたカスタムフックです。これにより、アプリケーション全体で一貫したメッセージの状態を管理できます。
+// useMessageStore は Zustand を使用して作成されたカスタムフックです。
+// これにより、アプリケーション全体で一貫したメッセージの状態を管理できます。
 const useMessageStore = create<MessageState>()(
   // ミドルウェアを使用して、開発ツールでのデバッグを可能にしています。
   devtools(
@@ -29,8 +30,9 @@ const useMessageStore = create<MessageState>()(
       messages: [],
       // 初期状態は0です。
       unreadCount: 0,
-      // 新しいメッセージを配列の先頭に追加します。
-      // stateは、関数が呼び出された時点でのMessageStateの現在の値を表します。つまり、この時点でのmessages配列の内容を含んでいます。
+      // 新しいメッセージを配列の"先頭"に追加します。"先頭"に追加することで、適切な順番でメッセージを表示できます。
+      // stateは、関数が呼び出された時点でのMessageStateの現在の値を表します。
+      // つまり、この時点でのmessages配列の内容を含んでいます。
       add: (message) => set((state) => ({ messages: [message, ...state.messages] })),
       // 指定されたIDのメッセージを配列から削除します。
       remove: (id) => set((state) => ({ messages: state.messages.filter((message) => message.id !== id) })),

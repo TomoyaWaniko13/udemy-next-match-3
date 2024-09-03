@@ -6,6 +6,7 @@ import clsx from 'clsx';
 
 // 120 (Adding the UI for pagination)
 const PaginationComponent = () => {
+  // activeなpage size buttonがどれかを管理します。
   const [active, setActive] = useState(3);
 
   return (
@@ -15,12 +16,13 @@ const PaginationComponent = () => {
       <div className={'flex flex-row justify-between items-center py-5'}>
         <div>showing 1-10 of 23 results</div>
         {/* NextUIの<Pagination/> componentです。 */}
+        {/* https://nextui.org/docs/components/pagination */}
         <Pagination total={20} color={'secondary'} initialPage={1} variant={'bordered'} />
         {/* Page sizeを指定するためのUIです。 */}
         <div className={'flex flex-row gap-1 items-center'}>
           Page size:
           {[3, 6, 12].map((size) => (
-            //　横並びにして、global.cssのboxのUIを適用します。
+            //　横並びにして、globals.cssで設定したboxのUIを適用します。'page-size-box'
             // activeなpage size buttonに対しては、classNameの二行目の条件を適用します。
             <div
               key={size}

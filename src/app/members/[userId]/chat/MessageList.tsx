@@ -10,6 +10,7 @@ import useMessageStore from '@/hooks/useMessageStore';
 
 type Props = {
   // readCountは既読になったメッセージの件数を表します。
+  // サーバーからgetMessageThread()でその件数を取得して、updateUnreadCount()に適用します。
   initialMessages: { messages: MessageDto[]; readCount: number };
   currentUserId: string;
   chatId: string;
@@ -23,6 +24,7 @@ const MessageList = ({ initialMessages, currentUserId, chatId }: Props) => {
   // useEffect()をstrict modeで2回実行させないためのlogicです。
   const setReadCount = useRef(false);
   const [messages, setMessages] = useState(initialMessages.messages);
+
   // updateUnreadCount()で未読のメッセージの件数を更新します。それにより、画面にその更新を反映できます。
   const { updateUnreadCount } = useMessageStore((state) => ({
     updateUnreadCount: state.updateUnreadCount,
@@ -62,7 +64,8 @@ const MessageList = ({ initialMessages, currentUserId, chatId }: Props) => {
   // handleReadMessages() は、サーバー側で messageActions.ts の getMessageThread() server actionで
   // message:read イベントを 発火させる際に既読となったメッセージIDの配列(messageIds)を受け取ります。
   // handleReadMessages()の目的は、メッセージが既読になったときに、該当するメッセージの状態を更新することです。
-  // handleReadMessages()により、このコンポーネントはリアルタイムで既読状態の更新を行い、常に最新のチャット状態をユーザーに表示することができます。
+  // handleReadMessages()により、このコンポーネントはリアルタイムで既読状態の更新を行い、
+  // 常に最新のチャット状態をユーザーに表示することができます。
   const handleReadMessages = useCallback((messageIds: string[]) => {
     setMessages((prevState) =>
       // 配列の各要素を加工したいのでmapを使います。

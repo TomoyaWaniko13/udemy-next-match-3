@@ -42,6 +42,7 @@ export async function createMessage(recipientUserId: string, data: MessageSchema
     await pusherServer.trigger(createChatId(userId, recipientUserId), 'message:new', messageDto);
     // メッセージの受信者(recipient)に対して「新しいメッセージが届きました」という通知をリアルタイムで送ることができます。
     // これにより、受信者はアプリを再読み込みしたり、手動で更新したりすることなく、新しいメッセージをすぐに確認できるようになります。
+    // private channelの名前は'private-'で始める必要があります。eventの名前に制約はありません。
     await pusherServer.trigger(`private-${recipientUserId}`, 'message:new', messageDto);
 
     return { status: 'success', data: messageDto };
@@ -316,7 +317,7 @@ export async function getUnreadMessageCount() {
   try {
     const userId = await getAuthUserId();
 
-    // 未読のmessageの個数を取得します。
+    // 現在のユーザーが受け取って, 現在のユーザーが消去していない, 未読のmessageの個数を取得します。
     return prisma.message.count({
       where: {
         // 現在のユーザーが受け取ったmessageを取得します。

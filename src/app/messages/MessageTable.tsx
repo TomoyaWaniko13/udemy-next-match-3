@@ -18,11 +18,12 @@ type Props = {
 // 110 (Refactoring the message table)
 // 111 (Adding the realtime functionality to the message table)
 const MessageTable = ({ initialMessages }: Props) => {
-  // Zustand ストアの状態が変更されると、その状態を使用しているコンポーネント
-  // （この場合は MessageTable）が自動的に再レンダリングされ、新しいメッセージが表示されます。
+  // Zustand ストアの状態が変更されると、その状態を使用しているコンポーネント（この場合は MessageTable）が
+  // 自動的に再レンダリングされ、新しいメッセージが表示されます
+  // useMessages() custom hooksは、<MessageTable/>で必要なlogicをまとめています。
   const { columns, isOutbox, isDeleting, deleteMessage, selectRow, messages } = useMessages(initialMessages);
 
-  // NextUIのTableについて:
+  // NextUIのTableの書き方について:
   // https://nextui.org/docs/components/table
   return (
     <Card className={'flex flex-col gap-3 h-[80vh] overflow-auto'}>

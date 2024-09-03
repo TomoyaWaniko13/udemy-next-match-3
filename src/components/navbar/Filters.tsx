@@ -12,81 +12,90 @@ const Filters = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
 
-  const orderByList = [
-    { label: 'Last active', value: 'updated' },
-    { label: 'Newest members', value: 'created' },
-  ];
-
   const genders = [
+    // valueをkeyとして扱います。
     { value: 'male', icon: FaMale },
     { value: 'female', icon: FaFemale },
   ];
 
-  // URLに 'gender' パラメータがある場合：その値をカンマで分割した配列を使用
-  // URLに 'gender' パラメータがない場合：デフォルト値 ['male', 'female'] を使用
-  const selectedGender = searchParams.get('gender')?.split(',') || ['male', 'female'];
+  const orderByList = [
+    // valueをkeyとして扱います。
+    { value: 'updated', label: 'Last active' },
+    { value: 'created', label: 'Newest members' },
+  ];
 
-  // query parameterを更新します。
-  const handleAgeSelect = (value: number[]) => {
-    const params = new URLSearchParams(searchParams);
-    params.set('ageRange', value.join(','));
-    router.replace(`${pathname}?${params}`);
-  };
-
-  // query parameterを更新します。
-  // NextUIのSelectionを引数にとります。
-  const handleOrderSelect = (value: Selection) => {
-    // Selection = 'all' | Set<Key>　ですが、今回は 'all' は関係ないです。
-    // なので、Set<Key>である場合に処理を開始します。
-    if (value instanceof Set) {
-      const params = new URLSearchParams(searchParams);
-      // 選択されている値をvalue.values().next().valueで取得します。
-      // その値をquery parameterに設定します。
-      params.set('orderBy', value.values().next().value);
-      router.replace(`${pathname}?${params}`);
-    }
-  };
-
-  // ['man', 'woman'].filter((g) => g !== clickedValue));
+  // URLに 'gender' パラメータがある場合：その値をカンマで分割した配列を使用します。
+  // URLに 'gender' パラメータがない場合：デフォルト値 ['male', 'female'] を使用します。
+  const selectedGenders = searchParams.get('gender')?.split(',') || ['male', 'female'];
 
   const handleGenderSelect = (clickedGender: string) => {
     // 現在のURLパラメータを取得します。
     const params = new URLSearchParams(searchParams);
 
-    // 選択されたジェンダーが既に selectedGender 配列に含まれているかチェックします。
-    if (selectedGender.includes(clickedGender)) {
-      // そのジェンダーを除外した新しい配列を作成し、URLパラメータを更新します。
-      // filter()内の条件が true の場合（つまり、現在のジェンダー, g が、クリックされたジェンダー, value と異なる場合）、
-      // その要素は新しい配列に含まれます。
-      params.set('gender', selectedGender.filter((g) => g !== clickedGender).toString());
+    // clickedGender が既に selectedGender 配列に含まれているかチェックします。
+    // includes() は true もしくは false を return します。
+    if (selectedGenders.includes(clickedGender)) {
+      // clickedGender が既に selectedGender 配列に含まれている場合、
+      // clickedGenderを除外した新しい配列を作成し、URLパラメータを更新します。
+      params.set('gender', selectedGenders.filter((selectedGender) => selectedGender !== clickedGender).toString());
     } else {
-      // そのジェンダーを既存の選択に追加し、URLパラメータを更新します。
-      params.set('gender', [...selectedGender, clickedGender].toString());
+      // clickedGender が selectedGender 配列に含まれていない場合、
+      // clickedGenderを加えた新しい配列を作成し、URLパラメータを更新します。
+      params.set('gender', [...selectedGenders, clickedGender].toString());
     }
     // 更新されたURLパラメータを使用してページをリロードせずにURLを更新します。
     router.replace(`${pathname}?${params}`);
   };
 
+  // <Slider/>で選ばれた値をもとにして、query parameterを更新します。
+  const handleAgeSelect = (ageRangeValue: number[]) => {
+    const params = new URLSearchParams(searchParams);
+    // %2C is the URL encoded version of a comma.
+    params.set('ageRange', ageRangeValue.join(','));
+    // 更新されたURLパラメータを使用してページをリロードせずにURLを更新します。
+    router.replace(`${pathname}?${params}`);
+  };
+
+  // NextUIのSelectionを引数にとります。 query parameterを更新します。
+  const handleOrderSelect = (orderByValue: Selection) => {
+    // Selection = 'all' | Set<Key>　ですが、今回は 'all' は関係ないです。
+    // なので、Set<Key>である場合に処理を開始します。
+    if (orderByValue instanceof Set) {
+      const params = new URLSearchParams(searchParams);
+      // 選択されている値をvalue.values().next().valueで取得します。
+      // その値をquery parameterに設定します。
+      params.set('orderBy', orderByValue.values().next().value);
+      // 更新されたURLパラメータを使用してページをリロードせずにURLを更新します。
+      router.replace(`${pathname}?${params}`);
+    }
+  };
+
+  // members pageでしか<Filters/>は表示しません。
   if (pathname !== '/members') return null;
 
   return (
     <div className={'shadow-md py-2'}>
+      {/* 横並びにします。 */}
       <div className={'flex flex-row justify-around items-center'}>
         <div className={'text-secondary font-semibold text-xl'}>Results: 10</div>
+        {/* 横並びにします。 */}
         <div className={'flex gap-2 items-center'}>
           <div>Gender: </div>
-          {genders.map(({ icon: Icon, value }) => (
+          {genders.map(({ value, icon: Icon }) => (
             <Button
               key={value}
               size={'sm'}
-              color={selectedGender.includes(value) ? 'secondary' : 'default'}
+              color={selectedGenders.includes(value) ? 'secondary' : 'default'}
               onClick={() => handleGenderSelect(value)}
             >
               <Icon size={24} />
             </Button>
           ))}
         </div>
+        {/* <Slider/>がwidthの1/2を占めるようにします。 */}
         <div className={'flex flex-row items-center gap-2 w-1/2'}>
+          {/* NextUIの<Slider/>について: */}
+          {/* https://nextui.org/docs/components/slider */}
           <Slider
             label={'Age range'}
             color={'secondary'}
@@ -97,7 +106,10 @@ const Filters = () => {
             onChangeEnd={(value) => handleAgeSelect(value as number[])}
           />
         </div>
+        {/*　<Select/>がwidthの1/4を占めるようにします。　*/}
         <div className={'w-1/4'}>
+          {/* NextUIの<Select/>について: */}
+          {/* https://nextui.org/docs/components/select */}
           <Select
             size={'sm'}
             fullWidth={true}

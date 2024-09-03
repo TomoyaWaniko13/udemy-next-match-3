@@ -15,11 +15,15 @@ type Props = {
 export default function NotificationToast({ image, href, title, subtitle }: Props) {
   return (
     <Link href={href} className={'flex items-center'}>
+      {/* この div は左側に配置します。 つまり image を左側に配置します。*/}
       <div className={'mr-2'}>
         <Image src={transformImageUrl(image) || '/images/user.png'} height={50} width={50} alt={'sender image'} />
       </div>
+      {/* この div は右側に配置します。 */}
       <div className={'flex flex-grow flex-col justify-center'}>
+        {/* titleは上に表示します。 */}
         <div className={'font-semibold'}>{title}</div>
+        {/* この div は下に表示します。　*/}
         <div className={'text-sm'}>{subtitle || 'Click to view'}</div>
       </div>
     </Link>
@@ -36,6 +40,7 @@ export const newMessageToast = (message: MessageDto) => {
   );
 };
 
+// name, image, userIdは serverから取得します。
 export const newLikeToast = (name: string, image: string | null, userId: string) => {
   toast(
     <NotificationToast

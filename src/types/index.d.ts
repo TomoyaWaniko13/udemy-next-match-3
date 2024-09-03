@@ -61,6 +61,8 @@ type MessageDto = {
 };
 
 // 121 (Adding the age slider functionality)
+// Filters.tsxで設定できる条件を表しています。
+// これにより memberActions.tsのgetMembers()で条件に合うMemberのみを取得できます。
 type UserFilters = {
   ageRange: number[];
   orderBy: string;

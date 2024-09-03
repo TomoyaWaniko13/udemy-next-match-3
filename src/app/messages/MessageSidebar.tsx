@@ -13,6 +13,8 @@ import useMessageStore from '@/hooks/useMessageStore';
 // 113 (Getting the unread message count)
 
 const MessageSidebar = () => {
+  // unreadCountはProviders.tsxで更新されています。
+  // それを取得して、UIに反映します。
   const { unreadCount } = useMessageStore((state) => ({
     unreadCount: state.unreadCount,
   }));
