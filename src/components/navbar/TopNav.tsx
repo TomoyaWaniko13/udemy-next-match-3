@@ -1,11 +1,11 @@
 import { Navbar, NavbarBrand, NavbarContent } from '@nextui-org/navbar';
 import Link from 'next/link';
-import { Button, NavbarItem } from '@nextui-org/react';
+import { Button } from '@nextui-org/react';
 import NavLink from '@/components/navbar/NavLink';
 import { auth } from '@/auth';
 import UserMenu from '@/components/navbar/UserMenu';
 import { getUserInfoForNav } from '@/app/actions/userActions';
-import Filters from '@/components/navbar/Filters';
+import FiltersWrapper from '@/components/navbar/FiltersWrapper';
 
 const TopNav = async () => {
   const session = await auth();
@@ -46,7 +46,7 @@ const TopNav = async () => {
           )}
         </NavbarContent>
       </Navbar>
-      <Filters />
+      <FiltersWrapper />
     </>
   );
 };
