@@ -68,3 +68,31 @@ type UserFilters = {
   orderBy: string;
   gender: string[];
 };
+
+// 128 (Adding a pagination store)
+// ページネーションのための基本的なパラメータを定義しています.
+type PagingParams = {
+  // 現在表示しているページの番号です。通常、1から始まります。
+  pageNumber: number;
+  // 1ページに表示するアイテムの数です。
+  pageSize: number;
+};
+
+// 128 (Adding a pagination store)
+// この型は PagingParams を拡張し、ページネーションの結果に関する追加情報を含みます。
+type PagingResult = {
+  // データセット全体のページ数です。
+  totalPages: number;
+  // データセット全体のアイテム総数です。
+  totalCount: number;
+} & PagingParams;
+
+// 128 (Adding a pagination store)
+// これはジェネリック型で、ページネーションされたデータの応答を表します。
+// T: ページネーションされるアイテムの型です（例: Member）。
+type PaginatedResponse<T> = {
+  // 現在のページに含まれるアイテムの配列です
+  items: T[];
+  // データセット全体のアイテム総数です。
+  totalCount: number;
+};
