@@ -1,74 +1,18 @@
 'use client';
 
-import { FaFemale, FaMale } from 'react-icons/fa';
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { Button, Select, SelectItem, Slider, Selection } from '@nextui-org/react';
+import { usePathname } from 'next/navigation';
+import { Button, Select, SelectItem, Slider } from '@nextui-org/react';
+import { useFilters } from '@/hooks/useFilters';
 
 // 119 (Adding the filters component)
 // 121 (Adding the age slider functionality)
 // 124 (Adding the gender filter)
+// 125 (Adding a filter store and hook)
 const Filters = () => {
   const pathname = usePathname();
-  const searchParams = useSearchParams();
-  const router = useRouter();
-
-  const genders = [
-    // valueをkeyとして扱います。
-    { value: 'male', icon: FaMale },
-    { value: 'female', icon: FaFemale },
-  ];
-
-  const orderByList = [
-    // valueをkeyとして扱います。
-    { value: 'updated', label: 'Last active' },
-    { value: 'created', label: 'Newest members' },
-  ];
-
-  // URLに 'gender' パラメータがある場合：その値をカンマで分割した配列を使用します。
-  // URLに 'gender' パラメータがない場合：デフォルト値 ['male', 'female'] を使用します。
-  const selectedGenders = searchParams.get('gender')?.split(',') || ['male', 'female'];
-
-  const handleGenderSelect = (clickedGender: string) => {
-    // 現在のURLパラメータを取得します。
-    const params = new URLSearchParams(searchParams);
-
-    // clickedGender が既に selectedGender 配列に含まれているかチェックします。
-    // includes() は true もしくは false を return します。
-    if (selectedGenders.includes(clickedGender)) {
-      // clickedGender が既に selectedGender 配列に含まれている場合、
-      // clickedGenderを除外した新しい配列を作成し、URLパラメータを更新します。
-      params.set('gender', selectedGenders.filter((selectedGender) => selectedGender !== clickedGender).toString());
-    } else {
-      // clickedGender が selectedGender 配列に含まれていない場合、
-      // clickedGenderを加えた新しい配列を作成し、URLパラメータを更新します。
-      params.set('gender', [...selectedGenders, clickedGender].toString());
-    }
-    // 更新されたURLパラメータを使用してページをリロードせずにURLを更新します。
-    router.replace(`${pathname}?${params}`);
-  };
-
-  // <Slider/>で選ばれた値をもとにして、query parameterを更新します。
-  const handleAgeSelect = (ageRangeValue: number[]) => {
-    const params = new URLSearchParams(searchParams);
-    // %2C is the URL encoded version of a comma.
-    params.set('ageRange', ageRangeValue.join(','));
-    // 更新されたURLパラメータを使用してページをリロードせずにURLを更新します。
-    router.replace(`${pathname}?${params}`);
-  };
-
-  // NextUIのSelectionを引数にとります。 query parameterを更新します。
-  const handleOrderSelect = (orderByValue: Selection) => {
-    // Selection = 'all' | Set<Key>　ですが、今回は 'all' は関係ないです。
-    // なので、Set<Key>である場合に処理を開始します。
-    if (orderByValue instanceof Set) {
-      const params = new URLSearchParams(searchParams);
-      // 選択されている値をvalue.values().next().valueで取得します。
-      // その値をquery parameterに設定します。
-      params.set('orderBy', orderByValue.values().next().value);
-      // 更新されたURLパラメータを使用してページをリロードせずにURLを更新します。
-      router.replace(`${pathname}?${params}`);
-    }
-  };
+  // このcomponent で使うロジックの部分を、useFilters() custom hook から取得します。
+  // filters は useFilterStore から取得しています。
+  const { genderList, orderByList, filters, selectAge, selectGender, selectOrder } = useFilters();
 
   // members pageでしか<Filters/>は表示しません。
   if (pathname !== '/members') return null;
@@ -80,13 +24,13 @@ const Filters = () => {
         <div className={'text-secondary font-semibold text-xl'}>Results: 10</div>
         {/* 横並びにします。 */}
         <div className={'flex gap-2 items-center'}>
-          <div>Gender: </div>
-          {genders.map(({ value, icon: Icon }) => (
+          <div>Gender:</div>
+          {genderList.map(({ value, icon: Icon }) => (
             <Button
               key={value}
               size={'sm'}
-              color={selectedGenders.includes(value) ? 'secondary' : 'default'}
-              onClick={() => handleGenderSelect(value)}
+              color={filters.gender.includes(value) ? 'secondary' : 'default'}
+              onClick={() => selectGender(value)}
             >
               <Icon size={24} />
             </Button>
@@ -102,8 +46,8 @@ const Filters = () => {
             size={'sm'}
             minValue={18}
             maxValue={100}
-            defaultValue={[18, 100]}
-            onChangeEnd={(value) => handleAgeSelect(value as number[])}
+            defaultValue={filters.ageRange}
+            onChangeEnd={(value) => selectAge(value as number[])}
           />
         </div>
         {/*　<Select/>がwidthの1/4を占めるようにします。　*/}
@@ -117,8 +61,8 @@ const Filters = () => {
             variant={'bordered'}
             color={'secondary'}
             aria-label={'Order by selector'}
-            selectedKeys={new Set([searchParams.get('orderBy') || 'updated'])}
-            onSelectionChange={handleOrderSelect}
+            selectedKeys={new Set([filters.orderBy])}
+            onSelectionChange={selectOrder}
           >
             {orderByList.map((item) => (
               <SelectItem key={item.value} value={item.value}>
