@@ -10,7 +10,6 @@ type PaginationState = {
   // 主に初期データ取得時や、データセットが変更されたときに使用されます。
   setPagination: (count: number) => void;
   // この関数は新しいページ番号（page）を受け取り、現在のページを更新します。
-  // ユーザーが異なるページに移動するときに使用されます。
   setPage: (page: number) => void;
   // この関数は新しいページサイズ（pageSize）を受け取り、1ページあたりのアイテム数を更新します。
   // ユーザーがページサイズを変更するときに使用されます（例：10件表示から20件表示に変更）。
@@ -52,6 +51,7 @@ const usePaginationStore = create<PaginationState>()(
       setPageSize: (pageSize: number) =>
         set((state) => ({
           pagination: {
+            // 現在のtotalCountを使用する必要があるので、
             // スプレッド演算子（...）を使用して現在のpagination状態をコピーします。
             ...state.pagination,
 

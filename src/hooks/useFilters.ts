@@ -3,9 +3,12 @@ import { FaFemale, FaMale } from 'react-icons/fa';
 import { Selection } from '@nextui-org/react';
 import useFilterStore from '@/hooks/useFilterStore';
 import { useEffect, useTransition } from 'react';
+import usePaginationStore from '@/hooks/usePaginationStore';
 
 // 125 (Adding a filter store and hook)
 // 127 (Adding loading indicators for the filters)
+// 129 (Adding the pagination functionality)
+
 // Filters.tsx で使うロジックをここに記述しています。
 export const useFilters = () => {
   const pathname = usePathname();
@@ -15,6 +18,12 @@ export const useFilters = () => {
   const [isPending, startTransition] = useTransition();
 
   const { filters, setFilters } = useFilterStore();
+
+  // pagination に基づいてquery parameter を変更するために、usePaginationStore() を使います。
+  const { pageNumber, pageSize } = usePaginationStore((state) => ({
+    pageNumber: state.pagination.pageNumber,
+    pageSize: state.pagination.pageSize,
+  }));
 
   const { gender, ageRange, orderBy } = filters;
 
@@ -36,10 +45,14 @@ export const useFilters = () => {
       if (ageRange) searchParams.set('ageRange', ageRange.toString());
       if (orderBy) searchParams.set('orderBy', orderBy);
 
+      // pageSize と pageNumber は number type なので、toString()を使う必要があります。
+      if (pageSize) searchParams.set('pageSize', pageSize.toString());
+      if (pageNumber) searchParams.set('pageNumber', pageNumber.toString());
+
       // 更新されたURLパラメータを使用してページをリロードせずにURLを更新します。
       router.replace(`${pathname}?${searchParams}`);
     });
-  }, [ageRange, orderBy, gender, router, pathname]);
+  }, [ageRange, orderBy, gender, router, pathname, pageNumber, pageSize]);
 
   const genderList = [
     // valueをkeyとして扱います。
