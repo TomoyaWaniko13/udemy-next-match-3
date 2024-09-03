@@ -1,18 +1,20 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
-import { Button, Select, SelectItem, Slider } from '@nextui-org/react';
+import { Button, Select, SelectItem, Slider, Spinner } from '@nextui-org/react';
 import { useFilters } from '@/hooks/useFilters';
 
 // 119 (Adding the filters component)
 // 121 (Adding the age slider functionality)
 // 124 (Adding the gender filter)
 // 125 (Adding a filter store and hook)
+// 127 (Adding loading indicators for the filters)
+
 const Filters = () => {
   const pathname = usePathname();
   // このcomponent で使うロジックの部分を、useFilters() custom hook から取得します。
   // filters は useFilterStore から取得しています。
-  const { genderList, orderByList, filters, selectAge, selectGender, selectOrder } = useFilters();
+  const { genderList, orderByList, filters, selectAge, selectGender, selectOrder, isPending } = useFilters();
 
   // members pageでしか<Filters/>は表示しません。
   if (pathname !== '/members') return null;
@@ -21,7 +23,10 @@ const Filters = () => {
     <div className={'shadow-md py-2'}>
       {/* 横並びにします。 */}
       <div className={'flex flex-row justify-around items-center'}>
-        <div className={'text-secondary font-semibold text-xl'}>Results: 10</div>
+        <div className={'flex gap-2 items-center'}>
+          <div className={'text-secondary font-semibold text-xl'}>Results: 10</div>
+          {isPending && <Spinner size={'sm'} color={'secondary'} />}
+        </div>
         {/* 横並びにします。 */}
         <div className={'flex gap-2 items-center'}>
           <div>Gender:</div>

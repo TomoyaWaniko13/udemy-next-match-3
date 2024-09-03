@@ -2,32 +2,43 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { FaFemale, FaMale } from 'react-icons/fa';
 import { Selection } from '@nextui-org/react';
 import useFilterStore from '@/hooks/useFilterStore';
-import { useEffect } from 'react';
+import { useEffect, useTransition } from 'react';
 
 // 125 (Adding a filter store and hook)
+// 127 (Adding loading indicators for the filters)
 // Filters.tsx で使うロジックをここに記述しています。
 export const useFilters = () => {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const router = useRouter();
+  //
+  const [isPending, startTransition] = useTransition();
 
   const { filters, setFilters } = useFilterStore();
 
   const { gender, ageRange, orderBy } = filters;
 
   useEffect(() => {
-    const searchParams = new URLSearchParams();
+    // URLの更新のような非緊急の状態更新を低優先度のタスクとしてマークします。
+    // これにより、より重要なUIの更新（例：ユーザー入力への即時反応）が遅延しないようにします。
+    // フィルターが変更されるたびにURLが更新されますが、useTransition()を使用することで、
+    // この更新処理中もUIは反応的で操作可能な状態を保ちます。
+    // さらに、isPendingフラグを提供し、更新プロセスの進行中であることをUIに示すことができます。
+    // これにより、ユーザーに視覚的なフィードバックを与えることが可能になります。
+    startTransition(() => {
+      const searchParams = new URLSearchParams();
 
-    // query parameterを更新します。
-    // %2C is the URL encoded version of a comma.
-    if (gender) searchParams.set('gender', gender.join(','));
-    // ageRangeは、[37, 65] というふうに取得されます。
-    // toString()を適用すると、'37,65' となります。
-    if (ageRange) searchParams.set('ageRange', ageRange.toString());
-    if (orderBy) searchParams.set('orderBy', orderBy);
+      // query parameterを更新します。
+      // %2C is the URL encoded version of a comma.
+      if (gender) searchParams.set('gender', gender.join(','));
+      // ageRangeは、[37, 65] というふうに取得されます。
+      // toString()を適用すると、'37,65' となります。
+      if (ageRange) searchParams.set('ageRange', ageRange.toString());
+      if (orderBy) searchParams.set('orderBy', orderBy);
 
-    // 更新されたURLパラメータを使用してページをリロードせずにURLを更新します。
-    router.replace(`${pathname}?${searchParams}`);
+      // 更新されたURLパラメータを使用してページをリロードせずにURLを更新します。
+      router.replace(`${pathname}?${searchParams}`);
+    });
   }, [ageRange, orderBy, gender, router, pathname]);
 
   const genderList = [
@@ -78,5 +89,6 @@ export const useFilters = () => {
     selectGender: handleGenderSelect,
     selectOrder: handleOrderSelect,
     filters,
+    isPending,
   };
 };
