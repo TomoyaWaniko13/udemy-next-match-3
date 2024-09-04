@@ -38,7 +38,7 @@ export async function getMembers({
 
   // 現在どのページにいるか
   const page = parseInt(pageNumber);
-  // １ページ当たりのアイテム数
+  //
   const limit = parseInt(pageSize);
 
   // 何個アイテムをスキップするか =  １ページ当たりのアイテム数 * (現在のページ - 1)

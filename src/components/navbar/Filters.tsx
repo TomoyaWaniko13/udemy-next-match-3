@@ -11,13 +11,9 @@ import { useFilters } from '@/hooks/useFilters';
 // 127 (Adding loading indicators for the filters)
 
 const Filters = () => {
-  const pathname = usePathname();
   // このcomponent で使うロジックの部分を、useFilters() custom hook から取得します。
   // filters は useFilterStore から取得しています。
   const { genderList, orderByList, filters, selectAge, selectGender, selectOrder, isPending } = useFilters();
-
-  // members pageでしか <Filters/> は表示しません。
-  if (pathname !== '/members') return null;
 
   return (
     <div className={'shadow-md py-2'}>

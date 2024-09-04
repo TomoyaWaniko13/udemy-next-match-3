@@ -174,8 +174,12 @@ export async function getMessageThread(recipientId: string) {
 
 // 89 (Creating the fetch messages action)
 // 93 (Adding the delete message action)
+// 131 (Cursor based pagination)
+
 //　この関数は、ユーザーの受信箱（inbox）または送信箱（outbox）のメッセージを取得するためのものです。
-export async function getMessagesByContainer(container: string) {
+// cursor は、次のページの開始点を示す値です。この場合、メッセージの作成日時（created）をカーソルとして使用しています。
+// カーソルは「しおり」のようなものです。「前回ここまで読んだ」という位置を示します。
+export async function getMessagesByContainer(container: string, cursor?: string, limit = 2) {
   try {
     const userId = await getAuthUserId();
 
@@ -193,8 +197,8 @@ export async function getMessagesByContainer(container: string) {
 
     const conditions = {
       // [] 内に式を記述することで、その式の評価結果がプロパティ名として使用されます。
-      // 'outbox'(送信箱)が選択されている場合、ログインしているユーザーが送信したmessageを取得するので、'senderId'を使う。
-      // そうでない場合、ログインしているユーザーが受信したmessageを取得するので、'recipientId'を使う。
+      // 'outbox'(送信箱)が選択されている場合、ログインしているユーザーが送信したmessageを取得するので、userIdとして'senderId'を使います。
+      // そうでない場合、ログインしているユーザーが受信したmessageを取得するので、userIdとして'recipientId'を使います。
       [container === 'outbox' ? 'senderId' : 'recipientId']: userId,
       // これはスプレッド演算子 (...) と三項演算子(?)を組み合わせています。
       // container === 'outbox' が true の場合、{ senderDeleted: false } というオブジェクトが展開されます。
@@ -203,27 +207,50 @@ export async function getMessagesByContainer(container: string) {
     };
 
     const messages = await prisma.message.findMany({
-      // where: conditionsについて:
-      // 'outbox' の場合:
-      // where: {
-      //   senderId: userId,
-      //   senderDeleted: false
-      // }
-      // これは「ユーザーIDが userId で、送信者が削除していないメッセージ」を意味します。
-
-      // 'inbox' の場合:
-      // where: {
-      //   recipientId: userId,
-      //   recipientDeleted: false
-      // }
-      // これは「ユーザーIDが userId で、受信者が削除していないメッセージ」を意味します。
-      where: conditions,
+      where: {
+        // Spread syntax (...) を使うことで、conditions に加えてさらに条件を指定できます。
+        ...conditions,
+        // cursor が提供されている場合、created: { lte: new Date(cursor) } という条件が追加されます。
+        // これは「cursor(どこから始めるか) の日時とそれ以前に作成されたメッセージ」を意味します。
+        // cursor が undefined の場合, 追加の条件なし（全てのメッセージが対象になります)。
+        ...(cursor ? { created: { lte: new Date(cursor) } } : {}),
+      },
       // メッセージを作成日時の降順（最新のものから）でソートします。
       orderBy: { created: 'desc' },
       select: messageSelect,
+      // limit は、一度に取得するデータの最大数を指定するパラメータです。一回のクエリで取得するメッセージの数を"制限"しています。
+      // 次のページがあるかどうかを判断するため、limit より1つ多く取得しています。
+      // もし limit より多くの messages が取得できたなら、まだ次のページがあることを意味します。
+      take: limit + 1,
     });
 
-    return messages.map((message) => mapMessageToMessageDto(message));
+    let nextCursor: string | undefined;
+
+    // データベースから limit + 1 個の messages を取得しています。
+    // もし limit より多くの messages が取得できたなら、まだ次のページがあることを意味します。
+    if (messages.length > limit) {
+      // 配列の最後の要素を取り除き、その要素を nextItem として保存します。
+      // これにより、現在のページに表示するメッセージ数を limit に調整します。
+      const nextItem = messages.pop();
+      // nextItem の作成日時を次の cursor として設定します。
+      // これが次のページの開始点になります。
+
+      // toString() を使用した場合：
+      // ローカルタイムゾーンに依存します。
+      // 形式が地域や言語設定によって変わる可能性があります。
+      // ミリ秒の情報が失われます。
+      nextCursor = nextItem?.created.toISOString();
+
+      // 取得したメッセージの数が limit 以下の場合, これ以上データがないことを意味します。
+    } else {
+      // したがって、nextCursor を undefined に設定し、最後のページであることを示します。
+      nextCursor = undefined;
+    }
+
+    const messagesToReturn = messages.map((message) => mapMessageToMessageDto(message));
+
+    // 取得したメッセージと次のカーソルを返します。
+    return { messages: messagesToReturn, nextCursor };
   } catch (error) {
     console.log(error);
     throw error;
