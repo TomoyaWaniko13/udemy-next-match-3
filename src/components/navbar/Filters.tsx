@@ -16,7 +16,7 @@ const Filters = () => {
   // filters は useFilterStore から取得しています。
   const { genderList, orderByList, filters, selectAge, selectGender, selectOrder, isPending } = useFilters();
 
-  // members pageでしか<Filters/>は表示しません。
+  // members pageでしか <Filters/> は表示しません。
   if (pathname !== '/members') return null;
 
   return (
@@ -41,7 +41,7 @@ const Filters = () => {
             </Button>
           ))}
         </div>
-        {/* <Slider/>がwidthの1/2を占めるようにします。 */}
+        {/* <Slider/> が width の1/2を占めるようにします。 */}
         <div className={'flex flex-row items-center gap-2 w-1/2'}>
           {/* NextUIの<Slider/>について: */}
           {/* https://nextui.org/docs/components/slider */}

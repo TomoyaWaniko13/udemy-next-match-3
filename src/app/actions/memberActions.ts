@@ -1,44 +1,51 @@
 'use server';
 
 import { prisma } from '@/lib/prisma';
-import { auth } from '@/auth';
-import { Photo } from '@prisma/client';
-import { UserFilters } from '@/types';
+import { Member, Photo } from '@prisma/client';
+import { GetMemberParams, PaginatedResponse } from '@/types';
 import { addYears } from 'date-fns';
 import { getAuthUserId } from '@/app/actions/authActions';
-import { linkGc } from 'next/dist/client/app-link-gc';
 
 // 42 (Fetching data from the Database using server actions)
 // 121 (Adding the age slider functionality)
 // 122 (Adding the sorting functionality)
 // 124 (Adding the gender filter)
+// 130 (Adding teh pagination functionality Part 2)
+
 // Memberはプロフィール情報(gender, dateOfBrith, city, Photo[]など)を含むmodel
 // getMembers()はserver側で実行されるserver action
 // query stringを使うことで、server側でも状態の変化を検知して、それに基づいてmemberを取得できます。
-export async function getMembers(searchParams: UserFilters) {
-  // searchParamsは、  { ageRange: '25,81', gender: ',male,female', orderBy: 'created' }　などです。
+export async function getMembers({
+  // default values
+  ageRange = '18,100',
+  gender = 'male,female',
+  orderBy = 'updated',
+  pageNumber = '1',
+  pageSize = '12',
+}: GetMemberParams): Promise<PaginatedResponse<Member>> {
+  const userId = await getAuthUserId();
 
-  const session = await auth();
-  if (!session?.user) return null;
+  // split(',') を使うと [18,100] のようになります。
+  const [minAge, maxAge] = ageRange.split(',');
 
-  // 121 (Adding the age slider functionality)
-  // [25,81] というふうに変換されます。
-  const ageRange = searchParams?.ageRange?.toString()?.split(',') || [18, 100];
   // データベースには年齢ではなく生年月日(DOB)を記録しているので、年齢ではなく生年月日を計算する必要があります。
   const currentDate = new Date();
-  const minDob = addYears(currentDate, -ageRange[1] - 1);
-  const maxDob = addYears(currentDate, -ageRange[0]);
+  const minDob = addYears(currentDate, -maxAge - 1);
+  const maxDob = addYears(currentDate, -minAge);
 
-  // 122 (Adding the sorting functionality)
-  // 'created' というふうに変換されます。
-  const orderBySelector = searchParams?.orderBy || 'updated';
+  // split(',') を使うと ['male', 'female'] のようになります。
+  const selectedGender = gender.split(',');
 
-  // [ '', 'female', 'male' ] というふうに変換されます。
-  const selectedGender = searchParams?.gender?.toString()?.split(',') || ['male', 'female'];
+  // 現在どのページにいるか
+  const page = parseInt(pageNumber);
+  // １ページ当たりのアイテム数
+  const limit = parseInt(pageSize);
+
+  // 何個アイテムをスキップするか =  １ページ当たりのアイテム数 * (現在のページ - 1)
+  const skip = limit * (page - 1);
 
   try {
-    // get all members except for the loggedIn user
-    return prisma.member.findMany({
+    const count = await prisma.member.count({
       where: {
         // gte = greater than or equal to, lte = less than or equal to
         AND: [
@@ -49,14 +56,43 @@ export async function getMembers(searchParams: UserFilters) {
           // 「gender が selectedGender 配列の中のいずれかの値と一致する」という条件を表しています。
           { gender: { in: selectedGender } },
         ],
-        NOT: { userId: session.user.id },
+        // get members except for the loggedIn user
+        NOT: {
+          userId,
+        },
+      },
+    });
+
+    const members = await prisma.member.findMany({
+      where: {
+        // gte = greater than or equal to, lte = less than or equal to
+        AND: [
+          // 121 (Adding the age slider functionality)
+          { dateOfBirth: { gte: minDob } },
+          { dateOfBirth: { lte: maxDob } },
+          // gender: { in: selectedGender }という部分は、
+          // 「gender が selectedGender 配列の中のいずれかの値と一致する」という条件を表しています。
+          { gender: { in: selectedGender } },
+        ],
+        // get members except for the loggedIn user
+        NOT: {
+          userId,
+        },
       },
       // [] (JavaScriptのComputed Property Names)を使うと、
       // オブジェクトのプロパティ名を動的に設定することができます。
-      orderBy: { [orderBySelector]: 'desc' },
+      orderBy: { [orderBy]: 'desc' },
+      skip,
+      take: limit,
     });
+
+    return {
+      items: members,
+      totalCount: count,
+    };
   } catch (error) {
     console.log(error);
+    throw error;
   }
 }
 

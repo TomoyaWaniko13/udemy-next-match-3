@@ -8,6 +8,7 @@ import usePaginationStore from '@/hooks/usePaginationStore';
 // 125 (Adding a filter store and hook)
 // 127 (Adding loading indicators for the filters)
 // 129 (Adding the pagination functionality)
+// 130 (Adding the pagination functionality Part 2)
 
 // Filters.tsx で使うロジックをここに記述しています。
 export const useFilters = () => {
@@ -20,12 +21,22 @@ export const useFilters = () => {
   const { filters, setFilters } = useFilterStore();
 
   // pagination に基づいてquery parameter を変更するために、usePaginationStore() を使います。
-  const { pageNumber, pageSize } = usePaginationStore((state) => ({
+  const { pageNumber, pageSize, setPage } = usePaginationStore((state) => ({
     pageNumber: state.pagination.pageNumber,
     pageSize: state.pagination.pageSize,
+    setPage: state.setPage,
   }));
 
   const { gender, ageRange, orderBy } = filters;
+
+  // 130 (Adding the pagination functionality)
+  useEffect(() => {
+    // フィルターが変更されたら,
+    if (gender || ageRange || orderBy) {
+      // 現在のページを 1 にします。
+      setPage(1);
+    }
+  }, [gender, ageRange, orderBy, setPage]);
 
   useEffect(() => {
     // URLの更新のような非緊急の状態更新を低優先度のタスクとしてマークします。

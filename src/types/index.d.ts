@@ -96,3 +96,15 @@ type PaginatedResponse<T> = {
   // データセット全体のアイテム総数です。
   totalCount: number;
 };
+
+// 130 (Adding the pagination functionality Part 2)
+// 130 までは　<Filters/> の props において、type UserFilters を query parameter
+// として使用していましたが、実際は query parameter は string type なので、
+// string のみで query parameter を定義します。
+type GetMemberParams = {
+  ageRange?: string;
+  gender?: string;
+  pageNumber?: string;
+  pageSize?: string;
+  orderBy?: string;
+};
