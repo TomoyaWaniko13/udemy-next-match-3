@@ -16,6 +16,7 @@ import EmptyState from '@/components/EmptyState';
 // これにより memberActions.ts の getMembers() で条件に合う Member のみを取得できます。
 const MembersPage = async ({ searchParams }: { searchParams: GetMemberParams }) => {
   const { items: members, totalCount } = await getMembers(searchParams);
+
   // 56 (Fetching the likes)
   // 現在の user がいいねをした相手の ID の配列です。
   const likeIds = await fetchCurrentUserLikeIds();

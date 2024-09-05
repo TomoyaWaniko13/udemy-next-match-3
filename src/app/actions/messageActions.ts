@@ -201,7 +201,8 @@ export async function getMessagesByContainer(container?: string | null, cursor?:
 
     const conditions = {
       // [] 内に式を記述することで、その式の評価結果がプロパティ名として使用されます。
-      // 'outbox'(送信箱)が選択されている場合、ログインしているユーザーが送信したmessageを取得するので、userIdとして'senderId'を使います。
+      // 'outbox'(送信箱) が選択されている場合、ログインしているユーザーが送信した message を取得するので、
+      // userId として 'senderId' を使います。
       // そうでない場合、ログインしているユーザーが受信したmessageを取得するので、userIdとして'recipientId'を使います。
       [container === 'outbox' ? 'senderId' : 'recipientId']: userId,
       // これはスプレッド演算子 (...) と三項演算子(?)を組み合わせています。

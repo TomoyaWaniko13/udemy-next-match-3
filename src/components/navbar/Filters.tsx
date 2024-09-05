@@ -1,7 +1,7 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
-import { Button, Select, SelectItem, Slider, Spinner } from '@nextui-org/react';
+import { Button, Select, SelectItem, Slider, Spinner, Switch } from '@nextui-org/react';
 import { useFilters } from '@/hooks/useFilters';
 
 // 119 (Adding the filters component)
@@ -9,11 +9,13 @@ import { useFilters } from '@/hooks/useFilters';
 // 124 (Adding the gender filter)
 // 125 (Adding a filter store and hook)
 // 127 (Adding loading indicators for the filters)
+// 135 (Challenge solution)
 
 const Filters = () => {
   // このcomponent で使うロジックの部分を、useFilters() custom hook から取得します。
   // filters は useFilterStore から取得しています。
-  const { genderList, orderByList, filters, selectAge, selectGender, selectOrder, isPending } = useFilters();
+  const { genderList, orderByList, filters, selectAge, selectGender, selectOrder, selectWithPhoto, isPending } =
+    useFilters();
 
   return (
     <div className={'shadow-md py-2'}>
@@ -52,6 +54,12 @@ const Filters = () => {
             aria-label={'Age range slider'}
           />
         </div>
+
+        <div className={'flex flex-col items-center'}>
+          <p className={'text-sm'}>With photo</p>
+          <Switch color={'secondary'} defaultSelected={true} size={'sm'} onChange={selectWithPhoto} />
+        </div>
+
         {/*　<Select/>がwidthの1/4を占めるようにします。　*/}
         <div className={'w-1/4'}>
           {/* NextUIの<Select/>について: */}

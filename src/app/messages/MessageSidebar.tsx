@@ -20,7 +20,6 @@ const MessageSidebar = () => {
   }));
 
   // Next.js の useSearchParams フックを使用しています。
-  // 現在のURLのクエリパラメータ（URLの?以降の部分）を取得します。
   // URLが/messages?container=inboxの場合、searchParams.get('container')で'inbox'を取得できます。
   const searchParams = useSearchParams();
 
@@ -28,8 +27,7 @@ const MessageSidebar = () => {
   // 使用例: URLがhttps://example.com/messagesの場合、pathnameは/messagesとなります。
   const pathname = usePathname();
 
-  // プログラムによるナビゲーション（ページ遷移やURL変更）を可能にするルーターオブジェクトを取得します。
-  // 使用例: router.replace()メソッドを使用して、URLを更新することができます。
+  // router.replace()メソッドを使用して、URLを更新することができます。
   const router = useRouter();
 
   // useState() フック を使用して、現在選択されているアイテム（inbox または outbox）を管理しています。
@@ -56,16 +54,6 @@ const MessageSidebar = () => {
     // 現在のページのパス（URLのドメイン以降の部分）を表します。
     // 例えば、現在のURLが https://example.com/messages なら、pathname は /messages となります。
 
-    // ?${params}:
-    // URLにクエリパラメータを追加します。
-    // ? はクエリパラメータの開始を示します。
-    // params は URLSearchParams オブジェクトで、これが文字列に変換されてURLに追加されます。
-
-    // 例えば、ユーザーが「Outbox」を選択した場合、以下のような処理が行われます：
-    // params.set('container', 'outbox') が実行され、params に container=outbox が設定されます。
-    // router.replace() が呼び出され、URLが更新されます。
-    // 結果として、URLは https://example.com/messages?container=outbox のようになります。
-
     // この処理により、以下のような利点があります：
     // ユーザーの選択がURLに反映されるので、ページをリロードしても選択状態が保持されます。
     // URLを共有すれば、特定の選択状態（この場合はInboxかOutbox）を他の人と共有できます。
@@ -77,8 +65,9 @@ const MessageSidebar = () => {
     <div className={'flex flex-col show-md rounded-lg cursor-pointer'}>
       {/* items 配列は、サイドバーに表示するアイテム（Inbox と Outbox）を定義しています。*/}
       {/* key は inbox か outbox です。*/}
+
       {items.map(({ key, icon: Icon, label, chip }) => (
-        // 横並びにする。
+        // 横並びにします。
         <div
           key={key}
           className={clsx('flex flex-row items-center rounded-t-lg gap-2 p-3', {

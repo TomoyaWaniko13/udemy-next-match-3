@@ -2,13 +2,14 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { FaFemale, FaMale } from 'react-icons/fa';
 import { Selection } from '@nextui-org/react';
 import useFilterStore from '@/hooks/useFilterStore';
-import { useEffect, useTransition } from 'react';
+import { ChangeEvent, useEffect, useTransition } from 'react';
 import usePaginationStore from '@/hooks/usePaginationStore';
 
 // 125 (Adding a filter store and hook)
 // 127 (Adding loading indicators for the filters)
 // 129 (Adding the pagination functionality)
 // 130 (Adding the pagination functionality Part 2)
+// 135 (Challenge solution)
 
 // Filters.tsx で使うロジックをここに記述しています。
 export const useFilters = () => {
@@ -27,16 +28,16 @@ export const useFilters = () => {
     setPage: state.setPage,
   }));
 
-  const { gender, ageRange, orderBy } = filters;
+  const { gender, ageRange, orderBy, withPhoto } = filters;
 
   // 130 (Adding the pagination functionality)
   useEffect(() => {
     // フィルターが変更されたら,
-    if (gender || ageRange || orderBy) {
+    if (gender || ageRange || orderBy || withPhoto) {
       // 現在のページを 1 にします。
       setPage(1);
     }
-  }, [gender, ageRange, orderBy, setPage]);
+  }, [gender, ageRange, orderBy, setPage, withPhoto]);
 
   useEffect(() => {
     // URLの更新のような非緊急の状態更新を低優先度のタスクとしてマークします。
@@ -60,10 +61,12 @@ export const useFilters = () => {
       if (pageSize) searchParams.set('pageSize', pageSize.toString());
       if (pageNumber) searchParams.set('pageNumber', pageNumber.toString());
 
+      searchParams.set('withPhoto', withPhoto.toString());
+
       // 更新されたURLパラメータを使用してページをリロードせずにURLを更新します。
       router.replace(`${pathname}?${searchParams}`);
     });
-  }, [ageRange, orderBy, gender, router, pathname, pageNumber, pageSize]);
+  }, [ageRange, orderBy, gender, router, pathname, pageNumber, pageSize, withPhoto]);
 
   const genderList = [
     // valueをkeyとして扱います。
@@ -89,7 +92,7 @@ export const useFilters = () => {
     }
   };
 
-  // <Slider/>で選ばれた値をもとにして、storeの値とquery parameterを更新します。
+  // <Slider/> で選ばれた値をもとにして、storeの値とquery parameterを更新します。
   const handleAgeSelect = (ageRangeValue: number[]) => {
     setFilters('ageRange', ageRangeValue);
   };
@@ -106,12 +109,18 @@ export const useFilters = () => {
     }
   };
 
+  // https://nextui.org/docs/components/switch#switch-events
+  const handleWithPhotoToggle = (e: ChangeEvent<HTMLInputElement>) => {
+    setFilters('withPhoto', e.target.checked);
+  };
+
   return {
     orderByList,
     genderList,
     selectAge: handleAgeSelect,
     selectGender: handleGenderSelect,
     selectOrder: handleOrderSelect,
+    selectWithPhoto: handleWithPhotoToggle,
     filters,
     isPending,
   };

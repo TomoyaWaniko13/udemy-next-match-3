@@ -19,6 +19,7 @@ const useFilterStore = create<FilterState>()(
       ageRange: [18, 100],
       gender: ['male', 'female'],
       orderBy: 'updated',
+      withPhoto: true,
     },
     // filterName: 更新するフィルターの名前
     // value: フィルターに設定する新しい値

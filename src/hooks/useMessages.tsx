@@ -27,18 +27,18 @@ const useMessages = (initialMessages: MessageDto[], nextCursor?: string) => {
   });
 
   // Next.js の useSearchParams フックを使用しています。
-  // 現在のURLのクエリパラメータ（URLの?以降の部分）を取得します。
-  // URLが/messages?container=inboxの場合、searchParams.get('container')で'inbox'を取得できます。
-  // parameterは<MessageSidebar/>で設定されるので、それを取得します。
+  // URLが /messages?container=inbox の場合、searchParams.get('container')で'inbox'を取得できます。
+  // parameter は <MessageSidebar/> で設定されるので、それを取得します。
   const searchParams = useSearchParams();
 
   const router = useRouter();
 
-  // outboxかinboxが選択されているかを取得します。
+  // outbox か inbox が選択されているかを取得します。
+  // outbox や inbox のどちらの UI を表示するかの判別や server action などにおいてこの真偽値が使われます。
   const isOutbox = searchParams.get('container') === 'outbox';
   const container = searchParams.get('container');
 
-  // 1つ以上delete buttonがあるので、特定するためにidが必要です。
+  // 1つ以上 delete button があるので、特定するためにidが必要です。
   const [isDeleting, setDeleting] = useState({ id: '', loading: false });
 
   // データ取得中であることをUIに示すために使用されます。
@@ -65,8 +65,8 @@ const useMessages = (initialMessages: MessageDto[], nextCursor?: string) => {
     if (cursorRef.current) {
       // これは、データ取得中であることをUIに示すために使用されます。
       setLoadingMore(true);
-      // getMessagesByContainer は非同期関数で、指定されたコンテナ（inbox や outbox）と
-      // 現在のカーソル位置から次のメッセージのセットを取得します。
+      // getMessagesByContainer は指定されたコンテナ（inbox や outbox）と 現在のカーソル位置から次のメッセージのセットを取得します。
+      // この getMessagesByContainer() は2回目以降使われます。1回目は messages/page.tsx の getMessagesByContainer() が使われます。
       const { messages, nextCursor } = await getMessagesByContainer(container, cursorRef.current);
       // これは Zustand ストアの set 関数を呼び出して、新しく取得したメッセージをストアに追加します。
       set(messages);
@@ -93,32 +93,37 @@ const useMessages = (initialMessages: MessageDto[], nextCursor?: string) => {
   const handleDeleteMessage = useCallback(
     //　deleteしたいMessageDto型のmessage を受け取ります。
     async (message: MessageDto) => {
-      // id: message.idでどの deleteButtonをロード中と表示するか指定します。
+      // id: message.id でどの deleteButton をロード中と表示するか指定します。
       setDeleting({ id: message.id, loading: true });
-      // deleteMessage() server actionで messageをdeleteします。
+
+      // deleteMessage() server actionで message を削除します。
       // isOutboxは、送信者と受信者のどちらの視点から削除するかを決定しています。
       await deleteMessage(message.id, isOutbox);
 
-      // useMessageStore()のremove() methodです。指定されたIDのメッセージを配列から削除します。
+      // useMessageStore()の methodです。指定されたIDのメッセージを配列から削除します。
       remove(message.id);
-      // useMessageStore()のupdateUnreadCount() methodです。
-      // "inbox(受信箱)"の"未読"のメッセージを消去した場合、未読件数を-1します。
+      // useMessageStore() の method です。
+      // "inbox(受信箱)" の"未読"のメッセージを消去した場合、未読件数を-1します。
       if (!isOutbox && !message.dateRead) updateUnreadCount(-1);
 
-      // deleteButtonをロード中と表示するのを終了します。
+      // deleteButton をロード中と表示するのを終了します。
       setDeleting({ id: '', loading: false });
     },
     [isOutbox, remove, updateUnreadCount],
   );
 
-  // keyはmessageのidを受け取ります。
-  const handleRowSelect = (key: Key) => {
-    // 配列の各要素 m に対して実行される条件関数です。この関数は、要素の id が引数 key と等しいかどうかをチェックします。
+  // この関数により、ユーザーがメッセージリストから特定のメッセージを選択したとき、
+  // そのメッセージの送信者または受信者とのチャットページに直接移動できるようになります。
+  // message の id を受け取ります。type Key = string | number;　です。
+  const handleRowSelect = (messageId: Key) => {
+    // 配列の各要素 m に対して実行される条件関数です。この関数は、要素の id が引数 messageId と等しいかどうかをチェックします。
     // 条件に一致する要素が見つかった場合、その要素（つまり、特定のメッセージオブジェクト）が message 変数に代入されます。
-    const message = initialMessages.find((m) => m.id === key);
-    // outbox(送信箱) が選択されていたら、recipient との chat に移動します。
-    // inbox(受信箱) が選択されていたら、sender との chat に移動します。
+    const message = initialMessages.find((m) => m.id === messageId);
+
+    // outbox(送信箱) が選択されていたら、recipient(受信者) との chat に移動します。
+    // inbox(受信箱) が選択されていたら、sender(送信者) との chat に移動します。
     const url = isOutbox ? `/members/${message?.recipientId}` : `/members/${message?.senderId}`;
+
     router.push(url + '/chat');
   };
 

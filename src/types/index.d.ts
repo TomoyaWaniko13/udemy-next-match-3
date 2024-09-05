@@ -61,12 +61,15 @@ type MessageDto = {
 };
 
 // 121 (Adding the age slider functionality)
+// 135 (Challenge solution)
+
 // Filters.tsxで設定できる条件を表しています。
-// これにより memberActions.tsのgetMembers()で条件に合うMemberのみを取得できます。
+// これにより memberActions.tsの getMembers() で条件に合う Member のみを取得できます。
 type UserFilters = {
   ageRange: number[];
   orderBy: string;
   gender: string[];
+  withPhoto: boolean;
 };
 
 // 128 (Adding a pagination store)
@@ -98,6 +101,8 @@ type PaginatedResponse<T> = {
 };
 
 // 130 (Adding the pagination functionality Part 2)
+// 135 (Challenge solution)
+
 // 130 までは　<Filters/> の props において、type UserFilters を query parameter
 // として使用していましたが、実際は query parameter は string type なので、
 // string のみで query parameter を定義します。
@@ -107,4 +112,5 @@ type GetMemberParams = {
   pageNumber?: string;
   pageSize?: string;
   orderBy?: string;
+  withPhoto?: string;
 };

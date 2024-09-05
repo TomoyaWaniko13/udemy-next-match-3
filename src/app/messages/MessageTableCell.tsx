@@ -14,7 +14,7 @@ type Props = {
 
 // 110 (Refactoring the message table)
 const MessageTableCell = ({ item, columnKey, isOutbox, deleteMessage, isDeleting }: Props) => {
-  // このcellValueを使って各々のcellを作ります。
+  // この cellValue を使って各々の cell を作ります。
   const cellValue = item[columnKey as keyof MessageDto];
 
   // returnの中が各々のcellとなります。

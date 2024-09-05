@@ -11,6 +11,7 @@ import { getAuthUserId } from '@/app/actions/authActions';
 // 122 (Adding the sorting functionality)
 // 124 (Adding the gender filter)
 // 130 (Adding teh pagination functionality Part 2)
+// 135 (Challenge solution)
 
 // Memberはプロフィール情報(gender, dateOfBrith, city, Photo[]など)を含むmodel
 // getMembers()はserver側で実行されるserver action
@@ -22,6 +23,7 @@ export async function getMembers({
   orderBy = 'updated',
   pageNumber = '1',
   pageSize = '12',
+  withPhoto = 'true',
 }: GetMemberParams): Promise<PaginatedResponse<Member>> {
   const userId = await getAuthUserId();
 
@@ -44,40 +46,31 @@ export async function getMembers({
   // 何個アイテムをスキップするか =  １ページ当たりのアイテム数 * (現在のページ - 1)
   const skip = limit * (page - 1);
 
+  let conditions: any[] = [
+    { dateOfBirth: { gte: minDob } },
+    { dateOfBirth: { lte: maxDob } },
+    { gender: { in: selectedGender } },
+  ];
+
+  if (withPhoto === 'true') {
+    conditions.push({ image: { not: null } });
+  }
+
   try {
     const count = await prisma.member.count({
       where: {
-        // gte = greater than or equal to, lte = less than or equal to
-        AND: [
-          // 121 (Adding the age slider functionality)
-          { dateOfBirth: { gte: minDob } },
-          { dateOfBirth: { lte: maxDob } },
-          // gender: { in: selectedGender }という部分は、
-          // 「gender が selectedGender 配列の中のいずれかの値と一致する」という条件を表しています。
-          { gender: { in: selectedGender } },
-        ],
+        AND: conditions,
         // get members except for the loggedIn user
-        NOT: {
-          userId,
-        },
+        NOT: { userId },
       },
     });
 
     const members = await prisma.member.findMany({
       where: {
         // gte = greater than or equal to, lte = less than or equal to
-        AND: [
-          // 121 (Adding the age slider functionality)
-          { dateOfBirth: { gte: minDob } },
-          { dateOfBirth: { lte: maxDob } },
-          // gender: { in: selectedGender }という部分は、
-          // 「gender が selectedGender 配列の中のいずれかの値と一致する」という条件を表しています。
-          { gender: { in: selectedGender } },
-        ],
+        AND: conditions,
         // get members except for the loggedIn user
-        NOT: {
-          userId,
-        },
+        NOT: { userId },
       },
       // [] (JavaScriptのComputed Property Names)を使うと、
       // オブジェクトのプロパティ名を動的に設定することができます。
@@ -97,7 +90,7 @@ export async function getMembers({
 }
 
 // 45 (Using dynamic routes in Next.js)
-// userIdをもとに Memberを取得するserver action
+// userId をもとに Member を取得する server action
 export async function getMemberByUserId(userId: string) {
   try {
     return prisma.member.findUnique({ where: { userId } });

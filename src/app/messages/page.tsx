@@ -5,8 +5,12 @@ import MessageTable from '@/app/messages/MessageTable';
 // 88 (Adding the message sidebar)
 // 89 (Creating the fetch messages action)
 // 133 (Cursor based pagination Part 3)
+
+// query parameter は <MessageSidebar/> で設定されるので、それを取得します。
 const MessagesPage = async ({ searchParams }: { searchParams: { container: string } }) => {
-  // parameter は <MessageSidebar/> で設定されるので、それを取得する。
+  // この getMessagesByContainer() は初回時に使われます。
+  // この時点では cursor は undefined です。getMessagesByContainer() の引数の設定により、2つメッセージを取得します。
+  // それらを <MessageTable/> に渡します。 2回目以降は、useMessages() custom hook の getMessagesByContainer() が使われます。
   const { messages, nextCursor } = await getMessagesByContainer(searchParams.container);
 
   return (
