@@ -11,6 +11,7 @@ import { createChatId } from '@/lib/util';
 // 82 (Creating the send message action)
 // 98 (Adding the live chat functionality)
 // 109 (Creating a message store)
+
 // validationがsuccessならば、データベースにメッセージを記録する。
 // throw errorだとerror pageが表示されるが、formのvalidation errorを表示したいので、ActionResultを使う。
 export async function createMessage(recipientUserId: string, data: MessageSchema): Promise<ActionResult<MessageDto>> {
@@ -58,6 +59,7 @@ export async function createMessage(recipientUserId: string, data: MessageSchema
 // 93 (Adding the delete message action)
 // 101 (Adding the read message feature)
 // 114 (Updating the count based on the event)
+
 // 特定の2人のユーザー間のメッセージスレッドを取得するためのserver action.
 // recipientIdは送信先のuserのidです。
 export async function getMessageThread(recipientId: string) {
@@ -175,11 +177,13 @@ export async function getMessageThread(recipientId: string) {
 // 89 (Creating the fetch messages action)
 // 93 (Adding the delete message action)
 // 131 (Cursor based pagination)
+// 132 (Cursor based pagination Part 2)
 
-//　この関数は、ユーザーの受信箱（inbox）または送信箱（outbox）のメッセージを取得するためのものです。
+// この関数は、ユーザーの受信箱（inbox）または送信箱（outbox）のメッセージを取得するためのものです。
+// container が提供されていなければ、 inbox(受信箱) であるとします。
 // cursor は、次のページの開始点を示す値です。この場合、メッセージの作成日時（created）をカーソルとして使用しています。
 // カーソルは「しおり」のようなものです。「前回ここまで読んだ」という位置を示します。
-export async function getMessagesByContainer(container: string, cursor?: string, limit = 2) {
+export async function getMessagesByContainer(container?: string | null, cursor?: string, limit = 2) {
   try {
     const userId = await getAuthUserId();
 
@@ -211,7 +215,7 @@ export async function getMessagesByContainer(container: string, cursor?: string,
         // Spread syntax (...) を使うことで、conditions に加えてさらに条件を指定できます。
         ...conditions,
         // cursor が提供されている場合、created: { lte: new Date(cursor) } という条件が追加されます。
-        // これは「cursor(どこから始めるか) の日時とそれ以前に作成されたメッセージ」を意味します。
+        // これは「cursor(どこから始めるか) の日時(equal) とそれ以前に作成されたメッセージ(less than) 」を意味します。
         // cursor が undefined の場合, 追加の条件なし（全てのメッセージが対象になります)。
         ...(cursor ? { created: { lte: new Date(cursor) } } : {}),
       },
@@ -226,7 +230,7 @@ export async function getMessagesByContainer(container: string, cursor?: string,
 
     let nextCursor: string | undefined;
 
-    // データベースから limit + 1 個の messages を取得しています。
+    // データベースから limit + 1 個の, つまり messages.length 個の messages を取得しています。
     // もし limit より多くの messages が取得できたなら、まだ次のページがあることを意味します。
     if (messages.length > limit) {
       // 配列の最後の要素を取り除き、その要素を nextItem として保存します。
@@ -249,7 +253,7 @@ export async function getMessagesByContainer(container: string, cursor?: string,
 
     const messagesToReturn = messages.map((message) => mapMessageToMessageDto(message));
 
-    // 取得したメッセージと次のカーソルを返します。
+    // 取得したメッセージと次のカーソル(開始地点)を返します。
     return { messages: messagesToReturn, nextCursor };
   } catch (error) {
     console.log(error);

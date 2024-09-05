@@ -4,10 +4,10 @@ import MessageTable from '@/app/messages/MessageTable';
 
 // 88 (Adding the message sidebar)
 // 89 (Creating the fetch messages action)
+// 133 (Cursor based pagination Part 3)
 const MessagesPage = async ({ searchParams }: { searchParams: { container: string } }) => {
-  // parameterは<MessageSidebar />で設定されるので、それを取得する。
-  const messages = await getMessagesByContainer(searchParams.container);
-  console.log({ messages });
+  // parameter は <MessageSidebar/> で設定されるので、それを取得する。
+  const { messages, nextCursor } = await getMessagesByContainer(searchParams.container);
 
   return (
     <div className={'grid grid-cols-12 gap-5 h-[80vh] mt-10'}>
@@ -15,7 +15,7 @@ const MessagesPage = async ({ searchParams }: { searchParams: { container: strin
         <MessageSidebar />
       </div>
       <div className={'col-span-10'}>
-        <MessageTable initialMessages={messages} />
+        <MessageTable initialMessages={messages} nextCursor={nextCursor} />
       </div>
     </div>
   );

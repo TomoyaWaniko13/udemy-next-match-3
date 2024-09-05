@@ -49,6 +49,7 @@ const Filters = () => {
             maxValue={100}
             defaultValue={filters.ageRange}
             onChangeEnd={(value) => selectAge(value as number[])}
+            aria-label={'Age range slider'}
           />
         </div>
         {/*　<Select/>がwidthの1/4を占めるようにします。　*/}
