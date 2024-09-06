@@ -100,7 +100,13 @@ const RegisterForm = () => {
                     Back
                   </Button>
                 )}
-                <Button isLoading={isSubmitting} isDisabled={!isValid} fullWidth color={'secondary'} type={'submit'}>
+                <Button
+                  isLoading={isSubmitting}
+                  isDisabled={!isValid}
+                  fullWidth={true}
+                  color={'secondary'}
+                  type={'submit'}
+                >
                   {/* 現在の step(= active step) が stepSchemas 配列の最後の index と同じ値の時、最後の step です。*/}
                   {activeStep === stepSchemas.length - 1 ? 'Submit' : 'Continue'}
                 </Button>

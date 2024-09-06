@@ -3,6 +3,7 @@ import { useFormContext } from 'react-hook-form';
 
 // 138 (Adding a Register wizard part 1)
 const UserDetailsForm = () => {
+  // useFormContext() を使用することにより、form の状態を共有できます。
   const {
     register,
     getValues,
