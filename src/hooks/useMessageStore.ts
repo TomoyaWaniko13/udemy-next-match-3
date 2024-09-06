@@ -51,7 +51,7 @@ const useMessageStore = create<MessageState>()(
             // 既存のメッセージと新しいメッセージを1つの配列に結合します。
             [...state.messages, ...messages]
               // 各メッセージをそのIDとメッセージ自体のペアに変換します。
-              .map((m) => [m.id, m]),
+              .map((message) => [message.id, message]),
           );
 
           // uniqueMessages は、Map 内のすべての値（メッセージ）を含む新しい配列になります。

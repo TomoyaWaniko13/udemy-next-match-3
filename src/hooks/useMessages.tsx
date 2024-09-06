@@ -35,8 +35,8 @@ const useMessages = (initialMessages: MessageDto[], nextCursor?: string) => {
 
   // outbox か inbox が選択されているかを取得します。
   // outbox や inbox のどちらの UI を表示するかの判別や server action などにおいてこの真偽値が使われます。
-  const isOutbox = searchParams.get('container') === 'outbox';
   const container = searchParams.get('container');
+  const isOutbox = container === 'outbox';
 
   // 1つ以上 delete button があるので、特定するためにidが必要です。
   const [isDeleting, setDeleting] = useState({ id: '', loading: false });
@@ -61,7 +61,6 @@ const useMessages = (initialMessages: MessageDto[], nextCursor?: string) => {
   // 取得したメッセージをアプリケーションの状態（Zustand ストア）に追加します。
   // 次回の取得のために新しいカーソル位置を保存します。
   const loadMore = useCallback(async () => {
-    //
     if (cursorRef.current) {
       // これは、データ取得中であることをUIに示すために使用されます。
       setLoadingMore(true);

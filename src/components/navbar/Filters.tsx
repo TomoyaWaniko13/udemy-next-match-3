@@ -1,6 +1,5 @@
 'use client';
 
-import { usePathname } from 'next/navigation';
 import { Button, Select, SelectItem, Slider, Spinner, Switch } from '@nextui-org/react';
 import { useFilters } from '@/hooks/useFilters';
 
@@ -12,8 +11,8 @@ import { useFilters } from '@/hooks/useFilters';
 // 135 (Challenge solution)
 
 const Filters = () => {
-  // このcomponent で使うロジックの部分を、useFilters() custom hook から取得します。
-  // filters は useFilterStore から取得しています。
+  // この component で使うロジックの部分を、useFilters() custom hook から取得します。
+  // filters は FilterStore から取得しています。
   const { genderList, orderByList, filters, selectAge, selectGender, selectOrder, selectWithPhoto, isPending } =
     useFilters();
 
@@ -44,6 +43,7 @@ const Filters = () => {
           {/* NextUIの<Slider/>について: */}
           {/* https://nextui.org/docs/components/slider */}
           <Slider
+            aria-label={'Age range slider'}
             label={'Age range'}
             color={'secondary'}
             size={'sm'}
@@ -51,7 +51,6 @@ const Filters = () => {
             maxValue={100}
             defaultValue={filters.ageRange}
             onChangeEnd={(value) => selectAge(value as number[])}
-            aria-label={'Age range slider'}
           />
         </div>
 
@@ -60,7 +59,7 @@ const Filters = () => {
           <Switch color={'secondary'} defaultSelected={true} size={'sm'} onChange={selectWithPhoto} />
         </div>
 
-        {/*　<Select/>がwidthの1/4を占めるようにします。　*/}
+        {/*　<Select/> が width の 1/4を占めるようにします。　*/}
         <div className={'w-1/4'}>
           {/* NextUIの<Select/>について: */}
           {/* https://nextui.org/docs/components/select */}

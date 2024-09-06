@@ -63,7 +63,7 @@ type MessageDto = {
 // 121 (Adding the age slider functionality)
 // 135 (Challenge solution)
 
-// Filters.tsxで設定できる条件を表しています。
+// Filters.tsx で設定できる条件を表しています。
 // これにより memberActions.tsの getMembers() で条件に合う Member のみを取得できます。
 type UserFilters = {
   ageRange: number[];
@@ -73,12 +73,12 @@ type UserFilters = {
 };
 
 // 128 (Adding a pagination store)
-// ページネーションのための基本的なパラメータを定義しています.
+// これらの値が query parameter として設定されます。?pageSize=3&pageNumber=1
 type PagingParams = {
-  // 現在表示しているページの番号です。通常、1から始まります。
-  pageNumber: number;
   // 1ページに表示するアイテムの数です。
   pageSize: number;
+  // 現在表示しているページの番号です。
+  pageNumber: number;
 };
 
 // 128 (Adding a pagination store)

@@ -27,7 +27,7 @@ export async function getMembers({
 }: GetMemberParams): Promise<PaginatedResponse<Member>> {
   const userId = await getAuthUserId();
 
-  // split(',') を使うと [18,100] のようになります。
+  // split(',') を使うと [18,100] のように配列になります。
   const [minAge, maxAge] = ageRange.split(',');
 
   // データベースには年齢ではなく生年月日(DOB)を記録しているので、年齢ではなく生年月日を計算する必要があります。
@@ -35,12 +35,13 @@ export async function getMembers({
   const minDob = addYears(currentDate, -maxAge - 1);
   const maxDob = addYears(currentDate, -minAge);
 
-  // split(',') を使うと ['male', 'female'] のようになります。
+  // split(',') を使うと ['male', 'female'] のように配列になります。
   const selectedGender = gender.split(',');
 
   // 現在どのページにいるか
   const page = parseInt(pageNumber);
-  //
+
+  // １ページ当たりのアイテム数、つまり何個アイテムを取るかを表しています。
   const limit = parseInt(pageSize);
 
   // 何個アイテムをスキップするか =  １ページ当たりのアイテム数 * (現在のページ - 1)
@@ -69,6 +70,7 @@ export async function getMembers({
       where: {
         // gte = greater than or equal to, lte = less than or equal to
         AND: conditions,
+
         // get members except for the loggedIn user
         NOT: { userId },
       },

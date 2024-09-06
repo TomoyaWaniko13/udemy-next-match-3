@@ -199,32 +199,26 @@ export async function getMessagesByContainer(container?: string | null, cursor?:
     //   recipientDeleted: false
     // }
 
+    const isOutbox = container === 'outbox';
+
     const conditions = {
-      // [] 内に式を記述することで、その式の評価結果がプロパティ名として使用されます。
-      // 'outbox'(送信箱) が選択されている場合、ログインしているユーザーが送信した message を取得するので、
-      // userId として 'senderId' を使います。
-      // そうでない場合、ログインしているユーザーが受信したmessageを取得するので、userIdとして'recipientId'を使います。
-      [container === 'outbox' ? 'senderId' : 'recipientId']: userId,
-      // これはスプレッド演算子 (...) と三項演算子(?)を組み合わせています。
-      // container === 'outbox' が true の場合、{ senderDeleted: false } というオブジェクトが展開されます。
-      // false の場合、{ recipientDeleted: false } が展開されます。
-      ...(container === 'outbox' ? { senderDeleted: false } : { recipientDeleted: false }),
+      [isOutbox ? 'senderId' : 'recipientId']: userId,
+      [isOutbox ? 'senderDeleted' : 'recipientDeleted']: false,
     };
 
     const messages = await prisma.message.findMany({
+      // Spread syntax (...) を使うことで、conditions に加えてさらに条件を指定できます。
+      // cursor が提供されている場合、created: { lte: new Date(cursor) } という条件が追加されます。
+      // これは「cursor(どこから始めるか) の日時(equal) とそれ以前に作成されたメッセージ(less than) 」を意味します。
+      // cursor が undefined の場合, 追加の条件なし（全てのメッセージが対象になります)。
       where: {
-        // Spread syntax (...) を使うことで、conditions に加えてさらに条件を指定できます。
         ...conditions,
-        // cursor が提供されている場合、created: { lte: new Date(cursor) } という条件が追加されます。
-        // これは「cursor(どこから始めるか) の日時(equal) とそれ以前に作成されたメッセージ(less than) 」を意味します。
-        // cursor が undefined の場合, 追加の条件なし（全てのメッセージが対象になります)。
         ...(cursor ? { created: { lte: new Date(cursor) } } : {}),
       },
       // メッセージを作成日時の降順（最新のものから）でソートします。
       orderBy: { created: 'desc' },
       select: messageSelect,
       // limit は、一度に取得するデータの最大数を指定するパラメータです。一回のクエリで取得するメッセージの数を"制限"しています。
-      // 次のページがあるかどうかを判断するため、limit より1つ多く取得しています。
       // もし limit より多くの messages が取得できたなら、まだ次のページがあることを意味します。
       take: limit + 1,
     });
