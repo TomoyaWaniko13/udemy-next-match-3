@@ -11,22 +11,21 @@ import { AuthError } from 'next-auth';
 import { auth, signIn, signOut } from '@/auth';
 
 // 30 (Signing in users Part 2)
-// signIn()を使って、サーバーサイドで、email, passwordをもとにloginする。
+// signIn() を使って、サーバーサイドで、email, password をもとに login します。
 export async function signInUser(data: LoginSchema): Promise<ActionResult<string>> {
-  console.log('signInUser() working!');
   try {
     const result = await signIn('credentials', {
       email: data.email,
       password: data.password,
       redirect: false,
     });
-
     console.log(result);
 
     return { status: 'success', data: 'Logged in' };
   } catch (error) {
     console.log(error);
 
+    // Auth.js は AuthError を提供しています。
     if (error instanceof AuthError) {
       switch (error.type) {
         case 'CredentialsSignin':
@@ -41,14 +40,14 @@ export async function signInUser(data: LoginSchema): Promise<ActionResult<string
 }
 
 // 35 (Adding a dropdown menu to the Nav bar Part 2)
-// signOut()はserver sideであり、client sideのcomponent（UserMenu.tsx) では呼び出せないので、
-// server actionとして設定する。
+// signOut() は server side であり、client side の component（UserMenu.tsx) では呼び出せないので、
+// server action として設定する。
 export async function signOutUser() {
   await signOut({ redirectTo: '/' });
 }
 
-// RegisterForm.tsxで使用される。
-// name, email, passwordで新しいuserをregisterする。
+// RegisterForm.tsx で使用されます。
+// name, email, password で新しい user を register(登録) します。。
 export async function registerUser(data: RegisterSchema): Promise<ActionResult<User>> {
   try {
     const validated = registerSchema.safeParse(data);
@@ -70,7 +69,11 @@ export async function registerUser(data: RegisterSchema): Promise<ActionResult<U
     if (existingUser) return { status: 'error', error: 'User already exists' };
 
     const user = await prisma.user.create({
-      data: { name, email, passwordHash: hashedPassword },
+      data: {
+        name,
+        email,
+        passwordHash: hashedPassword,
+      },
     });
 
     return { status: 'success', data: user };
@@ -91,7 +94,7 @@ export async function getUserById(id: string) {
 }
 
 // 54 (Adding the like toggle function)
-// userIdが複数回必要になるので、method化する。
+// userId が複数回必要になるので、メソッドを作ります。
 export async function getAuthUserId() {
   const session = await auth();
   // auth.tsでidを設定しているので、session?.user?.idでログインしているユーザーのuserIdが取得できる。

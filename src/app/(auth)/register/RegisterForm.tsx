@@ -2,34 +2,75 @@
 
 import { Card, CardBody, CardHeader } from '@nextui-org/card';
 import { GiPadlock } from 'react-icons/gi';
-import { Button, Input } from '@nextui-org/react';
-import { useForm } from 'react-hook-form';
+import { Button } from '@nextui-org/react';
+import { FormProvider, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { RegisterSchema, registerSchema } from '@/lib/schemas/registerSchema';
-import { registerUser } from '@/app/actions/authActions';
-import { handleFormServerErrors } from '@/lib/util';
+import { profileSchema, RegisterSchema, registerSchema } from '@/lib/schemas/registerSchema';
+import UserDetailsForm from '@/app/(auth)/register/UserDetailsForm';
+import { useState } from 'react';
+import ProfileForm from '@/app/(auth)/register/ProfileForm';
+
+// 29 (Handling errors in the form Part 2)
+// 65 (Adding the server action to update the member)
+// 138 (Adding a Register wizard part 1)
+// 139 (Adding a Register wizard Part 2)
+
+// step(段階) によって、使う schema を変更します。
+const stepSchemas = [registerSchema, profileSchema];
 
 const RegisterForm = () => {
-  const {
-    register,
-    handleSubmit,
-    setError,
-    formState: { errors, isValid, isSubmitting },
-  } = useForm<RegisterSchema>({
-    resolver: zodResolver(registerSchema),
+  // form は 2段階(2 steps) あるので、その状態を管理します。 0 から始めます。
+  const [activeStep, setActiveStep] = useState(0);
+  // step(段階) によって、使う schema を変更します。
+  const currentValidationSchema = stepSchemas[activeStep];
+
+  // この "methods" variable を <FormProvider/> にパスする必要があります。
+  const methods = useForm<RegisterSchema>({
+    // step(段階) によって、使う schema を変更します。
+    resolver: zodResolver(currentValidationSchema),
     mode: 'onTouched',
   });
 
-  const onSubmit = async (data: RegisterSchema) => {
-    // registerUser() は　server action.
-    const result = await registerUser(data);
+  const {
+    handleSubmit,
+    setError,
+    getValues,
+    formState: { errors, isValid, isSubmitting },
+  } = methods;
 
-    // 29 (Handling errors in the form Part 2)
-    if (result.status === 'success') {
-      console.log('User registered successfully');
+  const onSubmit = async () => {
+    console.log(getValues());
+    // const result = await registerUser(data);
+    //
+    // if (result.status === 'success') {
+    //   console.log('User registered successfully');
+    // } else {
+    //   handleFormServerErrors(result, setError);
+    // }
+  };
+
+  // step(段階) によって、使う form を変更します。
+  const getStepContent = (step: number) => {
+    switch (step) {
+      case 0:
+        return <UserDetailsForm />;
+      case 1:
+        return <ProfileForm />;
+      default:
+        return 'Unknown';
+    }
+  };
+
+  const onBack = () => {
+    setActiveStep((prevState) => prevState - 1);
+  };
+
+  const onNext = async () => {
+    // 現在の step(active step) が stepSchemas 配列の最後の index と同じ値の時、最後の step です。
+    if (activeStep === stepSchemas.length - 1) {
+      await onSubmit();
     } else {
-      // 65 (Adding the server action to update the member)
-      handleFormServerErrors(result, setError);
+      setActiveStep((prevState) => prevState + 1);
     }
   };
 
@@ -43,37 +84,30 @@ const RegisterForm = () => {
         <p className={'text-neutral-600'}>Welcome to NextMatch</p>
       </CardHeader>
       <CardBody>
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <div className={'space-y-4'}>
-            <Input
-              label={'Name'}
-              variant={'bordered'}
-              {...register('name')}
-              isInvalid={!!errors.name}
-              errorMessage={errors.name?.message as string}
-            />
-            <Input
-              label={'Email'}
-              variant={'bordered'}
-              {...register('email')}
-              isInvalid={!!errors.email}
-              errorMessage={errors.email?.message as string}
-            />
-            <Input
-              label={'Password'}
-              variant={'bordered'}
-              type={'password'}
-              {...register('password')}
-              isInvalid={!!errors.password}
-              errorMessage={errors.password?.message as string}
-            />
-            {/* 29(Handling errors in the form Part 2) */}
-            {errors.root?.serverError && <p className={'text-danger text-sm'}>{errors.root.serverError.message}</p>}
-            <Button isLoading={isSubmitting} isDisabled={!isValid} fullWidth color={'secondary'} type={'submit'}>
-              Register
-            </Button>
-          </div>
-        </form>
+        {/* react hook form の <FromProvider/> で囲むことにより、状態を共有できるようになります。*/}
+        <FormProvider {...methods}>
+          <form onSubmit={handleSubmit(onNext)}>
+            <div className={'space-y-4'}>
+              {/* step(段階) によって、使う form を変更します。*/}
+              {getStepContent(activeStep)}
+              {/* 29 (Handling errors in the form Part 2) */}
+              {errors.root?.serverError && <p className={'text-danger text-sm'}>{errors.root.serverError.message}</p>}
+              {/* 横並びにします。 */}
+              <div className={'flex flex-row items-center gap-6'}>
+                {/* 最初の step でなければ、back button が必要です。 */}
+                {activeStep !== 0 && (
+                  <Button onClick={onBack} fullWidth={true}>
+                    Back
+                  </Button>
+                )}
+                <Button isLoading={isSubmitting} isDisabled={!isValid} fullWidth color={'secondary'} type={'submit'}>
+                  {/* 現在の step(= active step) が stepSchemas 配列の最後の index と同じ値の時、最後の step です。*/}
+                  {activeStep === stepSchemas.length - 1 ? 'Submit' : 'Continue'}
+                </Button>
+              </div>
+            </div>
+          </form>
+        </FormProvider>
       </CardBody>
     </Card>
   );

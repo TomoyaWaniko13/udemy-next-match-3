@@ -12,6 +12,8 @@ import { getUnreadMessageCount } from '@/app/actions/messageActions';
 // 103 (Using the presence channel hook)
 // 108 (Setting up a private channel)
 // 113 (Getting the unread message count)
+// 138 (Adding a Register wizard part 1)
+
 const Providers = ({ children, userId }: { children: ReactNode; userId: string | null }) => {
   // useEffect()が2回実行されるのを防ぐためのlogicです。
   const isUnreadCountSet = useRef(false);
@@ -43,7 +45,7 @@ const Providers = ({ children, userId }: { children: ReactNode; userId: string |
     }
   }, [setUnreadCount, userId]);
 
-  usePresenceChannel();
+  usePresenceChannel(userId);
   useNotificationChannel(userId);
 
   return (

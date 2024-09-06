@@ -30,13 +30,23 @@ const useMessages = (initialMessages: MessageDto[], nextCursor?: string) => {
   // URLが /messages?container=inbox の場合、searchParams.get('container')で'inbox'を取得できます。
   // parameter は <MessageSidebar/> で設定されるので、それを取得します。
   const searchParams = useSearchParams();
-
   const router = useRouter();
 
   // outbox か inbox が選択されているかを取得します。
   // outbox や inbox のどちらの UI を表示するかの判別や server action などにおいてこの真偽値が使われます。
   const container = searchParams.get('container');
   const isOutbox = container === 'outbox';
+
+  const columns = [
+    // 1つ目のcolumnのheader. outboxかinboxが選択されているかによって、keyとlabelを変更します。
+    { key: isOutbox ? 'recipientName' : 'senderName', label: isOutbox ? 'Recipient' : 'Sender' },
+    // 2つ目のcolumnのheaderです。
+    { key: 'text', label: 'Message' },
+    // 3つ目のcolumnのheader.outboxかinboxが選択されているかによってlabelを変更します。
+    { key: 'created', label: isOutbox ? 'Date sent' : 'Date received' },
+    // 4つ目のcolumnのheaderです。
+    { key: 'actions', label: 'Actions' },
+  ];
 
   // 1つ以上 delete button があるので、特定するためにidが必要です。
   const [isDeleting, setDeleting] = useState({ id: '', loading: false });
@@ -77,17 +87,6 @@ const useMessages = (initialMessages: MessageDto[], nextCursor?: string) => {
     //  useCallback は、この関数を記憶（メモ化）します。container や set が変更されない限り、同じ関数インスタンスを返します。
     //  これにより、不要な再レンダリングを防ぎます。
   }, [container, set]);
-
-  const columns = [
-    // 1つ目のcolumnのheader. outboxかinboxが選択されているかによって、keyとlabelを変更します。
-    { key: isOutbox ? 'recipientName' : 'senderName', label: isOutbox ? 'Recipient' : 'Sender' },
-    // 2つ目のcolumnのheaderです。
-    { key: 'text', label: 'Message' },
-    // 3つ目のcolumnのheader.outboxかinboxが選択されているかによってlabelを変更します。
-    { key: 'created', label: isOutbox ? 'Date sent' : 'Date received' },
-    // 4つ目のcolumnのheaderです。
-    { key: 'actions', label: 'Actions' },
-  ];
 
   const handleDeleteMessage = useCallback(
     //　deleteしたいMessageDto型のmessage を受け取ります。

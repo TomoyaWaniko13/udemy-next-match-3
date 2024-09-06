@@ -51,7 +51,8 @@ type MessageDto = {
   text: string;
   created: string;
   dateRead: string | null;
-  // schema.prismaでsenderとrecipientをoptionalにしたので、以下のpropertiesもoptionalにする必要がある。
+  // schema.prismaで sender と recipient を optional にしたので、
+  // 以下の properties も optional にする必要がある。
   senderId?: string;
   senderName?: string;
   senderImage?: string | null;

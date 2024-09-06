@@ -6,13 +6,15 @@ import { updateLastActive } from '@/app/actions/memberActions';
 
 // 104 (Creating a presence channel hook)
 // 123 (Updating the last active property)
+// 138 (Adding a Register wizard part 1)
+
 // Pusher を使用してリアルタイムのユーザープレゼンス（オンライン状態）を管理するためのカスタムフック usePresenceChannel を定義しています。
 // user の状態管理：
 // 誰がオンラインなのか
 // 新しくオンラインになった人
 // オフラインになった人
 // これらの情報をリアルタイムで把握し、アプリケーションの状態（ストア）に反映します。
-export const usePresenceChannel = () => {
+export const usePresenceChannel = (userId: string | null) => {
   // usePresenceStore() から必要な関数を取得
   // これらの関数は、ストア内のメンバーリストを操作するために使用されます。
   // state は、Zustandというステート管理ライブラリのコンテキストにおいて、ストア（store）の現在の状態を表します。
@@ -59,6 +61,9 @@ export const usePresenceChannel = () => {
   // コンポーネントのライフサイクルに合わせてPusherのチャンネルを適切に管理し、メンバーの状態をリアルタイムで追跡することを可能にします。
   // また、メモリリークを防ぐためのクリーンアップも適切に行っています。
   useEffect(() => {
+    // 138 (Adding a Register wizard part 1)
+    if (!userId) return;
+
     if (!channelRef.current) {
       // https://pusher.com/docs/channels/using_channels/presence-channels/#subscribe
       // https://pusher.com/docs/static/img/private-channel-auth-process.png
@@ -117,5 +122,5 @@ export const usePresenceChannel = () => {
         channelRef.current.unbind('pusher:member_removed', handleRemoveMember);
       }
     };
-  }, [handleAddMember, handleRemoveMember, handleSetMembers]);
+  }, [handleAddMember, handleRemoveMember, handleSetMembers, userId]);
 };

@@ -8,7 +8,7 @@ export default {
   providers: [
     Credentials({
       // 29 (Signing in users)
-      // emailとpasswordを使ってloginする。
+      // email と password を使ってloginする。
       name: 'credentials',
       async authorize(creds) {
         const validated = loginSchema.safeParse(creds);
