@@ -29,6 +29,9 @@ export const profileSchema = z.object({
     ), // end of refine()
 });
 
+// 141 (Submitting the form)
+export const combineRegisterSchema = registerSchema.and(profileSchema);
+
 // 139 (Adding a Register wizard Part 2)
 // 2つのスキーマを組み合わせています。
 export type RegisterSchema = z.infer<typeof registerSchema & typeof profileSchema>;

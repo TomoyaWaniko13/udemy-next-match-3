@@ -1,7 +1,10 @@
 // 36 (Protecting routes using Middleware)
+// 141 (Submitting the form)
 
-// loginなしでもaccessできる routes
+// publicRoutes, authRoutes 配列は middleware.ts で使用されています。
+
+// ログインなしでもアクセスできる routes を表しています。
 export const publicRoutes = ['/'];
 
-// authenticationに関わる routes
-export const authRoutes = ['/login', '/register'];
+// authentication に関わる routes を表しています。
+export const authRoutes = ['/login', '/register', '/register/success'];

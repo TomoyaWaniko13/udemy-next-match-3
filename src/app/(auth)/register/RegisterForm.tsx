@@ -9,16 +9,22 @@ import { profileSchema, RegisterSchema, registerSchema } from '@/lib/schemas/reg
 import UserDetailsForm from '@/app/(auth)/register/UserDetailsForm';
 import { useState } from 'react';
 import ProfileForm from '@/app/(auth)/register/ProfileForm';
+import { registerUser } from '@/app/actions/authActions';
+import { handleFormServerErrors } from '@/lib/util';
+import { useRouter } from 'next/navigation';
 
 // 29 (Handling errors in the form Part 2)
 // 65 (Adding the server action to update the member)
 // 138 (Adding a Register wizard part 1)
 // 139 (Adding a Register wizard Part 2)
+// 141 (Submitting the form)
 
 // step(段階) によって、使う schema を変更します。
 const stepSchemas = [registerSchema, profileSchema];
 
 const RegisterForm = () => {
+  const router = useRouter();
+
   // form は 2段階(2 steps) あるので、その状態を管理します。 0 から始めます。
   const [activeStep, setActiveStep] = useState(0);
   // step(段階) によって、使う schema を変更します。
@@ -39,14 +45,13 @@ const RegisterForm = () => {
   } = methods;
 
   const onSubmit = async () => {
-    console.log(getValues());
-    // const result = await registerUser(data);
-    //
-    // if (result.status === 'success') {
-    //   console.log('User registered successfully');
-    // } else {
-    //   handleFormServerErrors(result, setError);
-    // }
+    const result = await registerUser(getValues());
+
+    if (result.status === 'success') {
+      router.push('/register/success');
+    } else {
+      handleFormServerErrors(result, setError);
+    }
   };
 
   // step(段階) によって、使う form を変更します。

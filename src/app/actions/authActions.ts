@@ -1,6 +1,6 @@
 'use server';
 
-import { registerSchema, RegisterSchema } from '@/lib/schemas/registerSchema';
+import { combineRegisterSchema, registerSchema, RegisterSchema } from '@/lib/schemas/registerSchema';
 import bcrypt from 'bcryptjs';
 import { prisma } from '@/lib/prisma';
 import { ActionResult } from '@/types';
@@ -46,18 +46,18 @@ export async function signOutUser() {
   await signOut({ redirectTo: '/' });
 }
 
-// RegisterForm.tsx で使用されます。
-// name, email, password で新しい user を register(登録) します。。
+// 141 (Submitting the form)
+// RegisterForm.tsx で使用されます。form の情報をもとに新しい user を register(登録) します.
 export async function registerUser(data: RegisterSchema): Promise<ActionResult<User>> {
   try {
-    const validated = registerSchema.safeParse(data);
+    const validated = combineRegisterSchema.safeParse(data);
 
     if (!validated.success) {
       // ZodIssue[]
       return { status: 'error', error: validated.error.errors };
     }
 
-    const { name, email, password } = validated.data;
+    const { name, email, password, gender, description, dateOfBirth, city, country } = validated.data;
 
     const hashedPassword = await bcrypt.hash(password, 12);
 
@@ -73,6 +73,16 @@ export async function registerUser(data: RegisterSchema): Promise<ActionResult<U
         name,
         email,
         passwordHash: hashedPassword,
+        member: {
+          create: {
+            name,
+            description,
+            city,
+            country,
+            dateOfBirth: new Date(dateOfBirth),
+            gender,
+          },
+        },
       },
     });
 

@@ -3,14 +3,20 @@ import { authRoutes, publicRoutes } from '@/routes';
 import { NextResponse } from 'next/server';
 
 // 36 (Protecting routes using Middleware)
+// Auth.js の auth middleware を使用します。
+// req は user がリンクをクリックした時のリクエストです。
+// https://authjs.dev/getting-started/session-management/protecting
 
-// Auth.jsのauth middlewareを使用す流。
-// req はuserがリンクをクリックした時のrequestのこと。
 export default auth((req) => {
   // nextUrl: リクエストの URL 情報
   // https://nextjs.org/docs/app/api-reference/functions/next-request#nexturl
   const { nextUrl } = req;
 
+  // req.auth: これは Auth.js のミドルウェアによって提供されるプロパティです。
+  //           ユーザーが認証されている場合、この req.auth にはセッション情報が含まれます。
+  //           認証されていない場合は null または undefined になります。
+  // !!:       これは二重否定演算子です。JavaScriptでは、値を真偽値（boolean）に変換するためによく使用されます。
+  // 複雑なセッション情報をシンプルな真偽値に変換しています。
   const isLoggedIn = !!req.auth;
 
   // nextUrl.pathname:
@@ -18,27 +24,33 @@ export default auth((req) => {
   const isPublic = publicRoutes.includes(nextUrl.pathname);
   const isAuthRoute = authRoutes.includes(nextUrl.pathname);
 
-  // リクエストされた route が publicRoutes である
+  // リクエストされた route が publicRoutes　配列に含まれている場合、
+  // ログインなしでもアクセスできるルートにアクセスしようとしている場合、
   if (isPublic) {
-    // that just simply allows them to proceed to where they've tried to get to
+    // リクエストされた route に移動します。
     return NextResponse.next();
   }
 
-  // リクエストされた route が authRoutes である
+  // リクエストされた route が authRoutes 配列に含まれている場合、
+  // つまり /login などにアクセスしようとしている場合、
   if (isAuthRoute) {
-    // loginしていれば、login pageやregister pageではなくmembers pageにredirectする。
+    // ログインしていれば、
     if (isLoggedIn) {
+      // login page や register page ではなく, members page に redirect します。
       return NextResponse.redirect(new URL('/members', nextUrl));
     }
-    // loginしていなければ　authRoutesに移動
+    // ログインしていなければ　リクエストされた route に移動します。
     return NextResponse.next();
   }
 
-  // 保護されたルート（メンバーページなど）にログインしていないユーザーがアクセスしようとした場合に実行されます。
+  // 保護されたルート（メンバーページなど）にログインしていないユーザーがアクセスしようとした場合,
   if (!isPublic && !isLoggedIn) {
+    // login page に移動します。
     return NextResponse.redirect(new URL('/login', nextUrl));
   }
 
+  // この next() メソッドは、現在のミドルウェア処理を終了し、リクエストを次の処理段階に進めることを指示します。
+  // 具体的には、ミドルウェアチェーンの次のミドルウェア（存在する場合）や、最終的にはルートハンドラーにリクエストを渡します。
   return NextResponse.next();
 });
 
