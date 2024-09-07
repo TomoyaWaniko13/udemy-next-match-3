@@ -47,6 +47,8 @@ export async function signOutUser() {
 }
 
 // 141 (Submitting the form)
+// 142 (Setting up tokens and resetting the Database)
+
 // RegisterForm.tsx で使用されます。form の情報をもとに新しい user を register(登録) します.
 export async function registerUser(data: RegisterSchema): Promise<ActionResult<User>> {
   try {
@@ -73,6 +75,7 @@ export async function registerUser(data: RegisterSchema): Promise<ActionResult<U
         name,
         email,
         passwordHash: hashedPassword,
+        profileComplete: true,
         member: {
           create: {
             name,

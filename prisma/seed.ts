@@ -5,6 +5,8 @@ import { hash } from 'bcryptjs';
 const prisma = new PrismaClient();
 
 // 41 (Seeding data into the Database)
+// 142 (Setting up tokens and resetting the Database)
+
 async function seedMembers() {
   // membersData（テストデータ)を databaseにinsertする。
   // User modelは authに関する情報
@@ -18,6 +20,7 @@ async function seedMembers() {
         emailVertified: new Date(),
         passwordHash: await hash('password', 12),
         image: member.image,
+        profileComplete: true,
         member: {
           create: {
             dateOfBirth: new Date(member.dateOfBirth),

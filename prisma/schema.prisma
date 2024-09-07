@@ -71,38 +71,20 @@ model Account {
 model User {
   // 33 (Usign NextAuth callbacks)
   // tokenのsub fieldがこのidの値と同じである。
-  id             String    @id @default(cuid())
-  name           String?
-  email          String?   @unique
-  emailVertified DateTime?
-  passwordHash   String
+  id              String    @id @default(cuid())
+  name            String?
+  email           String?   @unique
+  emailVertified  DateTime?
+  passwordHash    String
   // main imageのurl
-  image          String?
+  image           String?
+  // 142 (Setting up tokens and resetting the Database)
+  profileComplete Boolean   @default(false)
 
   // 対多（one-to-many）の関係を表現しています：
   // 1人のユーザー（User）が複数のアカウント（Account）を持つことができます。
   // 逆に言えば、各アカウントは1人のユーザーにのみ属します。
 
-  // この定義により、以下のようなことが可能になります：
-  // ユーザーの全アカウントを簡単に取得できる
-  // ユーザーに新しいアカウントを追加できる
-  // ユーザーに関連するアカウントを一括で操作できる
-
-  // // ユーザーとその全アカウントを取得
-  // const userWithAccounts = await prisma.user.findUnique({
-  //   where: { id: userId },
-  //   include: { accounts: true }
-  // });
-
-  // // ユーザーに新しいアカウントを追加
-  // const updatedUser = await prisma.user.update({
-  //   where: { id: userId },
-  //   data: {
-  //     accounts: {
-  //       create: { /* 新しいアカウントのデータ */ }
-  //     }
-  //   }
-  // });
   accounts Account[]
   member   Member?
 }
@@ -202,4 +184,23 @@ model Message {
   senderDeleted    Boolean   @default(false)
   //  受信者がメッセージを削除したかどうか。
   recipientDeleted Boolean   @default(false)
+}
+
+// 142 (Setting up tokens and resetting the Database)
+model Token {
+  id      String    @id @default(cuid())
+  email   String
+  token   String
+  expires DateTime
+  type    TokenType
+
+  // Token は unique であるということです。
+  // つまり、1つの user は 1つの Token しか持てないということです。
+  @@unique([email, token])
+}
+
+// 142 (Setting up tokens and resetting the Database)
+enum TokenType {
+  VERTIFICATION
+  PASSWORD_RESET
 }
