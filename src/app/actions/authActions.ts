@@ -4,15 +4,39 @@ import { combineRegisterSchema, registerSchema, RegisterSchema } from '@/lib/sch
 import bcrypt from 'bcryptjs';
 import { prisma } from '@/lib/prisma';
 import { ActionResult } from '@/types';
-import { User } from '@prisma/client';
+import { TokenType, User } from '@prisma/client';
 import { LoginSchema } from '@/lib/schemas/loginSchema';
 
 import { AuthError } from 'next-auth';
 import { auth, signIn, signOut } from '@/auth';
+import { generateToken } from '@/lib/tokens';
+import { sendVerificationEmail } from '@/lib/mail';
 
 // 30 (Signing in users Part 2)
+// 143. Creating the token functions
+// 144. Adding an email provider
+
 // signIn() を使って、サーバーサイドで、email, password をもとに login します。
 export async function signInUser(data: LoginSchema): Promise<ActionResult<string>> {
+  const existingUser = await getUserByEmail(data.email);
+
+  // もし getUserByEmail(data.email) において、data.email が null/undefined で データベースの User の email property も
+  // null /undefined の場合、User が取得できてしまいます。なので、email property の値が存在するか確認するために、
+  // !existingUser.email の条件も必要です。
+  if (!existingUser || !existingUser.email) {
+    return { status: 'error', error: 'Invalid credentials' };
+  }
+
+  // email が認証されている必要があります。
+  if (!existingUser.emailVerified) {
+    const token = await generateToken(existingUser.email, TokenType.VERIFICATION);
+
+    // ユーザーに検証リンクを含むメールが送信されます。
+    await sendVerificationEmail(token.email, token.token);
+
+    return { status: 'error', error: 'Please verify your email address before logging in' };
+  }
+
   try {
     const result = await signIn('credentials', {
       email: data.email,
@@ -25,7 +49,7 @@ export async function signInUser(data: LoginSchema): Promise<ActionResult<string
   } catch (error) {
     console.log(error);
 
-    // Auth.js は AuthError を提供しています。
+    //  AuthError は Auth.js によって提供されています。
     if (error instanceof AuthError) {
       switch (error.type) {
         case 'CredentialsSignin':
@@ -48,6 +72,7 @@ export async function signOutUser() {
 
 // 141 (Submitting the form)
 // 142 (Setting up tokens and resetting the Database)
+// 143. Creating the token functions
 
 // RegisterForm.tsx で使用されます。form の情報をもとに新しい user を register(登録) します.
 export async function registerUser(data: RegisterSchema): Promise<ActionResult<User>> {
@@ -88,6 +113,13 @@ export async function registerUser(data: RegisterSchema): Promise<ActionResult<U
         },
       },
     });
+
+    // この行では、generateToken 関数を呼び出して、メール検証用のトークンを生成しています。
+    // 同じメールアドレスに対する既存のトークンがあるかどうか確認するために、email を引数として受け取ります。
+    const verificationToken = await generateToken(email, TokenType.VERIFICATION);
+
+    // ユーザーに検証リンクを含むメールが送信されます。
+    await sendVerificationEmail(verificationToken.email, verificationToken.token);
 
     return { status: 'success', data: user };
   } catch (error) {

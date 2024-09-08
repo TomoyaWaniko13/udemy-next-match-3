@@ -17,7 +17,7 @@ async function seedMembers() {
       data: {
         email: member.email,
         name: member.name,
-        emailVertified: new Date(),
+        emailVerified: new Date(),
         passwordHash: await hash('password', 12),
         image: member.image,
         profileComplete: true,

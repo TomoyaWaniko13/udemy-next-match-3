@@ -74,7 +74,7 @@ model User {
   id              String    @id @default(cuid())
   name            String?
   email           String?   @unique
-  emailVertified  DateTime?
+  emailVerified   DateTime?
   passwordHash    String
   // main imageのurl
   image           String?
@@ -188,10 +188,16 @@ model Message {
 
 // 142 (Setting up tokens and resetting the Database)
 model Token {
+  // 一意の識別子として機能し、データベース内の各トークンを一意に識別します。
   id      String    @id @default(cuid())
+  // トークンが関連付けられているユーザーのメールアドレスを保存します。
   email   String
+  // 実際のトークン文字列を保存します。
   token   String
+  // トークンの有効期限を指定します。
   expires DateTime
+  // トークンの用途や目的を指定します。VERTIFICATION と PASSWORD_RESET の2つの値があります。
+  // これにより、同じトークンモデルを複数の目的（メール検証、パスワードリセットなど）に使用できます。
   type    TokenType
 
   // Token は unique であるということです。
@@ -201,6 +207,6 @@ model Token {
 
 // 142 (Setting up tokens and resetting the Database)
 enum TokenType {
-  VERTIFICATION
+  VERIFICATION
   PASSWORD_RESET
 }
