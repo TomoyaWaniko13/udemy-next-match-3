@@ -16,6 +16,19 @@ export async function getTokenByEmail(email: string) {
   }
 }
 
+// 145. Adding the verify email function
+// 引数の token は Token model の property の1つです。
+export async function getTokenByToken(token: string) {
+  try {
+    return prisma.token.findFirst({
+      where: { token },
+    });
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+}
+
 // 143. Creating the token functions
 // 新しいトークンを生成し、データベースに保存します。
 export async function generateToken(email: string, type: TokenType) {

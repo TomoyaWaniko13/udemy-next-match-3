@@ -12,6 +12,8 @@ const TopNav = async () => {
   // 75 (Challenge Solution)
   const userInfo = session?.user && (await getUserInfoForNav());
 
+  // const userInfo = session?.user;
+
   return (
     <>
       <Navbar

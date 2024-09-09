@@ -11,12 +11,13 @@ type Props = {
   body?: ReactNode;
   action?: () => void;
   actionLabel?: string;
+  footer?: ReactNode;
 };
 
 // 141 (Submitting the form)
 // <Card/> component を再利用できるようにしています。
 // headerIcon はそのままコンポーネントとなるので、大文字で始まる名前に変更します。
-const CardWrapper = ({ body, headerIcon: Icon, headerText, subHeaderText, action, actionLabel }: Props) => {
+const CardWrapper = ({ body, headerIcon: Icon, headerText, subHeaderText, action, actionLabel, footer }: Props) => {
   return (
     <div className={'flex items-center justify-center h-screen'}>
       <Card className={'w-3/5 mx-auto p-5'}>
@@ -34,6 +35,7 @@ const CardWrapper = ({ body, headerIcon: Icon, headerText, subHeaderText, action
               {actionLabel}
             </Button>
           )}
+          {footer && <>{footer}</>}
         </CardFooter>
       </Card>
     </div>
