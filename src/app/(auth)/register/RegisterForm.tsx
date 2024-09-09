@@ -30,7 +30,8 @@ const RegisterForm = () => {
   // step(段階) によって、使う schema を変更します。
   const currentValidationSchema = stepSchemas[activeStep];
 
-  // この "methods" variable を <FormProvider/> にパスする必要があります。
+  // この "methods" variable を, つまり useForm() の全てのメソッドを
+  // <FormProvider/> にパスする必要があります。
   const methods = useForm<RegisterSchema>({
     // step(段階) によって、使う schema を変更します。
     resolver: zodResolver(currentValidationSchema),
@@ -45,16 +46,21 @@ const RegisterForm = () => {
   } = methods;
 
   const onSubmit = async () => {
+    // form の入力情報をもとに user を register(登録) します。
     const result = await registerUser(getValues());
 
+    // 問題なくユーザー登録できれば、
     if (result.status === 'success') {
+      // このページに移動します。
       router.push('/register/success');
     } else {
+      // ユーザー登録に問題があれば、handleFormServerErrors を使ってエラーメッセージを表示します。
       handleFormServerErrors(result, setError);
     }
   };
 
-  // step(段階) によって、使う form を変更します。
+  // step(段階) によって、違う form を return します。
+  // これにより、step(段階) によって、違う form を表示できます。
   const getStepContent = (step: number) => {
     switch (step) {
       case 0:
@@ -62,7 +68,7 @@ const RegisterForm = () => {
       case 1:
         return <ProfileForm />;
       default:
-        return 'Unknown';
+        return 'Unknown step';
     }
   };
 
@@ -90,6 +96,7 @@ const RegisterForm = () => {
       </CardHeader>
       <CardBody>
         {/* react hook form の <FromProvider/> で囲むことにより、状態を共有できるようになります。*/}
+        {/* <FormProvider/> は useForm() の全てのメソッドが必要なので、{...methods} でパスします。*/}
         <FormProvider {...methods}>
           <form onSubmit={handleSubmit(onNext)}>
             <div className={'space-y-4'}>
@@ -97,7 +104,8 @@ const RegisterForm = () => {
               {getStepContent(activeStep)}
               {/* 29 (Handling errors in the form Part 2) */}
               {errors.root?.serverError && <p className={'text-danger text-sm'}>{errors.root.serverError.message}</p>}
-              {/* 横並びにします。 */}
+
+              {/* <Button/> などを横並びにします。 */}
               <div className={'flex flex-row items-center gap-6'}>
                 {/* 最初の step でなければ、back button が必要です。 */}
                 {activeStep !== 0 && (

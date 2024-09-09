@@ -18,22 +18,24 @@ import { sendVerificationEmail } from '@/lib/mail';
 
 // signIn() を使って、サーバーサイドで、email, password をもとに login します。
 export async function signInUser(data: LoginSchema): Promise<ActionResult<string>> {
+  // email を使って User を取得します。
   const existingUser = await getUserByEmail(data.email);
 
   // もし getUserByEmail(data.email) において、data.email が null/undefined で データベースの User の email property も
-  // null /undefined の場合、User が取得できてしまいます。なので、email property の値が存在するか確認するために、
+  // null/undefined の場合、User が取得できてしまいます。なので、email property の値が存在するか確認するために、
   // !existingUser.email の条件も必要です。
   if (!existingUser || !existingUser.email) {
+    // このメッセージを toast で表示します。
     return { status: 'error', error: 'Invalid credentials' };
   }
 
-  // email が認証されている必要があります。
+  // email が認証されているチェックします。
   if (!existingUser.emailVerified) {
+    // email が認証されていない場合、トークンを作成して、
     const token = await generateToken(existingUser.email, TokenType.VERIFICATION);
-
-    // ユーザーに検証リンクを含むメールが送信されます。
+    // ユーザーに認証リンクを含むメールが送信されます。
     await sendVerificationEmail(token.email, token.token);
-
+    // このメッセージを toast で表示します。
     return { status: 'error', error: 'Please verify your email address before logging in' };
   }
 
@@ -74,9 +76,11 @@ export async function signOutUser() {
 // 142 (Setting up tokens and resetting the Database)
 // 143. Creating the token functions
 
-// RegisterForm.tsx で使用されます。form の情報をもとに新しい user を register(登録) します.
+// RegisterForm.tsx で使用されます。form の情報をもとに新しい user を register (登録) します.
 export async function registerUser(data: RegisterSchema): Promise<ActionResult<User>> {
   try {
+    // form に入力された情報をサーバーサイドで検証します。
+    // combineRegisterSchema は2つの form に入力された情報を扱います。
     const validated = combineRegisterSchema.safeParse(data);
 
     if (!validated.success) {
@@ -84,16 +88,22 @@ export async function registerUser(data: RegisterSchema): Promise<ActionResult<U
       return { status: 'error', error: validated.error.errors };
     }
 
+    // form で入力された情報です。
     const { name, email, password, gender, description, dateOfBirth, city, country } = validated.data;
 
+    // パスワードをデータベースに保存するときは hash() します。
     const hashedPassword = await bcrypt.hash(password, 12);
 
+    // すでに email が他のユーザーによって使われているか確認します。
     const existingUser = await prisma.user.findUnique({
       where: { email },
     });
 
-    // string
-    if (existingUser) return { status: 'error', error: 'User already exists' };
+    //  すでに email が使われている場合、エラーメッセージを表示します。
+    if (existingUser) {
+      // このメッセージが toast で表示されます。
+      return { status: 'error', error: 'User already exists' };
+    }
 
     const user = await prisma.user.create({
       data: {

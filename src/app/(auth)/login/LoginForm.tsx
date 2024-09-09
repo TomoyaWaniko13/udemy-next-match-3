@@ -10,6 +10,9 @@ import { signInUser } from '@/app/actions/authActions';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
 
+// 30 (Signing in users Part 2)
+// 31 (Adding notification toasts to the app)
+
 const LoginForm = () => {
   const router = useRouter();
 
@@ -20,13 +23,11 @@ const LoginForm = () => {
   } = useForm<LoginSchema>({ resolver: zodResolver(loginSchema), mode: 'onTouched' });
 
   const onSubmit = async (data: LoginSchema) => {
-    // 30 (Signing in users Part 2)
     const result = await signInUser(data);
     if (result.status === 'success') {
       router.push('/members');
       router.refresh();
     } else {
-      // 31 (Adding notification toasts to the app)
       toast.error(result.error as string);
     }
   };

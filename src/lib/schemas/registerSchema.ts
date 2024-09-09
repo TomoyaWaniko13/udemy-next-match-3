@@ -30,6 +30,7 @@ export const profileSchema = z.object({
 });
 
 // 141 (Submitting the form)
+// 2つのスキーマを組み合わせています。server action で使用されます。
 export const combineRegisterSchema = registerSchema.and(profileSchema);
 
 // 139 (Adding a Register wizard Part 2)

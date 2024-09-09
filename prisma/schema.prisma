@@ -70,7 +70,7 @@ model Account {
 // emailとpasswordHashは loginに使われる。
 model User {
   // 33 (Usign NextAuth callbacks)
-  // tokenのsub fieldがこのidの値と同じである。
+  // token の sub field がこの id の値と同じである。
   id              String    @id @default(cuid())
   name            String?
   email           String?   @unique
@@ -79,6 +79,7 @@ model User {
   // main imageのurl
   image           String?
   // 142 (Setting up tokens and resetting the Database)
+  // email が認証されたかどうかを記録します。
   profileComplete Boolean   @default(false)
 
   // 対多（one-to-many）の関係を表現しています：
@@ -167,13 +168,13 @@ model Message {
   senderId         String?
   // 受信者のユーザーID
   recipientId      String?
-  // Member? は、このリレーションがオプショナル（nullable）であることを示しています。つまり、メッセージは必ずしも送信者や受信者を持つ必要がないということです。
-  // fields: [senderId] は、このリレーションが Message モデルの senderId フィールドを使用することを指定しています。
-  // references: [userId] は、Member モデルの userId フィールドを参照することを示しています。 これにより、senderId が Member の userId と一致するメンバーがこのメッセージの送信者となります。
-  // SetNull: Member レコードが削除されると、それに関連する Message レコードの senderId または recipientId フィールドが null に設定されます。この設定により、メンバーが削除されてもメッセージ自体は保持されます。
-  // 例えば、ユーザーID "user123" を持つメンバーがシステムから削除されたとします。このメンバーが送信したすべてのメッセージの senderId フィールドが null になります。 同様に、このメンバーが受信したすべてのメッセージの recipientId フィールドも null になります。
-  // senderId や recipientId が null になることで、そのメッセージの送信者や受信者が「不明」または「削除されたユーザー」であることを示すことができます。
-  // sender と recipient は多対多の関係を示しているので、一人のメンバーが多くのメッセージを送信でき、また多くのメッセージを受信できる。
+  // Member? は、このリレーションがオプショナル（nullable）であることを示しています。
+  // 　　　　　　　つまり、メッセージは必ずしも送信者や受信者を持つ必要がないということです。
+  // SetNull: Member レコードが削除されると、それに関連する Message レコードの senderId または recipientId フィールドが
+  // 　　　　　　　　　 null に設定されます。この設定により、メンバーが削除されてもメッセージ自体は保持されます。
+  // senderId や recipientId が null になることで、そのメッセージの送信者や受信者が「不明」または
+  // 「削除されたユーザー」であることを示すことができます。
+  // sender と recipient は多対多の関係を示しているので、一人のメンバーが多くのメッセージを送信でき、また多くのメッセージを受信できます。
   sender           Member?   @relation("sender", fields: [senderId], references: [userId], onDelete: SetNull)
   recipient        Member?   @relation("recipient", fields: [recipientId], references: [userId], onDelete: SetNull)
   // メッセージが読まれた日時。これにより、メッセージが既読か未読かを簡単に判断できます。

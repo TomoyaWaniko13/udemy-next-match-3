@@ -22,23 +22,27 @@ export function timeAgo(date: string) {
 // この関数の主な目的は、サーバーサイドのバリデーションエラー（server actionで検知したバリデーションエラー）をクライアントサイドの
 // フォームエラーに変換することです。これにより、ユーザーに適切なフィードバックを提供し、どのフィールドに問題があるかを
 // 示すことができます。
-
 // TFieldValues はTypeScriptのジェネリック型パラメータです。この関数において、フォームのフィールド値の型を表します。
 // T はTypeScriptの慣習で、型パラメータを示すために使用されます。
 export function handleFormServerErrors<TFieldValues extends FieldValues>(
-  // サーバーからのエラーレスポンス。
+  // エラーは string か ZodIssue[] のどちらかで表されます。
   errorResponse: { error: string | ZodIssue[] },
-  // UseFormSetErrorは React Hook Form が提供する型で、setError 関数の型を定義します。この関数を使用して、フォームフィールドにエラーを設定できます。
+  // react-hook-form の setError を使用することで、エラーメッセージを form に表示できます。
   setError: UseFormSetError<TFieldValues>,
 ) {
-  // まず、errorResponse.error が配列かどうか(formのvalidationが失敗したかどうか)をチェックします。
-  // なぜ配列になるかは registerUser() from authActions.tsと updateMemberProfile() from userActions.tsをチェック
+  // まず、errorResponse.error が配列かどうか、つまり form の validation が失敗したかどうかをチェックします。
+  // なぜ配列になるかは registerUser() from authActions.ts と  userActions.ts の updateMemberProfile()
+  // をチェックしましょう。
   if (Array.isArray(errorResponse.error)) {
     errorResponse.error.forEach((e: any) => {
-      // e.path: これは通常、エラーが発生したフィールドのパスを表す配列です。例えば、 ['name'] や ['address', 'city'] のようになります。
-      // .join('.'): この配列の要素を . で結合して文字列にします。例えば、 ['address', 'city'] は 'address.city' になります。
-      // as Path<TFieldValues>: これは TypeScript の型アサーションです。結果の文字列を Path<TFieldValues> 型として扱うよう TypeScript に指示しています。
-      // Path<TFieldValues>: これは React Hook Form の型で、フォームのフィールドパスを表します。TFieldValues はフォームの値の型です。
+      // e.path: これは通常、エラーが発生したフィールドのパスを表す配列です。
+      //         例えば、 ['name'] や ['address', 'city'] のようになります。
+      // .join('.'): この配列の要素を . で結合して文字列にします。
+      //             例えば、 ['address', 'city'] は 'address.city' になります。
+      // as Path<TFieldValues>: これは TypeScript の型アサーションです。
+      //                        結果の文字列を Path<TFieldValues> 型として扱うよう TypeScript に指示しています。
+      // Path<TFieldValues>: これは React Hook Form の型で、フォームのフィールドパスを表します。
+      //                     TFieldValues はフォームの値の型です。
 
       // フォームは、ネストされたオブジェクト構造を持つことがあります。例えば：
       // {
@@ -59,8 +63,8 @@ export function handleFormServerErrors<TFieldValues extends FieldValues>(
       setError(fieldName, { message: e.message });
     });
   } else {
-    // エラーが文字列の場合 (一般的なサーバーエラー):
-    // 'root.serverError' というフィールドにエラーメッセージを設定します。これは通常、フォーム全体に関するエラーを表示するために使用されます。
+    // エラーが文字列の場合、'root.serverError' というフィールドにエラーメッセージを設定します。
+    // これは通常、フォーム全体に関するエラーを表示するために使用されます。
     setError('root.serverError', { message: errorResponse.error });
   }
 }
