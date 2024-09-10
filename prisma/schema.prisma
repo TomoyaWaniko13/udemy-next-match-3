@@ -13,7 +13,9 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// model Account の主な役割は、ユーザーの認証情報を管理すること
+// model Account の主な役割は、ユーザーの認証情報を管理することです。
+// 以下の doc に従って書いています。
+// https://authjs.dev/getting-started/adapters/prisma
 model Account {
   id                String  @id @default(cuid())
   // このアカウントが属するユーザーのID, User モデルの id フィールドを参照する外部キー
@@ -64,9 +66,9 @@ model Account {
   @@unique([provider, providerAccountId])
 }
 
-// model User の主な役割は、アプリケーションのユーザー情報を管理すること
-// name, email, passwordHashは registerに使われる。
-// emailとpasswordHashは loginに使われる。
+// model User の主な役割は、ユーザーの認証情報を管理することです。
+// 以下の doc に従って書いています。
+// https://authjs.dev/getting-started/adapters/prisma
 model User {
   // 33 (Usign NextAuth callbacks)
   // token の sub field がこの id の値と同じである。
@@ -93,8 +95,8 @@ model User {
 }
 
 // 40 (Updating the prisma schema)
-// Memberはprofile情報(gender, dateOfBrith, city, Photo[]など)を含むmodel
-// 1つのMemberは1つのUserとrelationshipを持つ。
+// Member は profile 情報(gender, dateOfBrith, city, Photo[]など) を含む model
+// 1つの Member は1つの User と relationship を持つ。
 model Member {
   id          String   @id @default(cuid())
   // foregin key

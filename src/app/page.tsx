@@ -4,15 +4,16 @@ import Link from 'next/link';
 import { auth, signOut } from '@/auth';
 
 export default async function Home() {
-  // 32(Getting the session data)
+  // 32 (Getting the session data)
   const session = await auth();
 
   return (
     <>
-      {/* 32(Getting the session data) */}
+      {/* 32 (Getting the session data) */}
       <h3 className={'text-2xl font-semibold'}>User session data</h3>
       {session ? (
         <div>
+          {/* session data を取得して表示します。 */}
           <pre>{JSON.stringify(session, null, 2)}</pre>
           <form
             action={async () => {

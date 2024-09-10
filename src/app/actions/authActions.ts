@@ -16,7 +16,7 @@ import { sendPasswordResetEmail, sendVerificationEmail } from '@/lib/mail';
 // 143. Creating the token functions
 // 144. Adding an email provider
 
-// signIn() を使って、サーバーサイドで、email, password をもとに login します。
+// Auth.js の signIn() を使って、<LoginForm/> の入力情報の email, password をもとに login します。
 export async function signInUser(data: LoginSchema): Promise<ActionResult<string>> {
   // email を使って User を取得します。
   const existingUser = await getUserByEmail(data.email);
@@ -40,10 +40,16 @@ export async function signInUser(data: LoginSchema): Promise<ActionResult<string
   }
 
   try {
-    // signIn() で email, password をもとに signIn/login します。
+    // Auth.js の signIn() は server side でしか呼ぶことができないので、
+    // Auth.js の signIn() を呼ぶ server action を作る必要があります。
+    // signIn() で email, password をもとに signIn します。
+    // 'credentials' は、auth.config.ts の 'credentials' オプションで
+    // 設定したやり方で authorization するということです。
     const result = await signIn('credentials', {
       email: data.email,
       password: data.password,
+      // sever action で redirection をするとエラーになるので、
+      // redirect: false とします。
       redirect: false,
     });
 

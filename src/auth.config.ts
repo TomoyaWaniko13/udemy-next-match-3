@@ -16,23 +16,32 @@ export default {
       clientSecret: process.env.GITHUB_CLIENT_SECRET,
     }),
     Credentials({
-      // email と password を使って login します。
       name: 'credentials',
+      // 以下で、どのように authentication をするのかを設定します。
+      // email と password を使って login します。
       async authorize(creds) {
+        // email と password が loginSchema で指定された format か validate します。
         const validated = loginSchema.safeParse(creds);
 
+        // loginSchema.safeParse() による validation が成功の場合、
         if (validated.success) {
           const { email, password } = validated.data;
-          // userを取得
+          // 提供された email でデータベースから user を取得します。
           const user = await getUserByEmail(email);
 
+          // データベースに email で指定された user が存在しない場合、
+          // もしくは 提供されたパスワードが データベースから取得した user のパスワードと異なる場合、
+          // このアプリケーションに signIn することはできません。
           if (!user || !user.passwordHash || !(await compare(password, user.passwordHash))) {
             return null;
           }
 
+          //
           return user;
         }
 
+        // loginSchema.safeParse() による validation が成功でない場合、
+        // このアプリケーションに signIn することはできません。
         return null;
       },
     }),
