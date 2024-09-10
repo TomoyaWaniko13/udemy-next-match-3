@@ -17,7 +17,7 @@ export async function getTokenByEmail(email: string) {
 }
 
 // 145. Adding the verify email function
-// 引数の token は Token model の property の1つです。
+// 引数の token は、ランダムな文字列で Token model の property の1つです。
 export async function getTokenByToken(token: string) {
   try {
     return prisma.token.findFirst({
@@ -34,7 +34,9 @@ export async function getTokenByToken(token: string) {
 export async function generateToken(email: string, type: TokenType) {
   // ランダムな48バイトの16進数文字列としてトークンを生成します。
   const token = randomBytes(48).toString('hex');
+
   // トークンの有効期限を24時間に設定します。
+  // 1秒 (*60)-> 1分 (*60)-> 1時間 (*24)-> 24時間
   const expires = new Date(Date.now() + 1000 * 60 * 60 * 24);
 
   // 同じメールアドレスに対する既存のトークンがある場合、それを削除します。
@@ -49,11 +51,6 @@ export async function generateToken(email: string, type: TokenType) {
 
   // 新しいトークンをデータベースに保存します。
   return prisma.token.create({
-    data: {
-      email,
-      token,
-      expires,
-      type,
-    },
+    data: { email, token, expires, type },
   });
 }

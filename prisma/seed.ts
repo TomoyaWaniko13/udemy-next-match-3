@@ -8,10 +8,10 @@ const prisma = new PrismaClient();
 // 142 (Setting up tokens and resetting the Database)
 
 async function seedMembers() {
-  // membersData（テストデータ)を databaseにinsertする。
-  // User modelは authに関する情報
-  // Memberはプロフィールに関する情報
-  // photosはMemberが保持している写真
+  // membersData（テストデータ) をデータベースに記録します。
+  // User modelは auth に関する情報
+  // Member はプロフィールに関する情報
+  // photos は Member が保持している写真
   return membersData.map(async (member) =>
     prisma.user.create({
       data: {

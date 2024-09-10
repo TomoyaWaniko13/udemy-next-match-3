@@ -21,11 +21,23 @@ export async function sendVerificationEmail(email: string, token: string) {
            <a href="${link}">Verify email</a>
           `,
   });
+}
 
-  // return resend.emails.send({
-  //   from: 'onboarding@resend.dev',
-  //   to: 'alligatorfree12@gmail.com',
-  //   subject: 'Hello World',
-  //   html: '<p>Congrats on sending your <strong>first email</strong>!</p>',
-  // });
+// 146. Adding the forgot password functionality part 1
+export async function sendPasswordResetEmail(email: string, token: string) {
+  // 検証用のリンクを生成します。このリンクには、トークンがクエリパラメータとして含まれています。
+  // この token がデータベースの token と同じであれば、email が verified されているとわかります。
+  const link = `http://localhost:3000/reset-password?token=${token}`;
+
+  // Resendというメール送信サービスを使用して、検証メールを作成し送信します。
+  return resend.emails.send({
+    from: 'testing@resend.dev',
+    to: email,
+    subject: 'Reset your password',
+    html: `
+           <h1>Verify your email address</h1>
+           <p>Click the link below to reset password</p>
+           <a href="${link}">Reset password</a>
+          `,
+  });
 }

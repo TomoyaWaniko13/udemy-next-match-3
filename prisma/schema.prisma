@@ -59,9 +59,8 @@ model Account {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   // @@unique はテーブルレベルの制約を指定するPrismaの構文
-  // ([provider, providerAccountId]) は、この制約が provider と providerAccountId の2つのフィールドの組み合わせに適用されることを示しています。
-  // provider と providerAccountId の組み合わせは、テーブル内で一意でなければなりません。
-  // 同じ組み合わせの値を持つ別のレコードを作成することはできません。
+  // ([provider, providerAccountId]) は、provider と providerAccountId の組み合わせは、テーブル内で一意でないといけない、
+  // ということです。同じ組み合わせの値を持つ別のレコードを作成することはできません。
   @@unique([provider, providerAccountId])
 }
 
@@ -203,6 +202,8 @@ model Token {
 
   // Token は unique であるということです。
   // つまり、1つの user は 1つの Token しか持てないということです。
+  // ([provider, providerAccountId]) は、provider と providerAccountId の組み合わせは、
+  // テーブル内で一意でないといけない、ということです。
   @@unique([email, token])
 }
 

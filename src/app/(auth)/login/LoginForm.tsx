@@ -9,9 +9,11 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { signInUser } from '@/app/actions/authActions';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
+import Link from 'next/link';
 
 // 30 (Signing in users Part 2)
 // 31 (Adding notification toasts to the app)
+// 146. Adding the forgot password functionality part 1
 
 const LoginForm = () => {
   const router = useRouter();
@@ -62,6 +64,9 @@ const LoginForm = () => {
             <Button isLoading={isSubmitting} isDisabled={!isValid} fullWidth color={'secondary'} type={'submit'}>
               Login
             </Button>
+            <div className={'flex justify-center hover:underline text-sm'}>
+              <Link href={'/forgot-password'}>Forgot password?</Link>
+            </div>
           </div>
         </form>
       </CardBody>
