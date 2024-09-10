@@ -30,7 +30,7 @@ export async function getTokenByToken(token: string) {
 }
 
 // 143. Creating the token functions
-// 新しいトークンを生成し、データベースに保存します。
+// 新しいトークンを生成し、email と関連付けてデータベースに保存します。
 export async function generateToken(email: string, type: TokenType) {
   // ランダムな48バイトの16進数文字列としてトークンを生成します。
   const token = randomBytes(48).toString('hex');

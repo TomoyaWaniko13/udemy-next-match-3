@@ -103,7 +103,6 @@ export async function registerUser(data: RegisterSchema): Promise<ActionResult<U
 
     //  すでに email が使われている場合、エラーメッセージを表示します。
     if (existingUser) {
-      // このメッセージが toast で表示されます。
       return { status: 'error', error: 'User already exists' };
     }
 
@@ -132,7 +131,6 @@ export async function registerUser(data: RegisterSchema): Promise<ActionResult<U
   }
 }
 
-// used in auth.config.ts
 export async function getUserByEmail(email: string) {
   return prisma.user.findUnique({ where: { email } });
 }
