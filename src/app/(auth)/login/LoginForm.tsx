@@ -10,10 +10,12 @@ import { signInUser } from '@/app/actions/authActions';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
 import Link from 'next/link';
+import SocialLogin from '@/app/(auth)/login/SocialLogin';
 
 // 30 (Signing in users Part 2)
 // 31 (Adding notification toasts to the app)
 // 146. Adding the forgot password functionality part 1
+// 150. Social Login part 1
 
 const LoginForm = () => {
   const router = useRouter();
@@ -22,7 +24,10 @@ const LoginForm = () => {
     register,
     handleSubmit,
     formState: { errors, isValid, isSubmitting },
-  } = useForm<LoginSchema>({ resolver: zodResolver(loginSchema), mode: 'onTouched' });
+  } = useForm<LoginSchema>({
+    resolver: zodResolver(loginSchema),
+    mode: 'onTouched',
+  });
 
   const onSubmit = async (data: LoginSchema) => {
     const result = await signInUser(data);
@@ -64,6 +69,7 @@ const LoginForm = () => {
             <Button isLoading={isSubmitting} isDisabled={!isValid} fullWidth color={'secondary'} type={'submit'}>
               Login
             </Button>
+            <SocialLogin />
             <div className={'flex justify-center hover:underline text-sm'}>
               <Link href={'/forgot-password'}>Forgot password?</Link>
             </div>

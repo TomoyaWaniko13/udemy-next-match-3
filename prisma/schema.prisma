@@ -74,7 +74,10 @@ model User {
   name            String?
   email           String?   @unique
   emailVerified   DateTime?
-  passwordHash    String
+  // 150. Social Login part 1
+  // OAuth providers を使う場合、password は必要ないので、
+  // optional にします。
+  passwordHash    String?
   // main imageのurl
   image           String?
   // 142 (Setting up tokens and resetting the Database)
