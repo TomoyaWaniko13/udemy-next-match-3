@@ -1,6 +1,6 @@
 'use server';
 
-import { combineRegisterSchema, registerSchema, RegisterSchema } from '@/lib/schemas/registerSchema';
+import { combineRegisterSchema, RegisterSchema } from '@/lib/schemas/registerSchema';
 import bcrypt from 'bcryptjs';
 import { prisma } from '@/lib/prisma';
 import { ActionResult } from '@/types';
@@ -33,7 +33,7 @@ export async function signInUser(data: LoginSchema): Promise<ActionResult<string
   if (!existingUser.emailVerified) {
     // email が認証されていない場合、トークンを作成してデータベースに保存して、
     const token = await generateToken(existingUser.email, TokenType.VERIFICATION);
-    // ユーザーに認証リンクを含むメールが送信されます。
+    // Resend によって、ユーザーに認証リンクを含むメールが送信されます。
     await sendVerificationEmail(token.email, token.token);
     // このメッセージを form に表示します。
     return { status: 'error', error: 'Please verify your email address before logging in' };
@@ -120,7 +120,7 @@ export async function registerUser(data: RegisterSchema): Promise<ActionResult<U
     // 同じメールアドレスに対する既存のトークンがあるかどうか確認するために、email を引数として受け取ります。
     const verificationToken = await generateToken(email, TokenType.VERIFICATION);
 
-    // ユーザーに検証リンクを含むメールが送信されます。
+    // Resend によって、ユーザーに検証リンクを含むメールが送信されます。
     await sendVerificationEmail(verificationToken.email, verificationToken.token);
 
     return { status: 'success', data: user };
@@ -140,13 +140,17 @@ export async function getUserById(id: string) {
 }
 
 // 54 (Adding the like toggle function)
-// userId が複数回必要になるので、メソッドを作ります。
+// userId が複数回必要になるので、session をもとに userId を取得できるメソッドを
+// 作り、再利用できるようにします。
 export async function getAuthUserId() {
   const session = await auth();
-  // auth.tsでidを設定しているので、session?.user?.idでログインしているユーザーのuserIdが取得できる。
+  // auth.ts で id を設定しているので、session?.user?.id で
+  // ログインしているユーザーの userId が取得できる。
   const userId = session?.user?.id;
 
-  if (!userId) throw new Error('Unauthorized');
+  if (!userId) {
+    throw new Error('Unauthorized');
+  }
 
   return userId;
 }
@@ -171,11 +175,10 @@ export async function verifyEmail(token: string): Promise<ActionResult<string>> 
       return { status: 'error', error: 'Token has expired' };
     }
 
-    // データベースから取得した token の email で、データベースから user を取得できるか確認します。
+    // トークンに関連付けられたメールアドレスでユーザーを検索します。
     const existingUser = await getUserByEmail(existingToken.email);
 
-    // データベースから取得した token の email で、データベースから user を取得できないならば、
-    //　その token は有効でありません。
+    // ユーザーが見つからない場合、エラーを返します。
     if (!existingUser) {
       return { status: 'error', error: 'User not found' };
     }
@@ -199,21 +202,85 @@ export async function verifyEmail(token: string): Promise<ActionResult<string>> 
 }
 
 // 146. Adding the forgot password functionality part 1
+// ユーザーがパスワードを忘れた場合や、セキュリティ上の理由でパスワードを変更したい場合に使用されます。
+// ユーザーインターフェース側でこの action を呼び出すことで、パスワードリセットのプロセスを開始できます。
 export async function generateResetPasswordEmail(email: string): Promise<ActionResult<string>> {
   try {
+    // 提供されたメールアドレスがデータベースに登録されているかを確認します。
     const existingUser = await getUserByEmail(email);
 
+    // メールアドレスが登録されていなければ、パスワードはリセットできません。
     if (!existingUser) {
       return { status: 'error', error: 'Email not found' };
     }
 
+    // 確認されたユーザーに対して、パスワードリセット用の一意のトークンを生成します。
+    // email と トークンを関連付けてデータベースに保存します。
     const token = await generateToken(email, TokenType.PASSWORD_RESET);
 
+    // 生成されたトークンを使用して、Resend でパスワードリセット用のメールをユーザーに送信します。
     await sendPasswordResetEmail(token.email, token.token);
 
+    // 処理の結果（成功または失敗）を呼び出し元に返します。
     return { status: 'success', data: 'Password reset email has been sent. Pleases check your emails' };
   } catch (error) {
     console.log(error);
     throw error;
+  }
+}
+
+// 148. Adding the forgot password functionality part 3
+// ユーザーのパスワードを実際にリセット（更新）するための server action です。
+// この関数は、ユーザーがパスワードリセットのリンクをクリックし、新しいパスワードを入力した後に呼び出されます。
+export async function resetPassword(password: string, token: string | null): Promise<ActionResult<string>> {
+  try {
+    //　トークンが提供されていない場合、エラーを返します。
+    if (!token) {
+      return { status: 'error', error: 'Missing token ' };
+    }
+
+    // データベースから提供されたトークンを検索します。
+    const existingToken = await getTokenByToken(token);
+
+    // データベースに指定の token がなければ、その token は有効でありません。
+    if (!existingToken) {
+      return { status: 'error', error: 'Invalid token' };
+    }
+
+    // データベースから取得した token が 有効期限内か確認します。
+    const hasExpired = new Date() > existingToken.expires;
+
+    //　データベースから取得した token が 有効期限内でなければ、
+    // その token は有効でありません。
+    if (hasExpired) {
+      return { status: 'error', error: 'Token has expired' };
+    }
+
+    // トークンに関連付けられたメールアドレスでユーザーを検索します。
+    const existingUser = await getUserByEmail(existingToken.email);
+
+    // ユーザーが見つからない場合、その token は有効ではないので、エラーを返します。
+    if (!existingUser) {
+      return { status: 'error', error: 'User not found' };
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 12);
+
+    // existingUser.id で指定される user を検索して、
+    // その user に対して新しい password を更新します。
+    await prisma.user.update({
+      where: { id: existingUser.id },
+      data: { passwordHash: hashedPassword },
+    });
+
+    // 使用済みのリセットトークンをデータベースから削除します。
+    await prisma.token.delete({
+      where: { id: existingToken.id },
+    });
+
+    return { status: 'success', data: 'Password updated successfully. Please try logging in' };
+  } catch (error) {
+    console.log(error);
+    return { status: 'error', error: 'Something went wrong' };
   }
 }

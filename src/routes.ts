@@ -9,4 +9,14 @@
 export const publicRoutes = ['/'];
 
 // authentication に関わる routes を表しています。
-export const authRoutes = ['/login', '/register', '/register/success', '/verify-email', '/forgot-password'];
+// ログインしていないならば、アクセスできます。
+// ログインしていれば、　　　アクセスできません。
+export const authRoutes = [
+  //
+  '/login',
+  '/register',
+  '/register/success',
+  '/verify-email',
+  '/forgot-password',
+  '/reset-password',
+];

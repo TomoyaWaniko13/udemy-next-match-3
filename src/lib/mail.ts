@@ -24,9 +24,10 @@ export async function sendVerificationEmail(email: string, token: string) {
 }
 
 // 146. Adding the forgot password functionality part 1
+// パスワードリセットのためのメールを送信するための非同期関数です。
+// ユーザーのメールアドレスと検証用のトークンを引数として受け取ります。
 export async function sendPasswordResetEmail(email: string, token: string) {
-  // 検証用のリンクを生成します。このリンクには、トークンがクエリパラメータとして含まれています。
-  // この token がデータベースの token と同じであれば、email が verified されているとわかります。
+  // ユーザーは受け取ったメールのリンクをクリックすることで、パスワードリセットページに遷移できます。
   const link = `http://localhost:3000/reset-password?token=${token}`;
 
   // Resendというメール送信サービスを使用して、検証メールを作成し送信します。
