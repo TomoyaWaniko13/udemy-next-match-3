@@ -8,16 +8,12 @@ import { updateLastActive } from '@/app/actions/memberActions';
 // 123 (Updating the last active property)
 // 138 (Adding a Register wizard part 1)
 
-// Pusher を使用してリアルタイムのユーザープレゼンス（オンライン状態）を管理するためのカスタムフック usePresenceChannel を定義しています。
-// user の状態管理：
-// 誰がオンラインなのか
-// 新しくオンラインになった人
-// オフラインになった人
+// Pusher を使用してリアルタイムのユーザープレゼンス（オンライン状態）を管理するための
+// カスタムフック usePresenceChannel を定義しています。
+// 誰がオンラインなのか, 新しくオンラインになった人, オフラインになった人
 // これらの情報をリアルタイムで把握し、アプリケーションの状態（ストア）に反映します。
 export const usePresenceChannel = (userId: string | null) => {
-  // usePresenceStore() から必要な関数を取得
-  // これらの関数は、ストア内のメンバーリストを操作するために使用されます。
-  // state は、Zustandというステート管理ライブラリのコンテキストにおいて、ストア（store）の現在の状態を表します。
+  // usePresenceStore() から必要な関数を取得します。
   // state はオブジェクトで、ストアに保存されているすべてのデータと関数を含んでいます。
   const { set, add, remove } = usePresenceStore((state) => ({
     set: state.set,
@@ -28,9 +24,8 @@ export const usePresenceChannel = (userId: string | null) => {
   // これにより、コンポーネントの再レンダリング間でチャンネルの参照を保持できます。
   const channelRef = useRef<Channel | null>(null);
 
+  // 下のuseEffect()で使用されています。
   // この関数は、メンバーIDの配列を受け取り、それをストアにセットします。
-  // 主に、初期のメンバーリストを設定するために使われます。
-  // useCallback を使用することで、set 関数が変更されない限り、この関数は再作成されません。
   const handleSetMembers = useCallback(
     (memberIds: string[]) => {
       set(memberIds);
@@ -38,9 +33,8 @@ export const usePresenceChannel = (userId: string | null) => {
     [set],
   );
 
+  // 下のuseEffect()で使用されています。
   // この関数は、単一のメンバーIDを受け取り、それをストアに追加します。
-  // 新しいメンバーが接続したときに使用されます。
-  // useCallback により、add 関数が変更されない限り再作成されません。
   const handleAddMember = useCallback(
     (memberId: string) => {
       add(memberId);
@@ -48,9 +42,8 @@ export const usePresenceChannel = (userId: string | null) => {
     [add],
   );
 
+  //  下のuseEffect()で使用されています。
   //　この関数は、単一のメンバーIDを受け取り、それをストアから削除します。
-  // メンバーが切断したときに使用されます。
-  // useCallback により、remove 関数が変更されない限り再作成されません。
   const handleRemoveMember = useCallback(
     (memberId: string) => {
       remove(memberId);
@@ -67,9 +60,6 @@ export const usePresenceChannel = (userId: string | null) => {
     if (!channelRef.current) {
       // https://pusher.com/docs/channels/using_channels/presence-channels/#subscribe
       // https://pusher.com/docs/static/img/private-channel-auth-process.png
-      // チャンネルがまだ購読されていない場合、'presence-nm' という名前のプレゼンスチャンネルを購読します。
-      // When subscribing the user authorization process will be triggered.
-      // Since it is a presence channel the name must be prefixed with presence-.
       channelRef.current = pusherClient.subscribe('presence-nm');
 
       // https://pusher.com/docs/channels/using_channels/presence-channels/#pusher-subscription-succeeded
@@ -86,27 +76,12 @@ export const usePresenceChannel = (userId: string | null) => {
 
       // https://pusher.com/docs/channels/using_channels/presence-channels/#the-members-parameter
       // 新しいメンバーが追加されたときに呼ばれ、そのメンバーを追加します。
-      // The pusher:member_added event is triggered when a user joins a channel.
-
-      // When the event is triggered and member object is passed to the callback. The member object has the following properties:
-      // id (String)
-      // A unique identifier of the user. The value for this depends on the server authentication.
-      // info (Object)
-      // An object that can have any number of properties on it. The properties depend on the server authentication.
-      // pusher:member_removed
       channelRef.current.bind('pusher:member_added', (member: Record<string, any>) => {
         handleAddMember(member.id);
       });
 
       // https://pusher.com/docs/channels/using_channels/presence-channels/#the-members-parameter
       // The pusher:member_removed is triggered when a user leaves a channel.
-      // When the event is triggered and member object is passed to the callback.
-      // The member object has the following properties:
-      // id (String)
-      // A unique identifier of the user. The value for this depends on the server authentication.
-      // info (Object)
-      // An object that can have any number of properties on it. The properties depend on the server authentication.
-      // pusher:member_removed
       channelRef.current?.bind('pusher:member_removed', (member: Record<string, any>) => {
         handleRemoveMember(member.id);
       });

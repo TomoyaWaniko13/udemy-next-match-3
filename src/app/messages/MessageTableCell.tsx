@@ -13,15 +13,16 @@ type Props = {
 };
 
 // 110 (Refactoring the message table)
+// メッセージ一覧の1つの行(row)に表示される各々のCellを作ります。
 const MessageTableCell = ({ item, columnKey, isOutbox, deleteMessage, isDeleting }: Props) => {
-  // この cellValue を使って各々の cell を作ります。
+  // item は messageDto 型です。
   // columnKey は列(column)の識別子で、'recipientName'（または 'senderName'）、
   //'text'、'created'、'actions' のいずれかです。
   const cellValue = item[columnKey as keyof MessageDto];
 
-  // return の中が各々の cell となります。
+  // return の中が1つの行(row)に表示される各々のCellとなります。
   switch (columnKey) {
-    // 送信者もしくは受信者の場合,user の画像、オンラインかどうか、user の名前を出力します。
+    // 送信者もしくは受信者の場合,userの画像、オンラインかどうか、userの名前を出力します。
     case 'recipientName':
     case 'senderName':
       return (
@@ -34,13 +35,10 @@ const MessageTableCell = ({ item, columnKey, isOutbox, deleteMessage, isDeleting
           <span>{cellValue}</span>
         </div>
       );
-    // 'text' の場合、message の内容を含んでいるので、その message を出力します。
     case 'text':
       return <div>{truncateString(cellValue)}</div>;
-    // 'created' の場合、いつ,その message が作られたかを出力します。
     case 'created':
       return cellValue;
-    // 'actions' の場合、deleteButton component を出力します。
     default:
       return (
         <Button isIconOnly={true} variant={'light'} onClick={() => deleteMessage(item)} isLoading={isDeleting}>

@@ -10,7 +10,7 @@ import PresenceDot from '@/components/PresenceDot';
 
 type Props = {
   member: Member;
-  // edit/layout.tsxと[userId]/layout.tsxにでは、異なるnavLinksを使う。
+  // edit/layout.tsxと[userId]/layout.tsxには、異なるnavLinksを使う。
   navLinks: { name: string; href: string }[];
 };
 
@@ -18,6 +18,7 @@ type Props = {
 // 62 (Adding the edit member route)
 // 77 (Tidying up the images)
 // 107 (Displaying presence in other components)
+// /members page で左側に配置するサイドバーです。
 const MemberSidebar = ({ member, navLinks }: Props) => {
   const pathname = usePathname();
 

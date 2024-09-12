@@ -39,10 +39,8 @@ export async function createMessage(recipientUserId: string, data: MessageSchema
     // サーバーがこの関数を実行してメッセージを作成すると、Pusherを通じて'message:new'イベントが発火されます。
     // これは、クライアントサイド(MessageList.tsx)で以下のように監視されているイベントです：
     // channelRef.current.bind('message:new', handleNewMessage);
-    // この仕組みにより、メッセージの送信者だけでなく、受信者のUIも即座に更新されます。
     await pusherServer.trigger(createChatId(userId, recipientUserId), 'message:new', messageDto);
-    // メッセージの受信者(recipient)に対して「新しいメッセージが届きました」という通知をリアルタイムで送ることができます。
-    // これにより、受信者はアプリを再読み込みしたり、手動で更新したりすることなく、新しいメッセージをすぐに確認できるようになります。
+    // メッセージの受信者(recipient)に対して「新しいメッセージが届きました」という通知を個人にリアルタイムで送ることができます。
     // private channelの名前は'private-'で始める必要があります。eventの名前に制約はありません。
     await pusherServer.trigger(`private-${recipientUserId}`, 'message:new', messageDto);
 
@@ -93,8 +91,8 @@ export async function getMessageThread(recipientId: string) {
     // 既読のメッセージの件数を表します。その件数を、未読メッセージの表示の件数から引きます。
     let readCount = 0;
 
-    // 取得したメッセージの中で、現在のユーザーが受信者、recipientIdで指定された相手が送信者、
-    // 尚且つ未読のものを特定し、それらを既読にします。
+    // 取得したメッセージの中で、
+    // 現在のユーザーが受信者、recipientIdで指定された相手が送信者、尚且つ未読のものを特定し、それらを既読にします。
     // また、Pusherを使って、メッセージが既読になったことをリアルタイムで通知します。
     if (messages.length > 0) {
       const readMessagesIds = messages
@@ -129,42 +127,8 @@ export async function getMessageThread(recipientId: string) {
       // 'message:read' イベントを発火させ、既読になったメッセージのID配列を送信します。
       // クライアントサイド(MessageList.tsx)では、このイベントを以下のように監視しています：
       // channelRef.current.bind('message:read', handleReadMessages);
-      // handleReadMessages 関数が、サーバーから送られた readMessagesIds を受け取り、対応するメッセージの既読状態を更新します。
-      // これにより、メッセージの送信者のUIでも、メッセージが既読になったことがリアルタイムで反映されます。
       await pusherServer.trigger(createChatId(recipientId, userId), 'messages:read', readMessagesIds);
     }
-
-    // データベースから取得したメッセージの配列を、mapMessageToMessageDto()でフロントエンドで使用しやすい形式に変換しています。
-    // 例えば、以下のような変換が行われます：
-    // 変換前の配列（MessageWithSenderRecipient型）
-    // [
-    //   {
-    //     id: "1",
-    //     text: "Hello",
-    //     created: Date(2023-08-18T15:30:00),
-    //     dateRead: null,
-    //     sender: { userId: "user1", name: "Alice", image: "alice.jpg" },
-    //     recipient: { userId: "user2", name: "Bob", image: "bob.jpg" }
-    //   },
-    //   // ...他のメッセージオブジェクト
-    // ]
-    //
-    // // 変換後の配列（MessageDto型）
-    // [
-    //   {
-    //     id: "1",
-    //     text: "Hello",
-    //     created: "18 Aug 23 3:30:PM",
-    //     dateRead: null,
-    //     senderId: "user1",
-    //     senderName: "Alice",
-    //     senderImage: "alice.jpg",
-    //     recipientId: "user2",
-    //     recipientName: "Bob",
-    //     recipientImage: "bob.jpg"
-    //   },
-    //   // ...変換された他のメッセージオブジェクト
-    // ]
 
     const messagesToReturn = messages.map((message) => mapMessageToMessageDto(message));
     return { messages: messagesToReturn, readCount };
@@ -186,19 +150,6 @@ export async function getMessageThread(recipientId: string) {
 export async function getMessagesByContainer(container?: string | null, cursor?: string, limit = 2) {
   try {
     const userId = await getAuthUserId();
-
-    // container の値に応じて以下のようなオブジェクトが生成されます：
-    // container が 'outbox' の場合:
-    // {
-    //   senderId: userId,
-    //   senderDeleted: false
-    // }
-    // container が 'outbox' でない場合（つまり 'inbox' の場合）:
-    // {
-    //   recipientId: userId,
-    //   recipientDeleted: false
-    // }
-
     const isOutbox = container === 'outbox';
 
     const conditions = {
@@ -258,20 +209,7 @@ export async function getMessagesByContainer(container?: string | null, cursor?:
 
 // 93 (Adding the delete message action)
 // deleteMessage() は、メッセージの「論理削除」と「物理削除」を組み合わせて実装しています。
-
-// 論理削除の実装:
-// ユーザーがメッセージを「削除」した時、即座にデータベースから完全に削除するのではなく、まず「削除済み」としてマークします。
-// これにより、ユーザーの視点からはメッセージが削除されたように見えますが、実際にはデータベースに残っています
-//
-//　双方向の削除管理:
-// メッセージの送信者と受信者それぞれが独立して「削除」操作を行えるようにします。
-// 一方のユーザーが削除しても、もう一方のユーザーにはまだメッセージが見えるようになっています。
-
-//　完全削除（物理削除）の実行:
-// 送信者と受信者の両方が削除したと判断されたメッセージのみを、データベースから完全に削除します。
-
-// messageId: 削除するメッセージのID
-// isOutbox: 送信箱（outbox）からの削除かどうかを示すブール値
+// messageId: 削除するメッセージのID, isOutbox: 送信箱（outbox）からの削除かどうかを示すブール値
 export async function deleteMessage(messageId: string, isOutbox: boolean) {
   // この行では、送信者と受信者のどちらの視点から削除するかを決定しています。
   const selector = isOutbox ? 'senderDeleted' : 'recipientDeleted';
@@ -280,38 +218,15 @@ export async function deleteMessage(messageId: string, isOutbox: boolean) {
     const userId = await getAuthUserId();
 
     await prisma.message.update({
-      // 指定されたメッセージのIDに対して、senderDeleted または recipientDeleted フラグを true に設定します。
-      // これにより、メッセージは該当するユーザーの視点からは「削除された」ように見えますが、データベースには依然として存在します。
       where: { id: messageId },
-      // この部分は、動的に決定されたプロパティ名（selectorの値）を持つオブジェクトを作成しています。
-      // [] 内の selector は変数として評価され、その値がプロパティ名になります。
       data: { [selector]: true },
     });
 
-    // この部分では、送信者と受信者の両方が削除したメッセージ（つまり、senderDeleted と recipientDeleted の両方がtrue のメッセージ）
-    // を検索しています。
-    //　これらのメッセージは「安全に削除可能」と見なされます。なぜなら：
-    // 両方のユーザーがすでにこれらのメッセージを見えなくしたいと表明している（両方が削除フラグを立てている）
-    // 現在のユーザーが関与しているメッセージのみを対象としている（セキュリティ上の理由）
     const messagesToDelete = await prisma.message.findMany({
       where: {
         OR: [
-          // 現在のユーザーが送信者である
-          // 送信者（現在のユーザー）が削除したとマークしている
-          // 受信者も削除したとマークしている
-          {
-            senderId: userId,
-            senderDeleted: true,
-            recipientDeleted: true,
-          },
-          // 現在のユーザーが受信者である
-          // 送信者が削除したとマークしている
-          // 受信者（現在のユーザー）も削除したとマークしている
-          {
-            recipientId: userId,
-            senderDeleted: true,
-            recipientDeleted: true,
-          },
+          { senderId: userId, senderDeleted: true, recipientDeleted: true },
+          { recipientId: userId, senderDeleted: true, recipientDeleted: true },
         ],
       },
     });
@@ -320,15 +235,10 @@ export async function deleteMessage(messageId: string, isOutbox: boolean) {
     if (messagesToDelete.length > 0) {
       await prisma.message.deleteMany({
         where: {
-          // このmap関数は、messagesToDelete配列の各要素に対して実行されます。
-          // 各メッセージmから、{ id: m.id }というオブジェクトを生成します。
-          // 結果として、[{ id: 'id1' }, { id: 'id2' }, ...]のような配列が生成されます。
-
           // このOR条件は、生成された id のリストのいずれかに一致するメッセージを削除することを指示します。
           // 実質的に、「これらのIDのいずれかを持つメッセージを削除せよ」という命令になります。
-
           // この方法により、複数のメッセージを1回のクエリで効率的に削除することができます。
-          OR: messagesToDelete.map((m) => ({ id: m.id })),
+          OR: messagesToDelete.map((message) => ({ id: message.id })),
         },
       });
     }
@@ -339,6 +249,8 @@ export async function deleteMessage(messageId: string, isOutbox: boolean) {
 }
 
 // 113 (Getting the unread message count)
+// この server action で取得できる未読のメッセージの件数を<Providers/>でstoreに保存することで、
+// どこからでも未読のメッセージの件数にアクセスできるようになります。
 export async function getUnreadMessageCount() {
   try {
     const userId = await getAuthUserId();
@@ -346,12 +258,9 @@ export async function getUnreadMessageCount() {
     // 現在のユーザーが受け取って, 現在のユーザーが消去していない, 未読のmessageの個数を取得します。
     return prisma.message.count({
       where: {
-        // 現在のユーザーが受け取ったmessageを取得します。
         recipientId: userId,
-        // 未読のmessageを取得します。
-        dateRead: null,
-        // 現在のユーザーが消去してないmessageを取得します。
         recipientDeleted: false,
+        dateRead: null,
       },
     });
   } catch (error) {

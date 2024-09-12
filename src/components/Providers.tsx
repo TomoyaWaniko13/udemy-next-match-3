@@ -18,34 +18,34 @@ const Providers = ({ children, userId }: { children: ReactNode; userId: string |
   // useEffect()が2回実行されるのを防ぐためのlogicです。
   const isUnreadCountSet = useRef(false);
 
-  // useMessageStore()からupdateUnreadCount()を取得します。
-  // updateUnreadCount()を使用して、unreadCountを更新します。
+  // updateUnreadCount()を取得します。
+  // updateUnreadCount()は下のsetUnreadCount()で使われています。
   const { updateUnreadCount } = useMessageStore((state) => ({
     updateUnreadCount: state.updateUnreadCount,
   }));
 
+  // 下のuseEffect()の中で使われています。
   const setUnreadCount = useCallback(
     (amount: number) => {
-      // 未読のメッセージの件数についてのstateを更新します。
       updateUnreadCount(amount);
     },
     [updateUnreadCount],
   );
 
   useEffect(() => {
-    // useEffect()が2回実行されるのを防ぐためのlogicです。
+    // ログインしている必要があるので、userIdも存在する必要があります。
     if (!isUnreadCountSet.current && userId) {
       // 未読のメッセージの件数を取得します。
-      // getUnreadMessageCount()はserver actionです。
       getUnreadMessageCount().then((count) => {
         setUnreadCount(count);
       });
-      // useEffect()が2回実行されるのを防ぐためのlogicです。
       isUnreadCountSet.current = true;
     }
   }, [setUnreadCount, userId]);
 
+  // 誰がオンラインか表示するために必要なcustom hooksです。
   usePresenceChannel(userId);
+  // メッセージを通知するために必要なcustom hooksです。
   useNotificationChannel(userId);
 
   return (

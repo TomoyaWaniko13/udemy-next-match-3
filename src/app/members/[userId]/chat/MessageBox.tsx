@@ -16,9 +16,10 @@ type Props = {
 // 87 (Improving the message box)
 // 101 (Adding the read message feature)
 // 107 (Displaying presence in other components)
+
+// members/[userId]/chat で使われる、メッセージに背景色を追加したBoxです。
 const MessageBox = ({ message, currentUserId }: Props) => {
-  // message.senderIdがログインしているユーザーのidかどうか、つまり
-  // ログインしているユーザーがmessageの送信者かチェックする。
+  // 現在のユーザーがメッセージの送信者かチェックします。
   const isCurrentUserSender = message.senderId === currentUserId;
 
   // React の useRef フックを使用して、DOM 要素への参照を作成しています。
@@ -35,12 +36,14 @@ const MessageBox = ({ message, currentUserId }: Props) => {
   useEffect(() => {
     // useRef によって作成された ref オブジェクトの current プロパティは、その ref が参照している実際の DOM 要素を指します。
     //　if (messageEndRef.current) のチェックは、DOM 要素が実際に存在することを確認しています。
-
-    // scrollIntoView() メソッドは DOM API の一部で指定された要素が表示されるように、コンテナ（この場合はブラウザウィンドウ）をスクロールします。
-    // { behavior: 'smooth' } オプションは、スクロールをスムーズなアニメーションで行うように指定しています。
-    if (messageEndRef.current) messageEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    if (messageEndRef.current) {
+      // scrollIntoView() メソッドは DOM API の一部で指定された要素が表示されるように、コンテナ（この場合はブラウザウィンドウ）をスクロールします。
+      // { behavior: 'smooth' } オプションは、スクロールをスムーズなアニメーションで行うように指定しています。
+      messageEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
   }, [messageEndRef]);
 
+  // メッセージを送ったユーザーがオンラインかどうか表示します。
   const renderAvatar = () => {
     // 107 (Displaying presence in other components)
     return (
@@ -50,21 +53,21 @@ const MessageBox = ({ message, currentUserId }: Props) => {
     );
   };
 
-  // 'flex flex-col w-[50%] px-2 py-1'は常に適用される。
+  // renderMessageContent() の中で使われます。
+  // メッセージの背景色を変えます。
   const messageContentClasses = clsx('flex flex-col w-[50%] px-2 py-1', {
-    // messageを送ったのが、ログインしているユーザーである場合, 'rounded-l-xl rounded-tr-xl text-white bg-blue-100'が適用される。
-    // つまり、背景を青にする。
+    // messageを送ったのが、ログインしているユーザーである場合, 背景を青にします。
     'rounded-l-xl rounded-tr-xl text-white bg-blue-100': isCurrentUserSender,
-    // messageを送ったのが、ログインしているユーザーでない場合, 'rounded-r-xl rounded-tl-xl border-gray-200 bg-green-100'が適用される。
-    // つまり、背景を緑にする
+    // messageを送ったのが、ログインしているユーザーでない場合, 背景を緑にします。
     'rounded-r-xl rounded-tl-xl border-gray-200 bg-green-100': !isCurrentUserSender,
   });
 
-  // renderMessageContent()の中で使われる。
+  // renderMessageContent()の中で使われます。
+  // メッセージが読まれた日時、送信者の名前、作成日時を表示します。
   const renderMessageHeader = () => {
     return (
       <div className={clsx('flex items-center w-full', { 'justify-between': isCurrentUserSender })}>
-        {/* messageが既読で,ログインしているuserがmessageの受信者でない場合、いつmessageが読まれたか表示する。 */}
+        {/* 既読で,現在のユーザーが受信者でない場合、いつmessageが読まれたか表示します。。 */}
         {message.dateRead && message.recipientId !== currentUserId ? (
           <span className={'text-xs text-black text-italic'}>(Read {timeAgo(message.dateRead)})</span>
         ) : (
@@ -79,10 +82,14 @@ const MessageBox = ({ message, currentUserId }: Props) => {
     );
   };
 
+  // メッセージBoxを表示します。
   const renderMessageContent = () => {
     return (
+      // メッセージの背景色を変えます。
       <div className={messageContentClasses}>
+        {/*　メッセージが読まれた日時、送信者の名前、作成日時を表示します。　*/}
         {renderMessageHeader()}
+        {/*　メッセージの本文を表示します。　*/}
         <p className={'text-sm py-3 text-gray-900'}>{message.text}</p>
       </div>
     );
@@ -93,11 +100,9 @@ const MessageBox = ({ message, currentUserId }: Props) => {
       {/* 'flex gap-2 mb-3' は常に適用される。 */}
       <div
         className={clsx('flex gap-2 mb-3', {
-          // messageを送ったのが、ログインしているユーザーのである場合, 'justify-end text-right'が適用される。
-          // つまり、messageを画面の右側に表示する。
+          // messageを送ったのが、ログインしているユーザーのである場合, つまり、messageを画面の右側に表示する。
           'justify-end text-right': isCurrentUserSender,
-          //　messageを送ったのが、ログインしているユーザーでない場合, 'justify-start'が適用される。
-          // つまり、messageを画面の左側に表示する。
+          //　messageを送ったのが、ログインしているユーザーでない場合, messageを画面の左側に表示する。
           'justify-start': !isCurrentUserSender,
         })}
       >

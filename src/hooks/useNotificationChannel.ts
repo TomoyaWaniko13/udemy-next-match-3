@@ -11,21 +11,17 @@ import { newLikeToast, newMessageToast } from '@/components/NotificationToast';
 // 114 (Updating the count based on the event)
 // 116 (Challenge solution)
 
-// ユーザーIDを引数として受け取ります。
-// このIDを使用して、private-{userId}という形式のプライベートチャンネルを作成します。
+// このuserIdを使用して、private-{userId}という形式のプライベートチャンネルを作成します。
+// プライベートチャンネルを使用することで、特定のユーザーにのみメッセージを送信できます。
 export const useNotificationChannel = (userId: string | null) => {
   // useRef を使用して、チャンネルのインスタンスを保持します。
   // これにより、不必要な再購読を避け、パフォーマンスを向上させます。
   const channelRef = useRef<Channel | null>(null);
 
-  // URLのパス部分（ドメイン名の後のパス）を取得します。
   // 例えば、URL が "https://example.com/blog/post?id=1" の場合、usePathname() は "/blog/post" を返します。
   // パスの変更を監視し、変更があった場合にコンポーネントを再レンダリングします。
   const pathname = usePathname();
 
-  // URLのクエリパラメータ（?以降の部分）にアクセスするためのメソッドを提供します。
-  // 例えば、URL が "https://example.com/blog/post?id=1&category=tech" の場合、
-  // useSearchParams().get('id') は "1" を、useSearchParams().get('category') は "tech" を返します。
   // クエリパラメータの変更を監視し、変更があった場合にコンポーネントを再レンダリングします。
   const searchParams = useSearchParams();
 
@@ -34,14 +30,10 @@ export const useNotificationChannel = (userId: string | null) => {
     updateUnreadCount: state.updateUnreadCount,
   }));
 
-  // handleNewMessage() 関数は、新しいメッセージを受信したときに呼び出されます。
-  // 新しいメッセージを受信すると、useMessageStore の add 関数を使用して即座に状態を更新します。
-  // これにより、UIが自動的に再レンダリングされ、新しいメッセージが表示されます。
-  // ユーザーが /messages ページにいて、かつ送信済みメッセージ（outbox）を表示していない場合にのみ、
-  // 新しいメッセージをリストに追加します。これにより、適切なコンテキストでのみ更新が行われます。
+  // handleNewMessage() 関数は、下のuseEffect()で呼び出されます。
   const handleNewMessage = useCallback(
     (message: MessageDto) => {
-      // ユーザーがメッセージ一覧画面にいる場合、リロードなしで新しいメッセージがリアルタイムで表示されます。
+      // ユーザーがメッセージの受信箱にいる場合、リロードなしで新しいメッセージがリアルタイムで表示されます。
       if (pathname === '/messages' && searchParams.get('container') !== 'outbox') {
         add(message);
         updateUnreadCount(1);
@@ -56,7 +48,7 @@ export const useNotificationChannel = (userId: string | null) => {
   );
 
   // 116 (Challenge solution)
-  // serverで
+  // 下のuseEffect()で呼び出されます。
   const handleNewLike = useCallback((data: { name: string; image: string | null; userId: string }) => {
     newLikeToast(data.name, data.image, data.userId);
   }, []);
@@ -73,8 +65,6 @@ export const useNotificationChannel = (userId: string | null) => {
     // https://pusher.com/docs/channels/server_api/authorizing-users/
     if (!channelRef.current) {
       // https://pusher.com/docs/channels/using_channels/private-channels/
-      // private channel の名前は private- で始める必要があります。
-      // これにより、サーバーからクライアントへ即座にデータを送信できます。
       // private-${userId} という形式のプライベートチャンネルを使用することで、
       // 特定のユーザーにのみメッセージを送信できます。
       channelRef.current = pusherClient.subscribe(`private-${userId}`);
