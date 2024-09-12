@@ -10,7 +10,7 @@ export const publicRoutes = ['/'];
 
 // authentication に関わる routes を表しています。
 // ログインしていないならば、アクセスできます。
-// ログインしていれば、　　　アクセスできません。
+// ログインしていれば、     アクセスできません。
 export const authRoutes = [
   //
   '/login',

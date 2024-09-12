@@ -13,8 +13,15 @@ import { getUnreadMessageCount } from '@/app/actions/messageActions';
 // 108 (Setting up a private channel)
 // 113 (Getting the unread message count)
 // 138 (Adding a Register wizard part 1)
+// 151. Social Login part 2
 
-const Providers = ({ children, userId }: { children: ReactNode; userId: string | null }) => {
+type Props = {
+  children: ReactNode;
+  userId: string | null;
+  profileComplete: boolean;
+};
+
+const Providers = ({ children, userId, profileComplete }: Props) => {
   // useEffect()が2回実行されるのを防ぐためのlogicです。
   const isUnreadCountSet = useRef(false);
 
@@ -44,9 +51,9 @@ const Providers = ({ children, userId }: { children: ReactNode; userId: string |
   }, [setUnreadCount, userId]);
 
   // 誰がオンラインか表示するために必要なcustom hooksです。
-  usePresenceChannel(userId);
+  usePresenceChannel(userId, profileComplete);
   // メッセージを通知するために必要なcustom hooksです。
-  useNotificationChannel(userId);
+  useNotificationChannel(userId, profileComplete);
 
   return (
     <NextUIProvider>

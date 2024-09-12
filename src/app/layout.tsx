@@ -4,6 +4,7 @@ import './globals.css';
 import Providers from '@/components/Providers';
 import TopNav from '@/components/navbar/TopNav';
 import { auth } from '@/auth';
+import React from 'react';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -13,6 +14,7 @@ export const metadata: Metadata = {
 };
 
 // 108 (Setting up a private channel)
+// 151. Social Login part 2
 export default async function RootLayout({
   children,
 }: Readonly<{
@@ -22,11 +24,12 @@ export default async function RootLayout({
   // 親で尚且つsever componentの<RootLayout/>でsessionを取得して、子componentの<Providers/>にsession?.user?.idを渡します。
   const session = await auth();
   const userId = session?.user?.id || null;
+  const profileComplete = session?.user.profileComplete as boolean;
 
   return (
     <html lang='en'>
       <body className={inter.className}>
-        <Providers userId={userId}>
+        <Providers userId={userId} profileComplete={profileComplete}>
           <TopNav />
           <main className={'container mx-auto'}>{children}</main>
         </Providers>

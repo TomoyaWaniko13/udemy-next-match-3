@@ -13,7 +13,7 @@ import { newLikeToast, newMessageToast } from '@/components/NotificationToast';
 
 // このuserIdを使用して、private-{userId}という形式のプライベートチャンネルを作成します。
 // プライベートチャンネルを使用することで、特定のユーザーにのみメッセージの通知を送信できます。
-export const useNotificationChannel = (userId: string | null) => {
+export const useNotificationChannel = (userId: string | null, profileComplete: boolean) => {
   const channelRef = useRef<Channel | null>(null);
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -45,7 +45,7 @@ export const useNotificationChannel = (userId: string | null) => {
   }, []);
 
   useEffect(() => {
-    if (!userId) return;
+    if (!userId || !profileComplete) return;
     // コンポーネントがマウントされたときに、指定されたプライベートチャンネルをsubscribe()します。
     // そのsubscribe()の後で、/api/pusher-auth/route.tsのauthorizationが発生します。
     // 下のURLのwebpageの図に実行順が書かれています。
@@ -69,5 +69,5 @@ export const useNotificationChannel = (userId: string | null) => {
         channelRef.current = null;
       }
     };
-  }, [userId, handleNewMessage, handleNewLike]);
+  }, [userId, handleNewMessage, handleNewLike, profileComplete]);
 };

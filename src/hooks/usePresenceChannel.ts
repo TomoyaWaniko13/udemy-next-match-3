@@ -7,12 +7,13 @@ import { updateLastActive } from '@/app/actions/memberActions';
 // 104 (Creating a presence channel hook)
 // 123 (Updating the last active property)
 // 138 (Adding a Register wizard part 1)
+// 151. Social Login part 2
 
 // Pusher を使用してリアルタイムのユーザープレゼンス（オンライン状態）を管理するための
 // カスタムフック usePresenceChannel を定義しています。
 // 誰がオンラインなのか, 新しくオンラインになった人, オフラインになった人
 // これらの情報をリアルタイムで把握し、アプリケーションの状態（ストア）に反映します。
-export const usePresenceChannel = (userId: string | null) => {
+export const usePresenceChannel = (userId: string | null, profileComplete: boolean) => {
   // usePresenceStore() から必要な関数を取得します。
   // state はオブジェクトで、ストアに保存されているすべてのデータと関数を含んでいます。
   const { set, add, remove } = usePresenceStore((state) => ({
@@ -51,11 +52,12 @@ export const usePresenceChannel = (userId: string | null) => {
     [remove],
   );
 
-  // コンポーネントのライフサイクルに合わせてPusherのチャンネルを適切に管理し、メンバーの状態をリアルタイムで追跡することを可能にします。
+  // コンポーネントのライフサイクルに合わせてPusherのチャンネルを適切に管理し、
+  // メンバーの状態をリアルタイムで追跡することを可能にします。
   // また、メモリリークを防ぐためのクリーンアップも適切に行っています。
   useEffect(() => {
     // ログインしていなければ、Pusher channelにsubscribe()しません。
-    if (!userId) return;
+    if (!userId || !profileComplete) return;
 
     if (!channelRef.current) {
       // https://pusher.com/docs/channels/using_channels/presence-channels/#subscribe
@@ -63,7 +65,7 @@ export const usePresenceChannel = (userId: string | null) => {
       channelRef.current = pusherClient.subscribe('presence-nm');
 
       // https://pusher.com/docs/channels/using_channels/presence-channels/#pusher-subscription-succeeded
-      // subscribe() が成功したときに呼ばれ、handleSetMembers()　で現在のメンバーリストをセットします。
+      // subscribe() が成功したときに呼ばれ、handleSetMembers() で現在のメンバーリストをセットします。
       // Members は Pusher.js ライブラリで提供されるオブジェクトで、プレゼンスチャンネルに接続されているメンバー（ユーザー）
       // の情報を管理するために使用されます。
       channelRef.current.bind('pusher:subscription_succeeded', async (members: Members) => {
@@ -97,5 +99,5 @@ export const usePresenceChannel = (userId: string | null) => {
         channelRef.current.unbind('pusher:member_removed', handleRemoveMember);
       }
     };
-  }, [handleAddMember, handleRemoveMember, handleSetMembers, userId]);
+  }, [handleAddMember, handleRemoveMember, handleSetMembers, profileComplete, userId]);
 };
