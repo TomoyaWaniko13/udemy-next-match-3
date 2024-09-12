@@ -21,9 +21,9 @@ export async function signInUser(data: LoginSchema): Promise<ActionResult<string
   // email を使って User を取得します。
   const existingUser = await getUserByEmail(data.email);
 
-  // もし getUserByEmail(data.email) において、data.email が null/undefined で データベースの User の email property も
-  // null/undefined の場合、User が取得できてしまいます。なので、email property の値が存在するか確認するために、
-  // !existingUser.email の条件も必要です。
+  // もし getUserByEmail(data.email) において、data.email が null/undefined で
+  // データベースの User の email property も null/undefined の場合、User が取得できてしまいます。
+  // なので、email property の値が存在するか確認するために、!existingUser.email の条件も必要です。
   if (!existingUser || !existingUser.email) {
     // このメッセージを form に表示します。
     return { status: 'error', error: 'Invalid credentials' };
@@ -118,7 +118,16 @@ export async function registerUser(data: RegisterSchema): Promise<ActionResult<U
         email,
         passwordHash: hashedPassword,
         profileComplete: true,
-        member: { create: { name, description, city, country, dateOfBirth: new Date(dateOfBirth), gender } },
+        member: {
+          create: {
+            name,
+            description,
+            city,
+            country,
+            dateOfBirth: new Date(dateOfBirth),
+            gender,
+          },
+        },
       },
     });
 
@@ -132,7 +141,6 @@ export async function registerUser(data: RegisterSchema): Promise<ActionResult<U
     return { status: 'success', data: user };
   } catch (error) {
     console.log(error);
-    // string
     return { status: 'error', error: 'Something went wrong' };
   }
 }
@@ -189,8 +197,8 @@ export async function verifyEmail(token: string): Promise<ActionResult<string>> 
       return { status: 'error', error: 'User not found' };
     }
 
-    // token が有効ならば、データベースの User model の emailVerified property を
-    // 現在の日付で更新します。
+    // token が有効ならば、データベースの User model の
+    // emailVerified property を現在の日付で更新します。
     await prisma.user.update({
       where: { id: existingUser.id },
       data: { emailVerified: new Date() },
@@ -240,9 +248,9 @@ export async function generateResetPasswordEmail(email: string): Promise<ActionR
 // この関数は、ユーザーがパスワードリセットのリンクをクリックし、新しいパスワードを入力した後に呼び出されます。
 export async function resetPassword(password: string, token: string | null): Promise<ActionResult<string>> {
   try {
-    //　トークンが提供されていない場合、エラーを返します。
+    // トークンが提供されていない場合、エラーを返します。
     if (!token) {
-      return { status: 'error', error: 'Missing token ' };
+      return { status: 'error', error: 'Missing token' };
     }
 
     // データベースから提供されたトークンを検索します。
@@ -256,7 +264,7 @@ export async function resetPassword(password: string, token: string | null): Pro
     // データベースから取得した token が 有効期限内か確認します。
     const hasExpired = new Date() > existingToken.expires;
 
-    //　データベースから取得した token が 有効期限内でなければ、
+    // データベースから取得した token が 有効期限内でなければ、
     // その token は有効でありません。
     if (hasExpired) {
       return { status: 'error', error: 'Token has expired' };

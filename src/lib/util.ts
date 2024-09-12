@@ -25,24 +25,28 @@ export function timeAgo(date: string) {
 // TFieldValues はTypeScriptのジェネリック型パラメータです。この関数において、フォームのフィールド値の型を表します。
 // T はTypeScriptの慣習で、型パラメータを示すために使用されます。
 export function handleFormServerErrors<TFieldValues extends FieldValues>(
-  // エラーは string か ZodIssue[] のどちらかで表されます。
   errorResponse: { error: string | ZodIssue[] },
   // react-hook-form の setError を使用することで、エラーメッセージを form に表示できます。
   setError: UseFormSetError<TFieldValues>,
 ) {
-  // まず、errorResponse.error が配列かどうか、つまり form の validation が失敗したかどうかをチェックします。
-  // なぜ配列になるかは registerUser() from authActions.ts と  userActions.ts の updateMemberProfile()
-  // をチェックしましょう。
+  // まず、errorResponse.error が ZodIssue[] 配列かどうか、つまり form の validation が失敗したかどうかをチェックします。
   if (Array.isArray(errorResponse.error)) {
     errorResponse.error.forEach((e: any) => {
-      // e.path: これは通常、エラーが発生したフィールドのパスを表す配列です。
-      //         例えば、 ['name'] や ['address', 'city'] のようになります。
-      // .join('.'): この配列の要素を . で結合して文字列にします。
-      //             例えば、 ['address', 'city'] は 'address.city' になります。
-      // as Path<TFieldValues>: これは TypeScript の型アサーションです。
-      //                        結果の文字列を Path<TFieldValues> 型として扱うよう TypeScript に指示しています。
-      // Path<TFieldValues>: これは React Hook Form の型で、フォームのフィールドパスを表します。
-      //                     TFieldValues はフォームの値の型です。
+      // e.path:
+      // これは通常、エラーが発生したフィールドのパスを表す配列です。
+      // 例えば、 ['name'] や ['address', 'city'] のようになります。
+
+      // .join('.'):
+      // この配列の要素を . で結合して文字列にします。
+      // 例えば、 ['address', 'city'] は 'address.city' になります。
+
+      // as Path<TFieldValues>:
+      // これは TypeScript の型アサーションです。
+      // 結果の文字列を Path<TFieldValues> 型として扱うよう TypeScript に指示しています。
+
+      // Path<TFieldValues>:
+      // これは React Hook Form の型で、フォームのフィールドパスを表します。
+      // TFieldValues はフォームの値の型です。
 
       // フォームは、ネストされたオブジェクト構造を持つことがあります。例えば：
       // {

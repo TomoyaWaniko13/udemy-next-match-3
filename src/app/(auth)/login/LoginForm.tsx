@@ -1,6 +1,6 @@
 'use client';
 
-import { Card, CardHeader, CardBody, CardFooter } from '@nextui-org/card';
+import { Card, CardBody, CardHeader } from '@nextui-org/card';
 import { GiPadlock } from 'react-icons/gi';
 import { Button, Input } from '@nextui-org/react';
 import { useForm } from 'react-hook-form';

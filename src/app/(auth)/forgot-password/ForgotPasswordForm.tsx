@@ -12,16 +12,19 @@ import ResultMessage from '@/components/ResultMessage';
 // 147. Adding the forgot password functionality part 2
 // パスワードをリセットしたいときに、このフォームに email を入力して、リセットのプロセスを開始します。
 const ForgotPasswordForm = () => {
+  // result の値を他のコンポーネントに渡す必要があります。
+  // なので、ここで変数を宣言します。
   const [result, setResult] = useState<ActionResult<string> | null>(null);
 
   const {
     register,
     handleSubmit,
     reset,
-    formState: { errors, isSubmitting, isValid },
+    formState: { isSubmitting, isValid },
   } = useForm();
 
-  // ForgotPasswordForm は一つの <Input/> field しかないので、わざわざ Zod の validation schema を使いません。
+  // ForgotPasswordForm は一つの <Input/> field しかないので、
+  // わざわざ Zod の validation schema を使いません。
   const onSubmit = async (data: FieldValues) => {
     // result state の値が更新されます。成功か失敗を表す値です。
     setResult(await generateResetPasswordEmail(data.email));

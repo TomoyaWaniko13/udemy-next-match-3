@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { calculateAge } from '@/lib/util';
 
+// ユーザーの認証に必要な情報です。
 export const registerSchema = z.object({
   name: z.string().min(3),
   email: z.string().email(),
@@ -10,6 +11,7 @@ export const registerSchema = z.object({
 });
 
 // 138 (Adding a Register wizard part 1)
+// ユーザーのフィルターに必要な情報です。
 export const profileSchema = z.object({
   gender: z.string().min(1),
   description: z.string().min(1),

@@ -54,7 +54,7 @@ export const usePresenceChannel = (userId: string | null) => {
   // コンポーネントのライフサイクルに合わせてPusherのチャンネルを適切に管理し、メンバーの状態をリアルタイムで追跡することを可能にします。
   // また、メモリリークを防ぐためのクリーンアップも適切に行っています。
   useEffect(() => {
-    // 138 (Adding a Register wizard part 1)
+    // ログインしていなければ、Pusher channelにsubscribe()しません。
     if (!userId) return;
 
     if (!channelRef.current) {

@@ -40,29 +40,8 @@ model Account {
   id_token          String? @db.Text
   // セッション状態情報（一部のプロバイダーで使用）
   session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  // user User：
-  // これは、Account モデルが User モデルへの参照を持つことを示しています。
-  // user はこのリレーションシップの名前で、User はリレーションシップの対象となるモデルです。
-  // (各 Account は一人の User に属している。)
-
-  // fields: [userId]：
-  // この Account モデルの userId フィールドが、関係を表す外部キーであることを指定しています。
-  // (この関係は Account の userId フィールドによって表現される。)
-
-  // references: [id]：
-  // Account モデルの userId が、User モデルの id フィールドを参照することを示しています。
-  // (userId は User モデルの id を参照している。)
-
-  // onDelete: Cascade：
-  // これは削除時の挙動を指定しています。
-  // User レコードが削除された場合、それに関連する全ての Account レコードも自動的に削除されます（カスケード削除）。
-  // (User が削除されたら、関連する全ての Account も削除される。)
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  // @@unique はテーブルレベルの制約を指定するPrismaの構文
-  // ([provider, providerAccountId]) は、provider と providerAccountId の組み合わせは、テーブル内で一意でないといけない、
-  // ということです。同じ組み合わせの値を持つ別のレコードを作成することはできません。
   @@unique([provider, providerAccountId])
 }
 
@@ -85,13 +64,9 @@ model User {
   // 142 (Setting up tokens and resetting the Database)
   // email が認証されたかどうかを記録します。
   profileComplete Boolean   @default(false)
-
   // 対多（one-to-many）の関係を表現しています：
-  // 1人のユーザー（User）が複数のアカウント（Account）を持つことができます。
-  // 逆に言えば、各アカウントは1人のユーザーにのみ属します。
-
-  accounts Account[]
-  member   Member?
+  accounts        Account[]
+  member          Member?
 }
 
 // 40 (Updating the prisma schema)
@@ -152,7 +127,7 @@ model Like {
   // 「いいね」を送信したユーザーを表します。
   sourceUserId String
   sourceMember Member @relation("source", fields: [sourceUserId], references: [userId], onDelete: Cascade)
-  // 「いいね」を受け取ったユーザーを表します。
+  // 「いいね」を受け取ったユーザーを表します。 
   targetUserId String
   targetMember Member @relation("target", fields: [targetUserId], references: [userId], onDelete: Cascade)
 
