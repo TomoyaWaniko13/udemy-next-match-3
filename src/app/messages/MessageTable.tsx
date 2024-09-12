@@ -25,7 +25,6 @@ const MessageTable = ({ initialMessages, nextCursor }: Props) => {
   // Zustand ストアの状態が変更されると、その状態を使用しているコンポーネント（この場合は MessageTable）が
   // 自動的に再レンダリングされ、新しいメッセージが表示されます
   // useMessages() custom hooksは、<MessageTable/>で必要なlogicをまとめています。
-
   const { columns, isOutbox, isDeleting, deleteMessage, selectRow, messages, loadMore, loadingMore, hasMore } =
     useMessages(initialMessages, nextCursor);
 

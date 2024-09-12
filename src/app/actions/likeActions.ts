@@ -7,38 +7,30 @@ import { pusherServer } from '@/lib/pusher';
 
 // 54 (Adding the like toggle function)
 // 116 (Challenge solution)
-// isLiked の値に基づいて、いいねをつける(create method)、もしくはいいねを取り消す(delete method)。
+// isLiked の値に基づいて、いいねをつける(create method)、もしくはいいねを取り消します。
 export async function toggleLikeMember(targetUserId: string, isLiked: boolean) {
   try {
-    // server action from authActions.ts
     const userId = await getAuthUserId();
 
     // いいねがすでにつけられていたら、いいねを取り消します。
     if (isLiked) {
       await prisma.like.delete({
         where: {
-          sourceUserId_targetUserId: {
-            sourceUserId: userId,
-            targetUserId,
-          },
+          sourceUserId_targetUserId: { sourceUserId: userId, targetUserId },
         },
       });
       // いいねがまだつけられていなかったら、いいねをつけます。
       // さらに、いいねを押された人にtoastで通知するために、
       // いいねを押した人, つまりsourceMemberのpropertiesをselectで取得します。
     } else {
-      const like = await prisma.like.create({
+      const newLike = await prisma.like.create({
         data: {
           sourceUserId: userId,
           targetUserId,
         },
         select: {
           sourceMember: {
-            select: {
-              name: true,
-              image: true,
-              userId: true,
-            },
+            select: { name: true, image: true, userId: true },
           },
         },
       });
@@ -46,9 +38,9 @@ export async function toggleLikeMember(targetUserId: string, isLiked: boolean) {
       // Pusherでいいねをされた人(targetUser)に向けて通知を送ります。
       // これはuseNotificationChannel()で監視されています。
       await pusherServer.trigger(`private-${targetUserId}`, 'like:new', {
-        name: like.sourceMember.name,
-        image: like.sourceMember.image,
-        userId: like.sourceMember.userId,
+        name: newLike.sourceMember.name,
+        image: newLike.sourceMember.image,
+        userId: newLike.sourceMember.userId,
       });
     }
   } catch (error) {
@@ -106,10 +98,6 @@ export async function fetchLikedMembers(type = 'source') {
 
 // 57 (Adding the list actions)
 async function fetchSourceLikes(userId: string) {
-  // SELECT m.*
-  // FROM likes l
-  // JOIN members m ON l.target_user_id = m.user_id
-  // WHERE l.source_user_id = :userId;
   const sourceList = await prisma.like.findMany({
     where: { sourceUserId: userId },
     select: { targetMember: true },

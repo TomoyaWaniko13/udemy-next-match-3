@@ -13,6 +13,7 @@ import { useEffect } from 'react';
 // 81 (Creating a chat form)
 // 82 (Creating the send message action)
 // 87 (Improving the message box)
+// メッセージスレッドの入力欄を出力します。
 const ChatForm = () => {
   const router = useRouter();
   // useParams は Next.js のフックの1つです。このフックを使用すると、現在のURLのダイナミックルートパラメータにアクセスできます。

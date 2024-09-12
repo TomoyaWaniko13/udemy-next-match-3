@@ -146,14 +146,13 @@ model Photo {
 }
 
 // 53 (Updating the Prisma schema for a many to many relationship)
-// One user can like many other users and many other users can like the one user.
-// many-to-many relationship
+// Userは他の複数のUserに"いいねする"ことができます。また、Userは他の複数のUserに"いいねされる"ことができます。
+// つまり、many-to-many relationshipです。
 model Like {
-  // 「いいね」を送信したユーザー
+  // 「いいね」を送信したユーザーを表します。
   sourceUserId String
   sourceMember Member @relation("source", fields: [sourceUserId], references: [userId], onDelete: Cascade)
-
-  // 「いいね」を受け取ったユーザー
+  // 「いいね」を受け取ったユーザーを表します。
   targetUserId String
   targetMember Member @relation("target", fields: [targetUserId], references: [userId], onDelete: Cascade)
 

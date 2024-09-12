@@ -59,27 +59,19 @@ export async function createMessage(recipientUserId: string, data: MessageSchema
 // 114 (Updating the count based on the event)
 
 // 特定の2人のユーザー間のメッセージスレッドを取得するためのserver action.
-// recipientIdは送信先のuserのidです。
+// recipientIdはチャットをしている相手のidです。
 export async function getMessageThread(recipientId: string) {
   try {
-    // 現在ログインしているuserのidを取得。
+    // 現在ののidを取得します。
     const userId = await getAuthUserId();
 
     const messages = await prisma.message.findMany({
       where: {
         OR: [
-          // 現在のユーザー（userId）が送信者で、指定された相手（recipientId）が受信者であるメッセージ
-          {
-            senderId: userId,
-            recipientId,
-            senderDeleted: false,
-          },
-          // 指定された相手（recipientId）が送信者で、現在のユーザー（userId）が受信者であるメッセージ
-          {
-            senderId: recipientId,
-            recipientId: userId,
-            recipientDeleted: false,
-          },
+          // 現在のユーザーが送信者で、チャットしている相手が受信者であるメッセージ
+          { senderId: userId, recipientId, senderDeleted: false },
+          // チャットしている相手が受信者で、現在のユーザー（userId）が受信者であるメッセージ
+          { senderId: recipientId, recipientId: userId, recipientDeleted: false },
         ],
       },
       // メッセージは作成日時の昇順で並べられます。
@@ -91,22 +83,18 @@ export async function getMessageThread(recipientId: string) {
     // 既読のメッセージの件数を表します。その件数を、未読メッセージの表示の件数から引きます。
     let readCount = 0;
 
-    // 取得したメッセージの中で、
-    // 現在のユーザーが受信者、recipientIdで指定された相手が送信者、尚且つ未読のものを特定し、それらを既読にします。
-    // また、Pusherを使って、メッセージが既読になったことをリアルタイムで通知します。
     if (messages.length > 0) {
       const readMessagesIds = messages
         // filter() で未読メッセージのarrayを作ります。
         .filter(
           (message) =>
-            // まだ既読になっていない（dateReadがnull）
             // この条件により、既に読まれたメッセージを再度「既読」にする無駄な処理を避けられます。
             message.dateRead === null &&
-            // 受信者が現在のユーザー
-            // ユーザーは自分宛てのメッセージのみを「既読」にすべきです。他人宛てのメッセージを既読にすることは適切ではありません。
+            // ユーザーは自分宛てのメッセージのみを「既読」にすべきです。
+            // 他人宛てのメッセージを既読にすることは適切ではありません。
             message.recipient?.userId === userId &&
-            // 送信者がrecipientIdで指定された相手
-            // ユーザーが特定の相手とのチャットを見ているときに、そのチャットとは関係のない他の相手からのメッセージの状態が変わることを防ぎます。
+            // ユーザーが特定の相手とのチャットを見ているときに、
+            // そのチャットとは関係のない他の相手からのメッセージの状態が変わることを防ぎます。
             message.sender?.userId === recipientId,
         )
         // 未読メッセージの配列から id のみを取り出して新しい配列を作成しています。
@@ -131,6 +119,7 @@ export async function getMessageThread(recipientId: string) {
     }
 
     const messagesToReturn = messages.map((message) => mapMessageToMessageDto(message));
+
     return { messages: messagesToReturn, readCount };
   } catch (error) {
     console.log(error);

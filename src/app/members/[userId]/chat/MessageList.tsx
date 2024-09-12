@@ -19,10 +19,12 @@ type Props = {
 // 99 (Receiving the live messages)
 // 101 (Adding the read message feature)
 // 114 (Updating the count based on the event)
+// 特定のユーザーとのメッセージのスレッドを表示します。
 // Pusherからの通知に応じて状態を変化させる必要があるので、client componentである必要があります。
 const MessageList = ({ initialMessages, currentUserId, chatId }: Props) => {
   // useEffect()をstrict modeで2回実行させないためのlogicです。
   const setReadCount = useRef(false);
+
   const [messages, setMessages] = useState(initialMessages.messages);
 
   // updateUnreadCount()で未読のメッセージの件数を更新します。それにより、画面にその更新を反映できます。
@@ -30,12 +32,6 @@ const MessageList = ({ initialMessages, currentUserId, chatId }: Props) => {
     updateUnreadCount: state.updateUnreadCount,
   }));
 
-  // 1. useRefが使われているので、channelRef は、コンポーネントが再レンダリングされても、
-  //    その中身（Pusherのチャンネル）を保持し続けます。
-  //    通常の変数だと再レンダリングのたびに初期化されてしまいますが、useRefはその値を維持します。
-  // 2. また、useRefの値を変更してもコンポーネントは再レンダリングされません。
-  //    これは、UIに影響を与えない値（この場合はPusherチャンネル）を保存するのに適しています。
-  //    UIに影響を与えない値とは、画面上に表示されるないものや、レンダリングに直接関係しないものです。
   const channelRef = useRef<Channel | null>(null);
 
   // 114 (Updating the count based on the event)
@@ -50,53 +46,25 @@ const MessageList = ({ initialMessages, currentUserId, chatId }: Props) => {
     }
   }, [initialMessages.readCount, updateUnreadCount]);
 
-  // handleNewMessage() は、サーバー側で messageActions.ts の createMessage() server actionで
-  // message:read イベントを 発火させる際に作られた message を messageDto 型として受け取ります。
-  // handleNewMessage()の目的は 新しいメッセージを受信したときに、メッセージリストを更新することです。
-  // handleNewMessage()により、このコンポーネントはリアルタイムでメッセージの追加を行い、
-  // 常に最新のチャット状態をユーザーに表示することができます。
   const handleNewMessage = useCallback((message: MessageDto) => {
     setMessages((prevState) => {
       return [...prevState, message];
     });
   }, []);
 
-  // handleReadMessages() は、サーバー側で messageActions.ts の getMessageThread() server actionで
-  // message:read イベントを 発火させる際に既読となったメッセージIDの配列(messageIds)を受け取ります。
-  // handleReadMessages()の目的は、メッセージが既読になったときに、該当するメッセージの状態を更新することです。
-  // handleReadMessages()により、このコンポーネントはリアルタイムで既読状態の更新を行い、
-  // 常に最新のチャット状態をユーザーに表示することができます。
   const handleReadMessages = useCallback((messageIds: string[]) => {
     setMessages((prevState) =>
       // 配列の各要素を加工したいのでmapを使います。
       prevState.map((message) =>
-        // includes()は true もしくは false をreturnします。
-        // つまり, これは配列の各要素の message が既読になった message かを確かめる条件です。
-        messageIds.includes(message.id)
-          ? // 既読になった message の場合、message オブジェクトのコピーを作成し、dateRead プロパティを現在の日時で更新します。
-            { ...message, dateRead: formatShortDateTime(new Date()) }
-          : // 既読でなってない message の場合、元の message をそのまま返します
-            message,
+        messageIds.includes(message.id) ? { ...message, dateRead: formatShortDateTime(new Date()) } : message,
       ),
     );
   }, []);
 
-  // useEffect() は コンポーネントのレンダリング後に実行される処理を定義するために使用されます。
-  // ここでは、Pusherチャンネルの購読とイベントのバインディングを行っています。
-  // useEffect() を使うことで、コンポーネントのマウント時にチャンネルを購読し、アンマウント時に購読を解除するという、
-  // ライフサイクルに沿った処理を簡潔に記述できます。
-  // つまり、useEffect を使うことで、「コンポーネントが現れたときに開始し、消えるときに終了する」という一連の
-  // 処理を簡単に書くことができます.
   useEffect(() => {
     if (!channelRef.current) {
       channelRef.current = pusherClient.subscribe(chatId);
-      // サーバーがmessageActions.tsのcreateMessage() server actionを実行してメッセージを作成すると、
-      // Pusherを通じて'message:new'イベントが発火されます。
-      // クライアントサイド(このcomponent)では、このイベントをhandleNewMessage関数で捉え、UIを更新します。
       channelRef.current.bind('message:new', handleNewMessage);
-      // サーバーがmessageActions.tsのgetMessageThread() server actionを実行してメッセージを作成すると、
-      // Pusherを通じて'messages:read'イベントが発火されます。
-      // クライアントサイド(このcomponent)では、このイベントをhandleReadMessages関数で捉え、UIを更新します。
       channelRef.current.bind('messages:read', handleReadMessages);
     }
 
