@@ -3,6 +3,7 @@ import { authRoutes, publicRoutes } from '@/routes';
 import { NextResponse } from 'next/server';
 
 // 36 (Protecting routes using Middleware)
+// 152. Social Login part 3
 
 // Auth.js の auth middleware を使用します。
 // req は user がリンクをクリックした時のリクエストです。
@@ -28,33 +29,29 @@ export default auth((req) => {
   const isPublic = publicRoutes.includes(nextUrl.pathname);
   const isAuthRoute = authRoutes.includes(nextUrl.pathname);
 
-  // リクエストされた route が publicRoutes　配列に含まれている場合、
-  // ログインなしでもアクセスできるルートにアクセスしようとしている場合、
+  // req.auth は Session オブジェクトです。
+  // なので、user.profileCompleteを取得できます。
+  const isProfileComplete = req.auth?.user.profileComplete;
+
   if (isPublic) {
-    // リクエストされた route に移動します。
     return NextResponse.next();
   }
 
-  // リクエストされた route が authRoutes 配列に含まれている場合、
-  // つまり /login などにアクセスしようとしている場合、
   if (isAuthRoute) {
-    // ログインしていれば、
     if (isLoggedIn) {
-      // login page や register page ではなく, members page に redirect します。
       return NextResponse.redirect(new URL('/members', nextUrl));
     }
-    // ログインしていなければ　リクエストされた route に移動します。
     return NextResponse.next();
   }
 
-  // 保護されたルート（メンバーページなど）にログインしていないユーザーがアクセスしようとした場合,
   if (!isPublic && !isLoggedIn) {
-    // login page に移動します。
     return NextResponse.redirect(new URL('/login', nextUrl));
   }
 
-  // この next() メソッドは、現在のミドルウェア処理を終了し、リクエストを次の処理段階に進めることを指示します。
-  // 具体的には、ミドルウェアチェーンの次のミドルウェア（存在する場合）や、最終的にはルートハンドラーにリクエストを渡します。
+  if (isLoggedIn && !isProfileComplete && nextUrl.pathname !== '/complete-profile') {
+    return NextResponse.redirect(new URL('/complete-profile', nextUrl));
+  }
+
   return NextResponse.next();
 });
 

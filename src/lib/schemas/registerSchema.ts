@@ -35,6 +35,9 @@ export const profileSchema = z.object({
 // 2つのスキーマを組み合わせています。server action で使用されます。
 export const combineRegisterSchema = registerSchema.and(profileSchema);
 
+// 153. Adding a complete profile form for social login
+export type ProfileSchema = z.infer<typeof profileSchema>;
+
 // 139 (Adding a Register wizard Part 2)
 // 2つのスキーマを組み合わせています。
 export type RegisterSchema = z.infer<typeof registerSchema & typeof profileSchema>;

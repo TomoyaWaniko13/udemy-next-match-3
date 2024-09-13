@@ -1,6 +1,6 @@
 'use server';
 
-import { combineRegisterSchema, RegisterSchema } from '@/lib/schemas/registerSchema';
+import { combineRegisterSchema, ProfileSchema, RegisterSchema } from '@/lib/schemas/registerSchema';
 import bcrypt from 'bcryptjs';
 import { prisma } from '@/lib/prisma';
 import { ActionResult } from '@/types';
@@ -296,5 +296,50 @@ export async function resetPassword(password: string, token: string | null): Pro
   } catch (error) {
     console.log(error);
     return { status: 'error', error: 'Something went wrong' };
+  }
+}
+
+// 153. Adding a complete profile form for social login
+export async function completeSocialLoginProfile(data: ProfileSchema): Promise<ActionResult<string>> {
+  const session = await auth();
+
+  if (!session?.user) {
+    return { status: 'error', error: 'User not found' };
+  }
+
+  try {
+    const user = await prisma.user.update({
+      where: {
+        id: session.user.id,
+      },
+      data: {
+        // user の profileComplete を true にする必要があります。
+        profileComplete: true,
+        // user の profile を更新します。
+        member: {
+          create: {
+            name: session.user.name as string,
+            image: session.user.image,
+            gender: data.gender,
+            dateOfBirth: new Date(data.dateOfBirth),
+            description: data.description,
+            city: data.city,
+            country: data.country,
+          },
+        },
+      },
+      // 現在のユーザーの provider を取得します。
+      // そのために、user の related object の accounts property にアクセスします。
+      select: {
+        accounts: { select: { provider: true } },
+      },
+    });
+
+    // const user: { accounts: { provider: string }[] }
+    // user はこ　の型なので、user.accounts[0].provider で provider にアクセスできます。
+    return { status: 'success', data: user.accounts[0].provider };
+  } catch (error) {
+    console.log(error);
+    throw error;
   }
 }
