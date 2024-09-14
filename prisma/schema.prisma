@@ -67,6 +67,8 @@ model User {
   // gender, dateOfBirth など、フィルターに
   // 必要な情報をユーザーが入力したかを表します。
   profileComplete Boolean   @default(false)
+  // 157. Adding the roles to Prisma
+  role            Role      @default(MEMBER)
   // 対多（one-to-many）の関係を表現しています：
   accounts        Account[]
   member          Member?
@@ -194,4 +196,10 @@ model Token {
 enum TokenType {
   VERIFICATION
   PASSWORD_RESET
+}
+
+// 157. Adding the roles to Prisma
+enum Role {
+  ADMIN
+  MEMBER
 }
