@@ -51,8 +51,10 @@ const Providers = ({ children, userId, profileComplete }: Props) => {
   }, [setUnreadCount, userId]);
 
   // 誰がオンラインか表示するために必要なcustom hooksです。
+  // Pusher を使用しています。
   usePresenceChannel(userId, profileComplete);
   // メッセージを通知するために必要なcustom hooksです。
+  // Pusher を使用しています。
   useNotificationChannel(userId, profileComplete);
 
   return (

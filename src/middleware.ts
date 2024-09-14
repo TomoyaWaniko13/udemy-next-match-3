@@ -48,6 +48,9 @@ export default auth((req) => {
     return NextResponse.redirect(new URL('/login', nextUrl));
   }
 
+  // (Social login を利用するとこのケースが発生します)
+  // ログインしているが、プロフィール情報を入力していなくて、
+  // プロフィール情報入力ページ以外にアクセスしようとした場合、
   if (isLoggedIn && !isProfileComplete && nextUrl.pathname !== '/complete-profile') {
     return NextResponse.redirect(new URL('/complete-profile', nextUrl));
   }

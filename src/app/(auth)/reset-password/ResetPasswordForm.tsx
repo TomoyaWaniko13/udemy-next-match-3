@@ -29,7 +29,8 @@ const ResetPasswordForm = () => {
   });
 
   const onSubmit = async (data: ResetPasswordSchema) => {
-    // result state の値が更新されます。成功か失敗を表す値です。
+    // resetPassword()で、 token が有効であれば新しいパスワードに更新します。
+    // result state の値が更新されます。パスワードの更新が成功か失敗を表す値です。
     setResult(await resetPassword(data.password, searchParams.get('token')));
     // フォームをリセットします。
     reset();
@@ -58,7 +59,7 @@ const ResetPasswordForm = () => {
             defaultValue={''}
             {...register('confirmPassword')}
             isInvalid={!!errors.confirmPassword}
-            errorMessage={errors.password?.message as string}
+            errorMessage={errors.confirmPassword?.message as string}
           />
           <Button type={'submit'} color={'secondary'} isLoading={isSubmitting} isDisabled={!isValid}>
             Reset password

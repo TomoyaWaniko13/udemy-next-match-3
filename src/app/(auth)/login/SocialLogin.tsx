@@ -4,12 +4,11 @@ import { FaGithub } from 'react-icons/fa';
 import { signIn } from 'next-auth/react';
 
 // 150. Social Login part 1
+// OAuth 2.0 のログインのために、2つの<Button/>を表示します。
 const SocialLogin = () => {
   //
   const onClick = (provider: 'google' | 'github') => {
-    signIn(provider, {
-      callbackUrl: '/members',
-    });
+    signIn(provider, { callbackUrl: '/members' });
   };
 
   return (

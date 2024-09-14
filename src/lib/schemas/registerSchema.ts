@@ -20,6 +20,7 @@ export const profileSchema = z.object({
   dateOfBirth: z
     .string()
     .min(1, { message: 'Date of birth is required' })
+    // refine() で validation をカスタマイズできます。
     .refine(
       (dateString) => {
         const age = calculateAge(new Date(dateString));

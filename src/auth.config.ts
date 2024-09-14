@@ -4,11 +4,16 @@ import { loginSchema } from '@/lib/schemas/loginSchema';
 import { getUserByEmail } from '@/app/actions/authActions';
 import { compare } from 'bcryptjs';
 import GitHub from '@auth/core/providers/github';
+import Google from '@auth/core/providers/google';
 
 // 29 (Signing in users)
 // 150. Social Login part 1
 export default {
   providers: [
+    Google({
+      clientId: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    }),
     GitHub({
       // 認可サーバーがクライアントを識別するために使用するIDです。
       clientId: process.env.GITHUB_CLIENT_ID,

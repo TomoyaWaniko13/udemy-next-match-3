@@ -12,9 +12,9 @@ export const resetPasswordSchema = z
   .refine(
     // passwordとconfirmPasswordが等しいかどうかをチェックします。
     (data) => data.password === data.confirmPassword,
-    //　第二引数のオブジェクトには、バリデーションが失敗した場合のオプションが含まれています
+    //第二引数のオブジェクトには、バリデーションが失敗した場合のオプションが含まれています
     {
-      //　バリデーションが失敗した場合に表示されるエラーメッセージです。
+      // バリデーションが失敗した場合に表示されるエラーメッセージです。
       message: 'password do not match',
       // エラーを関連付けるフィールドを指定します。この場合、confirmPasswordフィールドにエラーが関連付けられます。
       path: ['confirmPassword'],

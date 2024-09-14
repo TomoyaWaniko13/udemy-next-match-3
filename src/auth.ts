@@ -22,7 +22,7 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
     },
 
     // The session callback is called whenever a session is checked.
-    // https://next-auth.js.org/configuration/callbacks
+    // https://next-auth.js.org/configuration/callbacks#session-callback
     async session({ token, session }) {
       // console.log(token);
       // console.log(session);

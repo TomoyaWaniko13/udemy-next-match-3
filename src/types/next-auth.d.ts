@@ -6,6 +6,10 @@ declare module 'next-auth' {
     profileComplete: boolean;
   }
 
+  // "Session の user プロパティは、profileComplete という boolean 型のプロパティを持ち、
+  // さらに DefaultSession['user'] が持つすべてのプロパティも持つ" ということです。
+  // DefaultSession にカーソルを合わせて、DefaultSession['user'] が持つすべてのプロパティ
+  // を確認できます。
   interface Session {
     user: {
       profileComplete: boolean;

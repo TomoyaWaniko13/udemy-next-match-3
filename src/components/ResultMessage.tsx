@@ -7,6 +7,7 @@ type Props = {
 };
 
 // 145. Adding the verify email function
+// email や token を認証した結果などを表示します。
 const ResultMessage = ({ result }: Props) => {
   if (!result) return null;
 

@@ -54,6 +54,8 @@ model User {
   id              String    @id @default(cuid())
   name            String?
   email           String?   @unique
+  // email に関連づけられた Token が有効であれば、その email は認証されます。
+  // そのときに、emailVertified の値に現在の日時を設定します。
   emailVerified   DateTime?
   // 150. Social Login part 1
   // OAuth providers を使う場合、password は必要ないので、
@@ -62,7 +64,8 @@ model User {
   // main imageのurl
   image           String?
   // 142 (Setting up tokens and resetting the Database)
-  // email が認証されたかどうかを記録します。
+  // gender, dateOfBirth など、フィルターに
+  // 必要な情報をユーザーが入力したかを表します。
   profileComplete Boolean   @default(false)
   // 対多（one-to-many）の関係を表現しています：
   accounts        Account[]
@@ -121,6 +124,7 @@ model Photo {
 }
 
 // 53 (Updating the Prisma schema for a many to many relationship)
+
 // Userは他の複数のUserに"いいねする"ことができます。また、Userは他の複数のUserに"いいねされる"ことができます。
 // つまり、many-to-many relationshipです。
 model Like {
@@ -147,9 +151,9 @@ model Message {
   // 受信者のユーザーID
   recipientId      String?
   // Member? は、このリレーションがオプショナル（nullable）であることを示しています。
-  // 　　　　　　　つまり、メッセージは必ずしも送信者や受信者を持つ必要がないということです。
+  //         つまり、メッセージは必ずしも送信者や受信者を持つ必要がないということです。
   // SetNull: Member レコードが削除されると、それに関連する Message レコードの senderId または recipientId フィールドが
-  // 　　　　　　　　　 null に設定されます。この設定により、メンバーが削除されてもメッセージ自体は保持されます。
+  //                 null に設定されます。この設定により、メンバーが削除されてもメッセージ自体は保持されます。
   // senderId や recipientId が null になることで、そのメッセージの送信者や受信者が「不明」または
   // 「削除されたユーザー」であることを示すことができます。
   // sender と recipient は多対多の関係を示しているので、一人のメンバーが多くのメッセージを送信でき、また多くのメッセージを受信できます。

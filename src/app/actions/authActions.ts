@@ -83,7 +83,6 @@ export async function signOutUser() {
 // 141 (Submitting the form)
 // 142 (Setting up tokens and resetting the Database)
 // 143. Creating the token functions
-
 // RegisterForm.tsx で使用されます。form の情報をもとに新しい user を register (登録) します.
 export async function registerUser(data: RegisterSchema): Promise<ActionResult<User>> {
   try {
@@ -118,6 +117,7 @@ export async function registerUser(data: RegisterSchema): Promise<ActionResult<U
         email,
         passwordHash: hashedPassword,
         profileComplete: true,
+        // member のデータがプロファイル情報です。
         member: {
           create: {
             name,
@@ -183,7 +183,7 @@ export async function verifyEmail(token: string): Promise<ActionResult<string>> 
     // データベースから取得した token が 有効期限内か確認します。
     const hasExpired = new Date() > existingToken.expires;
 
-    //　データベースから取得した token が 有効期限内でなければ、
+    // データベースから取得した token が 有効期限内でなければ、
     // その token は有効でありません。
     if (hasExpired) {
       return { status: 'error', error: 'Token has expired' };
@@ -206,7 +206,9 @@ export async function verifyEmail(token: string): Promise<ActionResult<string>> 
 
     // emailVerified property を更新した後に、
     // データベースから取得した token をデータベースから削除します。
-    await prisma.token.delete({ where: { id: existingToken.id } });
+    await prisma.token.delete({
+      where: { id: existingToken.id },
+    });
 
     return { status: 'success', data: 'Success' };
   } catch (error) {
@@ -249,37 +251,31 @@ export async function generateResetPasswordEmail(email: string): Promise<ActionR
 export async function resetPassword(password: string, token: string | null): Promise<ActionResult<string>> {
   try {
     // トークンが提供されていない場合、エラーを返します。
-    if (!token) {
-      return { status: 'error', error: 'Missing token' };
-    }
+    if (!token) return { status: 'error', error: 'Missing token' };
 
     // データベースから提供されたトークンを検索します。
     const existingToken = await getTokenByToken(token);
 
     // データベースに指定の token がなければ、その token は有効でありません。
-    if (!existingToken) {
-      return { status: 'error', error: 'Invalid token' };
-    }
+    if (!existingToken) return { status: 'error', error: 'Invalid token' };
 
     // データベースから取得した token が 有効期限内か確認します。
     const hasExpired = new Date() > existingToken.expires;
 
     // データベースから取得した token が 有効期限内でなければ、
     // その token は有効でありません。
-    if (hasExpired) {
-      return { status: 'error', error: 'Token has expired' };
-    }
+    if (hasExpired) return { status: 'error', error: 'Token has expired' };
 
     // トークンに関連付けられたメールアドレスでユーザーを検索します。
     const existingUser = await getUserByEmail(existingToken.email);
 
     // ユーザーが見つからない場合、その token は有効ではないので、エラーを返します。
-    if (!existingUser) {
-      return { status: 'error', error: 'User not found' };
-    }
+    if (!existingUser) return { status: 'error', error: 'User not found' };
 
+    // token が有効であれば、password を更新します。
     const hashedPassword = await bcrypt.hash(password, 12);
 
+    // token が有効であれば、password を更新します。
     // existingUser.id で指定される user を検索して、
     // その user に対して新しい password を更新します。
     await prisma.user.update({
@@ -316,6 +312,8 @@ export async function completeSocialLoginProfile(data: ProfileSchema): Promise<A
         // user の profileComplete を true にする必要があります。
         profileComplete: true,
         // user の profile を更新します。
+        // Social login により、session から取得できる情報は sessionから取得します。
+        // それ以外の情報は、form の入力情報 data から情報を取得します。
         member: {
           create: {
             name: session.user.name as string,
@@ -328,15 +326,15 @@ export async function completeSocialLoginProfile(data: ProfileSchema): Promise<A
           },
         },
       },
-      // 現在のユーザーの provider を取得します。
-      // そのために、user の related object の accounts property にアクセスします。
+      // 現在のユーザーの provider を取得するために、
+      // user の property である accounts object にアクセスします。
       select: {
         accounts: { select: { provider: true } },
       },
     });
 
     // const user: { accounts: { provider: string }[] }
-    // user はこ　の型なので、user.accounts[0].provider で provider にアクセスできます。
+    // user はこの型なので、user.accounts[0].provider で provider にアクセスできます。
     return { status: 'success', data: user.accounts[0].provider };
   } catch (error) {
     console.log(error);

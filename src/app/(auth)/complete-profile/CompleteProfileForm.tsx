@@ -26,9 +26,7 @@ const CompleteProfileForm = () => {
     const result = await completeSocialLoginProfile(data);
 
     if (result.status === 'success') {
-      signIn(result.data, {
-        callbackUrl: '/members',
-      });
+      signIn(result.data, { callbackUrl: '/members' });
     }
   };
 

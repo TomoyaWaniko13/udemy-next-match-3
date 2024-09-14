@@ -3,6 +3,7 @@ import { FieldValues, UseFormSetError, Path } from 'react-hook-form';
 import { ZodIssue } from 'zod';
 
 // 44 (Styling the members cards)
+// 138. Adding a Register wizard part 1
 export function calculateAge(dateOfBirth: Date) {
   return differenceInYears(new Date(), dateOfBirth);
 }
