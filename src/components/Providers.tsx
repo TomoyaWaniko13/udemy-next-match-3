@@ -8,12 +8,14 @@ import { usePresenceChannel } from '@/hooks/usePresenceChannel';
 import { useNotificationChannel } from '@/hooks/useNotificationChannel';
 import useMessageStore from '@/hooks/useMessageStore';
 import { getUnreadMessageCount } from '@/app/actions/messageActions';
+import { SessionProvider } from 'next-auth/react';
 
 // 103 (Using the presence channel hook)
 // 108 (Setting up a private channel)
 // 113 (Getting the unread message count)
 // 138 (Adding a Register wizard part 1)
 // 151. Social Login part 2
+// 160. Getting the session info in the client
 
 type Props = {
   children: ReactNode;
@@ -58,10 +60,12 @@ const Providers = ({ children, userId, profileComplete }: Props) => {
   useNotificationChannel(userId, profileComplete);
 
   return (
-    <NextUIProvider>
-      <ToastContainer position={'bottom-right'} hideProgressBar={true} className={'z-50'} />
-      {children}
-    </NextUIProvider>
+    <SessionProvider>
+      <NextUIProvider>
+        <ToastContainer position={'bottom-right'} hideProgressBar={true} className={'z-50'} />
+        {children}
+      </NextUIProvider>
+    </SessionProvider>
   );
 };
 export default Providers;

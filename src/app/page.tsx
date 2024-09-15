@@ -1,35 +1,25 @@
-import Image from 'next/image';
-import { Button } from '@nextui-org/react';
-import Link from 'next/link';
-import { auth, signOut } from '@/auth';
+import { auth } from '@/auth';
+import ClientSession from '@/components/ClientSession';
 
+// 160. Getting the session info in the client
 export default async function Home() {
   // 32 (Getting the session data)
   const session = await auth();
 
   return (
-    <>
-      {/* 32 (Getting the session data) */}
-      <h3 className={'text-2xl font-semibold'}>User session data</h3>
-      {session ? (
-        <div>
-          {/* session data を取得して表示します。 */}
-          <pre>{JSON.stringify(session, null, 2)}</pre>
-          <form
-            action={async () => {
-              'use server';
-
-              await signOut();
-            }}
-          >
-            <Button type={'submit'} color={'primary'} variant={'bordered'}>
-              Sign out
-            </Button>
-          </form>
-        </div>
-      ) : (
-        <>Not signed in </>
-      )}
-    </>
+    <div className={'flex flex-row justify-around mt-20 gap-6'}>
+      <div className={'bg-green-50 p-10 rounded-xl shadow-md w-1/2 overflow-auto'}>
+        <h3 className={'text-2xl font-semibold'}>Server session data</h3>
+        {session ? (
+          <div>
+            {/* session data を取得して表示します。 */}
+            <pre>{JSON.stringify(session, null, 2)}</pre>
+          </div>
+        ) : (
+          <>Not signed in </>
+        )}
+      </div>
+      <ClientSession />
+    </div>
   );
 }
