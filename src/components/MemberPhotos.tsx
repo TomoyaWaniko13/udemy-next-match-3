@@ -6,7 +6,6 @@ import DeleteButton from '@/components/DeleteButton';
 import { Photo } from '@prisma/client';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { registerSchema } from '@/lib/schemas/registerSchema';
 import { deleteImage, setMainImage } from '@/app/actions/userActions';
 
 type Props = {
@@ -20,6 +19,7 @@ type Props = {
 
 // 73 (Setting the main image)
 // 76 (Deleting an image)
+// 161. Adding the photo moderation functionality part 1
 //  ログインしているユーザーが自分がアップロードした写真を表示するのに使われる。
 // members/edit/photos/page.tsxでは、editingをtrueにするので、ログインしているユーザーがmainの写真を設定できるようになる。
 const MemberPhotos = ({ photos, editing, mainImageUrl }: Props) => {

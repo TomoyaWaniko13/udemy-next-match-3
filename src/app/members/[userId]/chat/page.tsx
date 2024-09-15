@@ -1,7 +1,6 @@
 import CardInnerWrapper from '@/components/CardInnerWrapper';
 import ChatForm from '@/app/members/[userId]/chat/ChatForm';
 import { getMessageThread } from '@/app/actions/messageActions';
-import MessageBox from '@/app/members/[userId]/chat/MessageBox';
 import { getAuthUserId } from '@/app/actions/authActions';
 import MessageList from '@/app/members/[userId]/chat/MessageList';
 import { createChatId } from '@/lib/util';

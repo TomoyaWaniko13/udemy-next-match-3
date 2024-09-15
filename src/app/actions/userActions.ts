@@ -50,7 +50,7 @@ export async function addImage(url: string, publicId: string) {
     const userId = await getAuthUserId();
     return prisma.member.update({
       where: { userId },
-      data: { photo: { create: [{ url, publicId }] } },
+      data: { photos: { create: [{ url, publicId }] } },
     });
   } catch (error) {
     console.log(error);
@@ -59,8 +59,12 @@ export async function addImage(url: string, publicId: string) {
 }
 
 // 73 (Setting the main image)
+// 161. Adding the photo moderation functionality part 1
 // 画像の<StarButton/>を押した時に、その画像をMainにする。
 export async function setMainImage(photo: Photo) {
+  // 承認された写真でないと、メイン画像として設定できません。
+  if (!photo.isApproved) throw new Error('Only approved photos can be set to main image');
+
   try {
     const userId = await getAuthUserId();
 
@@ -96,7 +100,7 @@ export async function deleteImage(photo: Photo) {
     // databaseからphotoをdeleteする。
     return prisma.member.update({
       where: { userId },
-      data: { photo: { delete: { id: photo.id } } },
+      data: { photos: { delete: { id: photo.id } } },
     });
   } catch (error) {
     console.log(error);

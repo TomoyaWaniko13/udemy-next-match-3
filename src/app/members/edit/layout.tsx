@@ -6,7 +6,7 @@ import { Card } from '@nextui-org/card';
 import { getAuthUserId } from '@/app/actions/authActions';
 
 // 62 (Adding the edit member route)
-const Layout = async ({ children, params }: { children: ReactNode; params: { userId: string } }) => {
+const Layout = async ({ children }: { children: ReactNode }) => {
   const userId = await getAuthUserId();
   // userIdをもとに Memberを取得する server action
   const member = await getMemberByUserId(userId);
@@ -20,6 +20,7 @@ const Layout = async ({ children, params }: { children: ReactNode; params: { use
 
   return (
     <div className={'grid grid-cols-12 gap-5 h-[80vh]'}>
+      {/* <MemberSidebar/> を左に表示します。 */}
       <div className={'col-span-3'}>
         <MemberSidebar member={member} navLinks={navLinks} />
       </div>

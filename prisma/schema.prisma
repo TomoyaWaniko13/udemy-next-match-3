@@ -95,7 +95,7 @@ model Member {
   // 対多（one-to-many）の関係を表現しています：
   // 1人のMember が複数のPhoto を持つことができます。
   // 逆に言えば、各Photo は1人のMember にのみ属します。
-  photo       Photo[]
+  photos      Photo[]
 
   // 53 (Updating the Prisma schema for a many to many relationship)
 
@@ -116,10 +116,12 @@ model Member {
 // Photo modelは　Member modelに含まれる。
 // 具体的には、、Memberがプロフィール情報としてPhoto[]を持つ。
 model Photo {
-  id       String  @id @default(cuid())
+  id         String  @id @default(cuid())
   // urlを <Image />のsrcに入力すると画像を表示できる。
-  url      String
-  publicId String?
+  url        String
+  publicId   String?
+  // 161. Adding the photo moderation functionality part 1
+  isApproved Boolean
 
   memberId String
   member   Member @relation(fields: [memberId], references: [id], onDelete: Cascade)

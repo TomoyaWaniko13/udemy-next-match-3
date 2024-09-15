@@ -32,7 +32,12 @@ async function seedMembers() {
             city: member.city,
             country: member.country,
             image: member.image,
-            photo: { create: { url: member.image } },
+            photos: {
+              create: {
+                url: member.image,
+                isApproved: true,
+              },
+            },
           },
         },
       },

@@ -1,5 +1,5 @@
 import { differenceInYears, format, formatDistance } from 'date-fns';
-import { FieldValues, UseFormSetError, Path } from 'react-hook-form';
+import { FieldValues, Path, UseFormSetError } from 'react-hook-form';
 import { ZodIssue } from 'zod';
 
 // 44 (Styling the members cards)
@@ -10,7 +10,7 @@ export function calculateAge(dateOfBirth: Date) {
 
 // 84 (Creating a message DTO)
 export function formatShortDateTime(date: Date) {
-  // 18 Aug 24 3:30:PM　というふうにformatされる。
+  // 18 Aug 24 3:30:PM というふうにformatされる。
   return format(date, 'dd MMM yy h:mm:a');
 }
 
