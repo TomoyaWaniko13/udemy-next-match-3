@@ -7,12 +7,26 @@ import UserMenu from '@/components/navbar/UserMenu';
 import { getUserInfoForNav } from '@/app/actions/userActions';
 import FiltersWrapper from '@/components/navbar/FiltersWrapper';
 
+// 158. Adding the role to the session data
 const TopNav = async () => {
   const session = await auth();
   // 75 (Challenge Solution)
   const userInfo = session?.user && (await getUserInfoForNav());
 
   // const userInfo = session?.user;
+
+  const memberLinks = [
+    { href: '/members', label: 'Matches' },
+    { href: '/lists', label: 'Lists' },
+    { href: '/messages', label: 'Messages' },
+  ];
+
+  const adminLinks = [
+    //
+    { href: '/admin/moderation', label: 'Photo moderation' },
+  ];
+
+  const links = session?.user.role === 'ADMIN' ? adminLinks : memberLinks;
 
   return (
     <>
@@ -27,9 +41,9 @@ const TopNav = async () => {
           <span className={'font-bold font-mono text-3xl'}>NM</span>
         </NavbarBrand>
         <NavbarContent justify={'center'}>
-          <NavLink href={'/members'} label={'Matches'} />
-          <NavLink href={'/lists'} label={'Lists'} />
-          <NavLink href={'/messages'} label={'Messages'} />
+          {links.map((item) => (
+            <NavLink key={item.href} href={item.href} label={item.label} />
+          ))}
         </NavbarContent>
         <NavbarContent justify={'end'}>
           {/* 34 (Adding a dropdown menu to the Nav bar) */}

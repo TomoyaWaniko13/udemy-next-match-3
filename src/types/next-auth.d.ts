@@ -1,9 +1,12 @@
 import { DefaultSession } from 'next-auth';
 
 // 151. Social Login part 2
+// 158. Adding the role to the session data
+
 declare module 'next-auth' {
   interface User {
     profileComplete: boolean;
+    role: Role;
   }
 
   // "Session の user プロパティは、profileComplete という boolean 型のプロパティを持ち、
@@ -21,5 +24,6 @@ declare module 'next-auth' {
 declare module 'next-auth/jwt' {
   interface JWT {
     profileComplete: boolean;
+    role: Role;
   }
 }
