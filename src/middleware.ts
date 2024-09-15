@@ -4,6 +4,7 @@ import { NextResponse } from 'next/server';
 
 // 36 (Protecting routes using Middleware)
 // 152. Social Login part 3
+// 159. Creating an admin page
 
 // Auth.js の auth middleware を使用します。
 // req は user がリンクをクリックした時のリクエストです。
@@ -33,8 +34,15 @@ export default auth((req) => {
   // なので、user.profileCompleteを取得できます。
   const isProfileComplete = req.auth?.user.profileComplete;
 
-  if (isPublic) {
+  const isAdmin = req.auth?.user.role === 'ADMIN';
+  const isAdminRoute = nextUrl.pathname.startsWith('/admin');
+
+  if (isPublic || isAdmin) {
     return NextResponse.next();
+  }
+
+  if (isAdminRoute && !isAdmin) {
+    return NextResponse.redirect(new URL('/', nextUrl));
   }
 
   if (isAuthRoute) {
@@ -68,6 +76,6 @@ export const config = {
      * - _next/image (image optimization filesも静的であり、特別な処理を必要としません。)
      * - favicon.ico (favicon fileは認証や特別な処理を必要としない単純なアイコンファイルです。)
      */
-    '/((?!api|_next/static|_next/image|favicon.ico).*)',
+    '/((?!api|_next/static|_next/image|images|favicon.ico).*)',
   ],
 };
