@@ -2,12 +2,14 @@ import NextAuth from 'next-auth';
 import { PrismaAdapter } from '@auth/prisma-adapter';
 import authConfig from './auth.config';
 import { prisma } from '@/lib/prisma';
+import { Role } from '@prisma/client';
 
-// signIn() などは server side でしか呼ぶことができないので、authActions.ts で
-// signIn() などを呼ぶ server action を作る必要があります。
 // 33 (Using Auth.js callbacks)
 // 151. Social Login part 2
 // 158. Adding the role to the session data
+
+// signIn() などは server side でしか呼ぶことができないので、authActions.ts で
+// signIn() などを呼ぶ server action を作る必要があります。
 export const { auth, handlers, signIn, signOut } = NextAuth({
   callbacks: {
     // This callback is called whenever a JSON Web Token is created (i.e. at sign in)
@@ -36,7 +38,7 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
         // これで、session を取得すればログインしている user の id を取得できるようになります。
         session.user.id = token.sub;
         session.user.profileComplete = token.profileComplete as boolean;
-        session.user.role = token.role;
+        session.user.role = token.role as Role;
       }
       return session;
     },

@@ -27,11 +27,9 @@ const MemberPhotoUpload = () => {
     }
   };
 
-  return (
-    <div>
-      <ImageUploadButton onUploadImage={onAddImage} />
-    </div>
-  );
+  // onAddImage() を <ImageUploadButton/> に渡して、そのボタンによって
+  // Cloudinary に画像がアップロードされてから、 onAddImage() を実行します。
+  return <ImageUploadButton onUploadImage={onAddImage} />;
 };
 
 export default MemberPhotoUpload;

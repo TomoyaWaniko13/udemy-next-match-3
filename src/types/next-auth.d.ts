@@ -1,4 +1,5 @@
 import { DefaultSession } from 'next-auth';
+import { Role } from '@prisma/client';
 
 // 151. Social Login part 2
 // 158. Adding the role to the session data
@@ -16,6 +17,7 @@ declare module 'next-auth' {
   interface Session {
     user: {
       profileComplete: boolean;
+      role: Role;
     } & DefaultSession['user'];
   }
 }

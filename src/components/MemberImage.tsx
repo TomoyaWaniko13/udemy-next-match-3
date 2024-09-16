@@ -27,8 +27,8 @@ const MemberImage = ({ photo }: Props) => {
           className={'rounded-2xl'}
         />
       ) : (
-        // file systemからの写真の時, <Image />を使う。
-        // <Image />はNextUIのcomponent.
+        // file systemからの写真の時, <Image/>を使います。
+        // <Image/>はNextUIのcomponentです。
         <Image width={220} height={220} src={photo?.url || '/images/user.png'} alt={'Image of user'} />
       )}
     </div>

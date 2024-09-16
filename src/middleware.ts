@@ -34,6 +34,7 @@ export default auth((req) => {
   // なので、user.profileCompleteを取得できます。
   const isProfileComplete = req.auth?.user.profileComplete;
 
+  // req.auth は Session オブジェクトです。
   const isAdmin = req.auth?.user.role === 'ADMIN';
   const isAdminRoute = nextUrl.pathname.startsWith('/admin');
 

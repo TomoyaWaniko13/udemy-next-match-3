@@ -119,6 +119,7 @@ model Photo {
   // 70. Adding an image upload button
   // publicId は ユニークなstring と
   // Cloudinary上で保存されるフォルダ一の名前を組み合わせたものです。
+  // publicId が null であれば、その Photo は file system 上の Photo です。
   publicId   String?
   // 161. Adding the photo moderation functionality part 1
   isApproved Boolean

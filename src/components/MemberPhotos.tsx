@@ -35,7 +35,7 @@ const MemberPhotos = ({ photos, editing, mainImageUrl }: Props) => {
 
   const onSetMain = async (photo: Photo) => {
     if (photo.url === mainImageUrl) return null;
-    // 複数の写真があるので、id が必要です。
+    // 複数の photo があるので、id が必要です。
     setLoading({ isLoading: true, id: photo.id, type: 'main' });
     await setMainImage(photo);
     router.refresh();
@@ -44,7 +44,7 @@ const MemberPhotos = ({ photos, editing, mainImageUrl }: Props) => {
 
   const onDelete = async (photo: Photo) => {
     if (photo.url === mainImageUrl) return null;
-    // 複数の写真があるので、id が必要です。
+    // 複数の photo があるので、id が必要です。
     setLoading({ isLoading: true, id: photo.id, type: 'delete' });
     await deleteImage(photo);
     router.refresh();
@@ -58,7 +58,6 @@ const MemberPhotos = ({ photos, editing, mainImageUrl }: Props) => {
         photos.map((photo) => (
           // <Image/>の上に <StarButton/>と＜DeleteButton/>を配置したいので relativeを使う。
           <div key={photo.id} className={'w-[220px] h-[220px] relative'}>
-            {/* 72 (Using the Cloudinary image component) */}
             {/* photoがCloudinaryからかfile systemからを判断して写真を表示するcomponent */}
             <MemberImage photo={photo} />
             {editing && (

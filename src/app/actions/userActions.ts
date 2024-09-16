@@ -11,7 +11,9 @@ import { cloudinary } from '@/lib/cloudinary';
 // 75 (Challenge solution)
 
 // EditForm.tsxからのデータをvalidateしてMemberの情報を更新するserver action.
-// 75でnameUpdatedを追加。user Profileをアップデートした時にnameがアップデートされる。
+// 引数の nameUpdated により、form で name を変更した時に、その変更を user table に保存します。
+// これにより、下の getUserInfoForNav() で変更された name を user table から取得して、
+// <TopNav/> に最新の情報を反映されることができます。
 export async function updateMemberProfile(data: MemberEditSchema, nameUpdated: boolean): Promise<ActionResult<Member>> {
   try {
     const userId = await getAuthUserId();
@@ -46,11 +48,12 @@ export async function updateMemberProfile(data: MemberEditSchema, nameUpdated: b
 
 // 71 (Adding the image upload server actions)
 
-// url は 画像にアクセスできるURLを表しています。
-// public_id は ユニークなstring と Cloudinary上で保存されるフォルダ一の名前を組み合わせたものです。
+// 第一引数の url は 画像にアクセスできるURLを表しています。
+// 第二引数の public_id は ユニークなstring と Cloudinary上で保存されるフォルダ一の名前を組み合わせたものです。
 export async function addImage(url: string, publicId: string) {
   try {
     const userId = await getAuthUserId();
+
     return prisma.member.update({
       where: { userId },
       data: { photos: { create: [{ url, publicId }] } },
@@ -122,7 +125,7 @@ export async function getUserInfoForNav() {
   try {
     const userId = await getAuthUserId();
 
-    // アップデートされたuserのnameとimageをreturnする。
+    // アップデートされた user の name と image を return します。
     return prisma.user.findUnique({
       where: { id: userId },
       select: { name: true, image: true },
