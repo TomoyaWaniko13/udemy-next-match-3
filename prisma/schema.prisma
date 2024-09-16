@@ -122,7 +122,7 @@ model Photo {
   // publicId が null であれば、その Photo は file system 上の Photo です。
   publicId   String?
   // 161. Adding the photo moderation functionality part 1
-  isApproved Boolean
+  isApproved Boolean @default(false)
 
   memberId String
   member   Member @relation(fields: [memberId], references: [id], onDelete: Cascade)

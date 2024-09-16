@@ -37,9 +37,14 @@ const MemberPhotos = ({ photos, editing, mainImageUrl }: Props) => {
     if (photo.url === mainImageUrl) return null;
     // 複数の photo があるので、id が必要です。
     setLoading({ isLoading: true, id: photo.id, type: 'main' });
-    await setMainImage(photo);
-    router.refresh();
-    setLoading({ isLoading: false, id: '', type: '' });
+
+    try {
+      await setMainImage(photo);
+    } catch (error: any) {
+      router.refresh();
+    } finally {
+      setLoading({ isLoading: false, id: '', type: '' });
+    }
   };
 
   const onDelete = async (photo: Photo) => {

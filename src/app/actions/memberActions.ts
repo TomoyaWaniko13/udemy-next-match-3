@@ -92,6 +92,7 @@ export async function getMembers({
 }
 
 // 45 (Using dynamic routes in Next.js)
+// 161. Adding the photo moderation functionality part 1
 
 // userId をもとに Member を取得する server action
 export async function getMemberByUserId(userId: string) {
@@ -105,17 +106,20 @@ export async function getMemberByUserId(userId: string) {
 // 48 (Creating the Member detailed content)
 // 66 (Displaying the images in the member edit component)
 
-// userIdをもとにMemberのPhotosを取得するserver action
 export async function getMemberPhotosByUserId(userId: string) {
+  const currentUserId = await getAuthUserId();
+
   // Member の photos property だけを select します。
   const member = await prisma.member.findUnique({
     where: { userId },
-    select: { photos: true },
+    // 現在のユーザーの photos なら、 認証されていなくても表示できます。
+    // 現在のユーザー以外の photos なら、認証されなければ表示されません。
+    select: { photos: { where: currentUserId === userId ? {} : { isApproved: true } } },
   });
 
   if (!member) return null;
 
-  return member.photos.map((photo) => photo) as Photo[];
+  return member.photos as Photo[];
 }
 
 // 123 (Updating the last active property)

@@ -18,6 +18,9 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
     async jwt({ user, token }) {
       if (user) {
         // console.log(user);
+
+        // token に property を追加できます。
+        // https://authjs.dev/guides/extending-the-session
         token.profileComplete = user.profileComplete;
         token.role = user.role;
       }
@@ -34,8 +37,9 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
       // session.user はログインしているユーザーの基本的な情報を含みます。
       // なので、この条件は User の idが存在しているかどうかと、 ユーザーがログインしているかどうか確認しています。
       if (token.sub && session.user) {
-        // session.user.id に token.sub (user の id) をセットします。
-        // これで、session を取得すればログインしている user の id を取得できるようになります。
+        // session に property を追加できます。
+        // これで、session を取得すればログインしている user の id, profileComplete, role を取得できるようになります。
+        // https://authjs.dev/guides/extending-the-session
         session.user.id = token.sub;
         session.user.profileComplete = token.profileComplete as boolean;
         session.user.role = token.role as Role;
