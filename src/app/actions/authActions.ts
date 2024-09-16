@@ -74,6 +74,7 @@ export async function signInUser(data: LoginSchema): Promise<ActionResult<string
 }
 
 // 35 (Adding a dropdown menu to the Nav bar Part 2)
+
 // signOut() は server side であり、client side の component（UserMenu.tsx) では呼び出せないので、
 // server action として設定する。
 export async function signOutUser() {
@@ -83,6 +84,7 @@ export async function signOutUser() {
 // 141 (Submitting the form)
 // 142 (Setting up tokens and resetting the Database)
 // 143. Creating the token functions
+
 // RegisterForm.tsx で使用されます。form の情報をもとに新しい user を register (登録) します.
 export async function registerUser(data: RegisterSchema): Promise<ActionResult<User>> {
   try {
@@ -154,6 +156,7 @@ export async function getUserById(id: string) {
 }
 
 // 54 (Adding the like toggle function)
+
 // userId が複数回必要になるので、session をもとに userId を取得できるメソッドを
 // 作り、再利用できるようにします。
 export async function getAuthUserId() {
@@ -218,6 +221,7 @@ export async function verifyEmail(token: string): Promise<ActionResult<string>> 
 }
 
 // 146. Adding the forgot password functionality part 1
+
 // ユーザーがパスワードを忘れた場合や、セキュリティ上の理由でパスワードを変更したい場合に使用されます。
 // ユーザーインターフェース側でこの action を呼び出すことで、パスワードリセットのプロセスを開始できます。
 export async function generateResetPasswordEmail(email: string): Promise<ActionResult<string>> {
@@ -246,6 +250,7 @@ export async function generateResetPasswordEmail(email: string): Promise<ActionR
 }
 
 // 148. Adding the forgot password functionality part 3
+
 // ユーザーのパスワードを実際にリセット（更新）するための server action です。
 // この関数は、ユーザーがパスワードリセットのリンクをクリックし、新しいパスワードを入力した後に呼び出されます。
 export async function resetPassword(password: string, token: string | null): Promise<ActionResult<string>> {

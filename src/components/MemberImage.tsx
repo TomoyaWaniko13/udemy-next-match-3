@@ -5,17 +5,18 @@ import { CldImage } from 'next-cloudinary';
 import { Image } from '@nextui-org/react';
 
 type Props = {
-  // Photo from Prisma client.
   photo: Photo | null;
 };
 
 // 72 (Using the cloudinary image component)
+
 const MemberImage = ({ photo }: Props) => {
   return (
     <div>
       {photo?.publicId ? (
-        // Cloudinaryからの写真の時, CldImageを使う。
-        // CldImageはnext-cloudinaryのcomponent.
+        // Cloudinaryからの写真の時, <CldImage/>を使う。
+        // <CldImage/> について:
+        // https://next.cloudinary.dev/cldimage/basic-usage
         <CldImage
           alt={'Image of member'}
           src={photo.publicId}

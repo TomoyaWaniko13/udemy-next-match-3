@@ -1,8 +1,9 @@
 import { cloudinary } from '@/lib/cloudinary';
 
 // 70 (Adding an image upload button)
+
+// documentに従って書きます。
 // https://cloudinary.com/blog/cloudinary-image-uploads-using-nextjs-app-router
-// documentに従って書くだけ。
 export async function POST(request: Request) {
   const body = (await request.json()) as { paramsToSign: Record<string, string> };
   const { paramsToSign } = body;

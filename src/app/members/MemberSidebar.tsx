@@ -18,7 +18,6 @@ type Props = {
 // 62 (Adding the edit member route)
 // 77 (Tidying up the images)
 // 107 (Displaying presence in other components)
-// /members page で左側に配置するサイドバーです。
 const MemberSidebar = ({ member, navLinks }: Props) => {
   const pathname = usePathname();
 

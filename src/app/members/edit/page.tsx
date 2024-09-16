@@ -6,6 +6,7 @@ import EditForm from '@/app/members/edit/EditForm';
 
 // 62 (Adding the edit member route)
 // 63 (Adding the edit member form)
+
 const MemberEditPage = async () => {
   const userId = await getAuthUserId();
   const member = await getMemberByUserId(userId);

@@ -1,27 +1,23 @@
 'use client';
 
-import { Session } from 'next-auth';
 import { Avatar, Dropdown, DropdownItem, DropdownMenu, DropdownSection, DropdownTrigger } from '@nextui-org/react';
 import Link from 'next/link';
-import { signOut } from '@/auth';
 import { signOutUser } from '@/app/actions/authActions';
 import { transformImageUrl } from '@/lib/util';
 
 type Props = {
-  // userは name, email, idなどを含んでいる。（prismaのUser modelではない。）
-  // Session['user']　はAuth.jsから
-  // user: Session['user'];
-
-  // 75 (Challenge solution)
+  // この型は userInfo にカーソルを合わせると表示されるので、copy & paste します。
   userInfo: { name: string | null; image: string | null } | null | undefined;
 };
 
 // 34 (Adding a dropdown menu to the Nav bar)
 // 75 (Challenge solution)
 // 77 (Tidying up the images)
+
 const UserMenu = ({ userInfo }: Props) => {
   return (
     <Dropdown placement={'bottom-end'}>
+      {/* 現在のユーザーの丸い写真をクリックすると、メニューが開きます。 */}
       <DropdownTrigger>
         <Avatar
           isBordered={true}

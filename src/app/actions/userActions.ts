@@ -9,11 +9,13 @@ import { cloudinary } from '@/lib/cloudinary';
 
 // 65 (Adding the server action to update the member)
 // 75 (Challenge solution)
+
 // EditForm.tsxからのデータをvalidateしてMemberの情報を更新するserver action.
 // 75でnameUpdatedを追加。user Profileをアップデートした時にnameがアップデートされる。
 export async function updateMemberProfile(data: MemberEditSchema, nameUpdated: boolean): Promise<ActionResult<Member>> {
   try {
     const userId = await getAuthUserId();
+
     const validated = memberEditSchema.safeParse(data);
 
     if (!validated.success) return { status: 'error', error: validated.error.errors };
@@ -43,8 +45,9 @@ export async function updateMemberProfile(data: MemberEditSchema, nameUpdated: b
 }
 
 // 71 (Adding the image upload server actions)
-// what we're doing here is nothing to do with Cloudinary.
-// We're going to call this function after the image has been successfully uploaded into Cloudinary.
+
+// url は 画像にアクセスできるURLを表しています。
+// public_id は ユニークなstring と Cloudinary上で保存されるフォルダ一の名前を組み合わせたものです。
 export async function addImage(url: string, publicId: string) {
   try {
     const userId = await getAuthUserId();
@@ -60,6 +63,7 @@ export async function addImage(url: string, publicId: string) {
 
 // 73 (Setting the main image)
 // 161. Adding the photo moderation functionality part 1
+
 // 画像の<StarButton/>を押した時に、その画像をMainにする。
 export async function setMainImage(photo: Photo) {
   // 承認された写真でないと、メイン画像として設定できません。
@@ -68,9 +72,6 @@ export async function setMainImage(photo: Photo) {
   try {
     const userId = await getAuthUserId();
 
-    //  we've got two places we need to update the image here.
-    //  So inside the User we have an image property.
-    //  And also we've got the image property inside the Member.
     await prisma.user.update({
       where: { id: userId },
       data: { image: photo.url },
@@ -91,13 +92,14 @@ export async function deleteImage(photo: Photo) {
   try {
     const userId = await getAuthUserId();
 
-    // photo.publicIdが存在すれば、Cloudinaryのphotoであるということ。
-    // そうであれば、Cloudinaryからphotoを削除する必要がある。
+    // photo.publicId は ユニークなstring と
+    // Cloudinary上で保存されるフォルダ一の名前を組み合わせたものです。
+    // photo.publicId が存在すれば、Cloudinary の photo であるということです。
+    // そうであれば、Cloudinary からも photo を削除する必要があります。
     if (photo.publicId) {
       await cloudinary.v2.uploader.destroy(photo.publicId);
     }
 
-    // databaseからphotoをdeleteする。
     return prisma.member.update({
       where: { userId },
       data: { photos: { delete: { id: photo.id } } },
@@ -109,7 +111,13 @@ export async function deleteImage(photo: Photo) {
 }
 
 // 75 (Challenge solution)
-// mainの写真を変更した時、<TopNav/>で写真の表示を変更するために使う。
+
+// main の写真を変更した時、<TopNav/> で写真の表示を変更するために使います。
+// server side から session cookie を編集して session cookie の
+// name と image を変更できないため、client side から session cookieを
+// 利用して、変更された name と image を取得することはできません。
+// なので、getUserInfoForNav() <TopNav/> で使用される、
+// name と image を return する必要があります。
 export async function getUserInfoForNav() {
   try {
     const userId = await getAuthUserId();

@@ -51,17 +51,17 @@ model Account {
 model User {
   // 33 (Usign NextAuth callbacks)
   // token の sub field がこの id の値と同じである。
-  id              String    @id @default(cuid())
-  name            String?
-  email           String?   @unique
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
   // email に関連づけられた Token が有効であれば、その email は認証されます。
   // そのときに、emailVertified の値に現在の日時を設定します。
-  emailVerified   DateTime?
+  emailVerified DateTime?
   // 150. Social Login part 1
   // OAuth providers を使う場合、password は必要ないので、
   // optional にします。
-  passwordHash    String?
-  // main imageのurl
+  passwordHash  String?
+
   image           String?
   // 142 (Setting up tokens and resetting the Database)
   // gender, dateOfBirth など、フィルターに
@@ -113,12 +113,12 @@ model Member {
 }
 
 // 40 (Updating the prisma schema)
-// Photo modelは　Member modelに含まれる。
-// 具体的には、、Memberがプロフィール情報としてPhoto[]を持つ。
 model Photo {
   id         String  @id @default(cuid())
-  // urlを <Image />のsrcに入力すると画像を表示できる。
   url        String
+  // 70. Adding an image upload button
+  // publicId は ユニークなstring と
+  // Cloudinary上で保存されるフォルダ一の名前を組み合わせたものです。
   publicId   String?
   // 161. Adding the photo moderation functionality part 1
   isApproved Boolean

@@ -6,6 +6,7 @@ import { Card } from '@nextui-org/card';
 
 // 47 (Using Next.js Layout pages)
 // 62 (Adding the edit member route)
+
 const Layout = async ({ children, params }: { children: ReactNode; params: { userId: string } }) => {
   const member = await getMemberByUserId(params.userId);
   if (!member) return notFound();

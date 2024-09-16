@@ -19,6 +19,8 @@ type Props = {
 // 64 (Adding the edit member form Part 2)
 // 65 (Adding the server action to update the member)
 // 75 (Challenge solution)
+
+// 現在のユーザーのプロフィールを更新するために使われます。
 const EditForm = ({ member }: Props) => {
   const router = useRouter();
 
@@ -55,6 +57,7 @@ const EditForm = ({ member }: Props) => {
 
   // 65 (Adding the server action to update the member)
   // 75 (Challenge Solution)
+
   const onSubmit = async (data: MemberEditSchema) => {
     const nameUpdated = data.name !== member.name;
     const result = await updateMemberProfile(data, nameUpdated);

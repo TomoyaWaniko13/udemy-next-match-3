@@ -11,6 +11,7 @@ import MemberPhotos from '@/components/MemberPhotos';
 // 72 (Using the Cloudinary image component)
 // 73 (Setting the main image)
 // 77 (Tidying up the images)
+
 const PhotosPage = async () => {
   const userId = await getAuthUserId();
   const member = await getMemberByUserId(userId);

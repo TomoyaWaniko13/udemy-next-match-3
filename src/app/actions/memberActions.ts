@@ -92,6 +92,7 @@ export async function getMembers({
 }
 
 // 45 (Using dynamic routes in Next.js)
+
 // userId をもとに Member を取得する server action
 export async function getMemberByUserId(userId: string) {
   try {
@@ -103,18 +104,18 @@ export async function getMemberByUserId(userId: string) {
 
 // 48 (Creating the Member detailed content)
 // 66 (Displaying the images in the member edit component)
+
 // userIdをもとにMemberのPhotosを取得するserver action
 export async function getMemberPhotosByUserId(userId: string) {
-  // Memberのphotoだけをselectする。
+  // Member の photos property だけを select します。
   const member = await prisma.member.findUnique({
     where: { userId },
-    select: { photo: true },
+    select: { photos: true },
   });
 
   if (!member) return null;
 
-  // member objectの photo配列を抽出する。
-  return member.photo.map((p) => p) as Photo[];
+  return member.photos.map((photo) => photo) as Photo[];
 }
 
 // 123 (Updating the last active property)

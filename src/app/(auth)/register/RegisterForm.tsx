@@ -85,6 +85,7 @@ const RegisterForm = () => {
       handleFormServerErrors(result, setError);
     }
   };
+
   return (
     <Card className={'w-3/5 mx-auto'}>
       <CardHeader className={'flex flex-col items-center justify-center'}>

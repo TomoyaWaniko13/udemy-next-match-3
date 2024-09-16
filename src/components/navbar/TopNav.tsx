@@ -7,10 +7,13 @@ import UserMenu from '@/components/navbar/UserMenu';
 import { getUserInfoForNav } from '@/app/actions/userActions';
 import FiltersWrapper from '@/components/navbar/FiltersWrapper';
 
+// 75 (Challenge Solution)
 // 158. Adding the role to the session data
 const TopNav = async () => {
   const session = await auth();
-  // 75 (Challenge Solution)
+
+  // session が存在するか確認してから、
+  // getUserInfoForNav() server action を実行します。
   const userInfo = session?.user && (await getUserInfoForNav());
 
   // const userInfo = session?.user;

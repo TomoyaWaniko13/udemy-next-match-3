@@ -1,6 +1,5 @@
 'use server';
 
-import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
 import { getAuthUserId } from '@/app/actions/authActions';
 import { pusherServer } from '@/lib/pusher';
