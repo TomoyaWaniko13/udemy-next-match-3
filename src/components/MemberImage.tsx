@@ -6,6 +6,9 @@ import { Button, Image } from '@nextui-org/react';
 import clsx from 'clsx';
 import { useRole } from '@/hooks/useRole';
 import { ImCheckmark, ImCross } from 'react-icons/im';
+import { useRouter } from 'next/navigation';
+import { toast } from 'react-toastify';
+import { approvePhoto, rejectPhoto } from '@/app/actions/adminActions';
 
 type Props = {
   photo: Photo | null;
@@ -14,10 +17,35 @@ type Props = {
 // 72 (Using the cloudinary image component)
 // 161. Adding the photo moderation functionality part 1
 // 162. Adding the photo moderation functionality part 2
+// 164. Adding the photo moderation functionality part 4
 
 const MemberImage = ({ photo }: Props) => {
   // 現在のユーザーの role を取得します。
   const role = useRole();
+  const router = useRouter();
+
+  if (!photo) return null;
+
+  // approvePhoto() において、photoId: string を使って、
+  // Photo model から 関連する Member model を取得するので、
+  // photo: Photo ではなく photoId: string が引数として必要です。
+  const approve = async (photoId: string) => {
+    try {
+      await approvePhoto(photoId);
+      router.refresh();
+    } catch (error: any) {
+      toast.error(error.message);
+    }
+  };
+
+  const reject = async (photo: Photo) => {
+    try {
+      await rejectPhoto(photo);
+      router.refresh();
+    } catch (error: any) {
+      toast.error(error.message);
+    }
+  };
 
   return (
     <div>
@@ -48,10 +76,10 @@ const MemberImage = ({ photo }: Props) => {
       {/* role が ADMIN であれば、写真を承認するかしないかを決定できます。 */}
       {role === 'ADMIN' && (
         <div className={'flex flex-row gap-2 mt-2'}>
-          <Button color={'success'} variant={'bordered'} fullWidth={true}>
+          <Button onClick={() => approve(photo.id)} color={'success'} variant={'bordered'} fullWidth={true}>
             <ImCheckmark size={20} />
           </Button>
-          <Button color={'danger'} variant={'bordered'} fullWidth={true}>
+          <Button onClick={() => reject(photo)} color={'danger'} variant={'bordered'} fullWidth={true}>
             <ImCross size={20} />
           </Button>
         </div>

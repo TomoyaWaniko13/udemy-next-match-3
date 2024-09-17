@@ -61,7 +61,7 @@ export async function approvePhoto(photoId: string) {
     }
 
     // Memberテーブルの特定のレコードを更新します。
-    prisma.member.update({
+    return prisma.member.update({
       where: { id: member.id },
       data: {
         ...memberUpdate,
