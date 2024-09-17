@@ -3,16 +3,11 @@ import { fetchCurrentUserLikeIds, fetchLikedMembers } from '@/app/actions/likeAc
 
 // 58 (Adding the list tabs)
 const ListsPage = async ({ searchParams }: { searchParams: { type: string } }) => {
-  // likeIdsとmembersは<MemberCard/>で使われる。
-  // searchParams.type(query string)の値によりfetchするMembersの種類が変わる。
   const likeIds = await fetchCurrentUserLikeIds();
+  // 引数のquery parameter の値により、return する users の ids の配列を変更します。
   const members = await fetchLikedMembers(searchParams.type);
 
-  return (
-    <>
-      <ListsTab members={members} likeIds={likeIds} />
-    </>
-  );
+  return <ListsTab members={members} likeIds={likeIds} />;
 };
 
 export default ListsPage;

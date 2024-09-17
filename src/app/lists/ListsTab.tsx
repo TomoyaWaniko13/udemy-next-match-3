@@ -14,6 +14,7 @@ type Props = {
 
 // 58 (Adding the list tabs)
 // 59 (Using the useTransition hook for subtle loading)
+
 const ListsTab = ({ members, likeIds }: Props) => {
   const searchParams = new URLSearchParams();
   const router = useRouter();
@@ -27,14 +28,11 @@ const ListsTab = ({ members, likeIds }: Props) => {
   ];
 
   // この関数の主な目的は、選択されたタブに応じて URL のクエリパラメータを更新することです。
-  // URL の変更はlists/page.tsxのfetchLikedMembersで検出され、適切なデータをfetchするのに使用されます。
-
   // key パラメータを受け取ります。これは選択されたタブの ID を表します。
   function handleTabChange(key: Key) {
     // startTransition()は、その中で行われる状態更新を非緊急（non-urgent）として扱うよう React に指示します。
     // これにより、React はこの更新を他の緊急性の高いタスク（ユーザー入力への反応など）の後に処理することができます。
     startTransition(() => {
-      // 新しい URLSearchParams オブジェクトを作成します。これは現在の URL のクエリパラメータを操作するために使用されます。
       const params = new URLSearchParams(searchParams);
       // 'type' パラメータを選択されたタブの ID に設定します。
       params.set('type', key.toString());

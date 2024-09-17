@@ -7,6 +7,7 @@ import { Photo } from '@prisma/client';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { deleteImage, setMainImage } from '@/app/actions/userActions';
+import { toast } from 'react-toastify';
 
 type Props = {
   photos: Photo[] | null;
@@ -19,8 +20,8 @@ type Props = {
 // 76 (Deleting an image)
 // 161. Adding the photo moderation functionality part 1
 
-//  ログインしているユーザーが自分がアップロードした写真を表示するのに使われる。
-// members/edit/photos/page.tsxでは、editingをtrueにするので、ログインしているユーザーがmainの写真を設定できるようになる。
+//  現在のユーザーのアップロードした写真を表示するのに使われます。
+// members/edit/photos/page.tsxでは、editingをtrueにするので、現在のユーザーがmainの写真を設定できます。
 const MemberPhotos = ({ photos, editing, mainImageUrl }: Props) => {
   const router = useRouter();
 
@@ -38,10 +39,14 @@ const MemberPhotos = ({ photos, editing, mainImageUrl }: Props) => {
     // 複数の photo があるので、id が必要です。
     setLoading({ isLoading: true, id: photo.id, type: 'main' });
 
+    // setMainImage() は error を throw する可能性があるので、
+    // try & catch を使います。
     try {
       await setMainImage(photo);
-    } catch (error: any) {
       router.refresh();
+    } catch (error: any) {
+      // setMainImage() のエラー内容を toast で表示します。
+      toast.error(error.message);
     } finally {
       setLoading({ isLoading: false, id: '', type: '' });
     }

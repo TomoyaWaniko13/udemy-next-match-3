@@ -16,6 +16,7 @@ type Props = {
 // 162. Adding the photo moderation functionality part 2
 
 const MemberImage = ({ photo }: Props) => {
+  // 現在のユーザーの role を取得します。
   const role = useRole();
 
   return (
@@ -38,11 +39,13 @@ const MemberImage = ({ photo }: Props) => {
         // <Image/>はNextUIのcomponentです。
         <Image width={220} height={220} src={photo?.url || '/images/user.png'} alt={'Image of user'} />
       )}
+
       {!photo?.isApproved && role !== 'ADMIN' && (
         <div className={'absolute bottom-2 w-full bg-slate-200 p-1'}>
           <div className={'flex justify-center text-danger font-semibold'}>Awaiting approval</div>
         </div>
       )}
+      {/* role が ADMIN であれば、写真を承認するかしないかを決定できます。 */}
       {role === 'ADMIN' && (
         <div className={'flex flex-row gap-2 mt-2'}>
           <Button color={'success'} variant={'bordered'} fullWidth={true}>

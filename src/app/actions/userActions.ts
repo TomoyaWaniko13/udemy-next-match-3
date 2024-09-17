@@ -70,6 +70,7 @@ export async function addImage(url: string, publicId: string) {
 // 画像の<StarButton/>を押した時に、その画像をMainにする。
 export async function setMainImage(photo: Photo) {
   // 承認された写真でないと、メイン画像として設定できません。
+  // このエラーメッセージが toast で表示されます。
   if (!photo.isApproved) throw new Error('Only approved photos can be set to main image');
 
   try {

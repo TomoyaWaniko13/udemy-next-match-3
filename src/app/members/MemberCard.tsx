@@ -18,11 +18,10 @@ type Props = {
 // 55 (Creating a like Button)
 // 56 (Fetching the likes)
 // 106 (Creating a presence indicator)
-// /members page に表示するユーザーの写真を含んだカードです。
+
 const MemberCard = ({ member, likeIds }: Props) => {
-  // 56 (Fetching the likes)
   // member.userId が likeIds array に含まれている状態が、その member にいいねをしている状態です。
-  // member.userIdがlikeIds arrayに含まれていない状態が、そのmemberにいいねをしていない状態です。
+  // member.userId が likeIds array に含まれていない状態が、その member にいいねをしていない状態です。
   const hasLiked = likeIds.includes(member.userId);
 
   // 56 (Fetching the likes)

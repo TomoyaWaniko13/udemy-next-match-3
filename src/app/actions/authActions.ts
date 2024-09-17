@@ -348,6 +348,7 @@ export async function completeSocialLoginProfile(data: ProfileSchema): Promise<A
 }
 
 // 162. Adding the photo moderation functionality part 2
+// session から現在の user の role を取得します。
 export async function getUserRole() {
   const session = await auth();
   const role = session?.user?.role;

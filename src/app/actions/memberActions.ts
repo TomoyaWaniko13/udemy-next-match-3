@@ -109,12 +109,14 @@ export async function getMemberByUserId(userId: string) {
 export async function getMemberPhotosByUserId(userId: string) {
   const currentUserId = await getAuthUserId();
 
-  // Member の photos property だけを select します。
+  // Member の photos field だけを select します。
   const member = await prisma.member.findUnique({
     where: { userId },
     // 現在のユーザーの photos なら、 認証されていなくても表示できます。
     // 現在のユーザー以外の photos なら、認証されなければ表示されません。
-    select: { photos: { where: currentUserId === userId ? {} : { isApproved: true } } },
+    select: {
+      photos: { where: currentUserId === userId ? {} : { isApproved: true } },
+    },
   });
 
   if (!member) return null;
