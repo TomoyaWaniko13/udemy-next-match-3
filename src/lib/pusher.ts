@@ -15,11 +15,11 @@ declare global {
 if (!global.pusherServerInstance) {
   global.pusherServerInstance = new PusherServer({
     //　Pusherアプリケーションの一意のID。
-    appId: process.env.PUSHER_APP_ID,
+    appId: process.env.PUSHER_APP_ID as string,
     // Pusherアプリケーションの公開キー。
-    key: process.env.NEXT_PUBLIC_PUSHER_APP_KEY,
+    key: process.env.NEXT_PUBLIC_PUSHER_APP_KEY as string,
     //　Pusherアプリケーションの秘密キー。
-    secret: process.env.PUSHER_SECRET,
+    secret: process.env.PUSHER_SECRET as string,
     //　Pusherのデータセンターの地理的位置。ここでは 'ap3' (おそらくAsia Pacific 3) を指定しています。
     cluster: 'ap3',
     // セキュアな接続（HTTPS）を使用するかどうか。true に設定されているので、セキュアな接続を使用します。

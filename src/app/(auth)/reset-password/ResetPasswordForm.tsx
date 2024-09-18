@@ -1,3 +1,5 @@
+'use client';
+
 import { useState } from 'react';
 import { ActionResult } from '@/types';
 import { useForm } from 'react-hook-form';

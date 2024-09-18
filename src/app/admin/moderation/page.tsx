@@ -4,6 +4,10 @@ import MemberPhotos from '@/components/MemberPhotos';
 
 // 159. Creating an admin page
 // 162. Adding the photo moderation functionality part 2
+// 171. Preparing the app for publishing
+
+export const dynamic = 'force-dynamic';
+
 const PhotoModerationPage = async () => {
   const photos = await getUnapprovedPhotos();
 

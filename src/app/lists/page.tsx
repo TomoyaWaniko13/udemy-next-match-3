@@ -2,6 +2,9 @@ import ListsTab from '@/app/lists/ListsTab';
 import { fetchCurrentUserLikeIds, fetchLikedMembers } from '@/app/actions/likeActions';
 
 // 58 (Adding the list tabs)
+
+export const dynamic = 'force-dynamic';
+
 const ListsPage = async ({ searchParams }: { searchParams: { type: string } }) => {
   const likeIds = await fetchCurrentUserLikeIds();
   // 引数のquery parameter の値により、return する users の ids の配列を変更します。
