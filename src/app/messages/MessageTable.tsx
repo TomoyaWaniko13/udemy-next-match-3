@@ -6,11 +6,6 @@ import { Card } from '@nextui-org/card';
 import MessageTableCell from '@/app/messages/MessageTableCell';
 import useMessages from '@/hooks/useMessages';
 
-type Props = {
-  initialMessages: MessageDto[];
-  nextCursor?: string;
-};
-
 // 90 (Creating the message table)
 // 91 (Adding the message read functionality)
 // 92 (Using custom cells in the NextUI table)
@@ -20,7 +15,12 @@ type Props = {
 // 111 (Adding the realtime functionality to the message table)
 // 133 (Cursor based pagination Part 3)
 
-// message一覧を表示します。
+type Props = {
+  initialMessages: MessageDto[];
+  nextCursor?: string;
+};
+
+// メッセージ一覧を表示します。
 const MessageTable = ({ initialMessages, nextCursor }: Props) => {
   // Zustand ストアの状態が変更されると、その状態を使用しているコンポーネント（この場合は MessageTable）が
   // 自動的に再レンダリングされ、新しいメッセージが表示されます
@@ -48,10 +48,10 @@ const MessageTable = ({ initialMessages, nextCursor }: Props) => {
             )}
           </TableHeader>
           {/* TableBody は items prop として messages 配列を受け取り、
-        　　その各要素（item）に対して関数を適用してテーブルの行を生成します。 */}
+              その各要素（item）に対して関数を適用してテーブルの行を生成します。 */}
           <TableBody items={messages} emptyContent={'No messages for this container'}>
             {/* item messageDto 型で、messages 配列の各要素を表します.
-              外側の関数：{(item) => (...)}　は messages 配列の各要素（各メッセージ）に対して呼び出されます。　*/}
+                外側の関数：{(item) => (...)}　は messages 配列の各要素（各メッセージ）に対して呼び出されます。*/}
             {(item) => (
               // 各メッセージに対して1つの行(row)を生成します。
               <TableRow key={item.id} className={'cursor-pointer'}>
