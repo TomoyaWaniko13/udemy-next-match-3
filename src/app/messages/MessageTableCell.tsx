@@ -25,9 +25,13 @@ const MessageTableCell = ({ item, columnKey, isOutbox, deleteMessage, isDeleting
 
   const { isOpen, onOpen, onClose } = useDisclosure();
 
+  const onConfirmDeleteMessage = () => {
+    deleteMessage(item);
+  };
+
   const footerButtons: ButtonProps[] = [
-    { color: 'default', onClick: onClose, children: 'Close' },
-    { color: 'secondary', onClick: onClose, children: 'Submit' },
+    { color: 'default', onClick: onClose, children: 'Cancel' },
+    { color: 'secondary', onClick: onConfirmDeleteMessage, children: 'Confirm' },
   ];
 
   // return の中が1つの行(row)に表示される各々のCellとなります。
@@ -48,7 +52,7 @@ const MessageTableCell = ({ item, columnKey, isOutbox, deleteMessage, isDeleting
     case 'text':
       return <div>{truncateString(cellValue)}</div>;
     case 'created':
-      return <div>cellValue</div>;
+      return <div>{cellValue}</div>;
     default:
       return (
         <>
@@ -58,8 +62,8 @@ const MessageTableCell = ({ item, columnKey, isOutbox, deleteMessage, isDeleting
           <AppModal
             isOpen={isOpen}
             onClose={onClose}
-            header={'Test modal'}
-            body={<div>Just testing</div>}
+            header={'Please confirm this action'}
+            body={<div>Are you sure you want to delete this message? This cannot be undone.</div>}
             footerButtons={footerButtons}
           />
         </>

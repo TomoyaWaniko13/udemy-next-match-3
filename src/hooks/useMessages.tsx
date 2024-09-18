@@ -78,19 +78,13 @@ const useMessages = (initialMessages: MessageDto[], nextCursor?: string) => {
   }, [container, set]);
 
   const handleDeleteMessage = useCallback(
-    //　deleteしたいmessage を受け取ります。
+    // 削除したい message: MessageDto を受け取ります。
     async (message: MessageDto) => {
       // id: message.id でどの deleteButton をロード中と表示するか指定します。
       setDeleting({ id: message.id, loading: true });
-
       await deleteMessage(message.id, isOutbox);
-
       remove(message.id);
-
-      if (!message.dateRead && !isOutbox) {
-        updateUnreadCount(-1);
-      }
-
+      if (!message.dateRead && !isOutbox) updateUnreadCount(-1);
       setDeleting({ id: '', loading: false });
     },
     [isOutbox, remove, updateUnreadCount],

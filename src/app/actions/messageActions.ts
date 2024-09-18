@@ -12,8 +12,8 @@ import { createChatId } from '@/lib/util';
 // 98 (Adding the live chat functionality)
 // 109 (Creating a message store)
 
-// validationがsuccessならば、データベースにメッセージを記録する。
-// throw errorだとerror pageが表示されるが、formのvalidation errorを表示したいので、ActionResultを使う。
+// throw error だとerror page が表示されますが、
+// form で validation error を表示したいので、ActionResult を return type として使います。
 export async function createMessage(recipientUserId: string, data: MessageSchema): Promise<ActionResult<MessageDto>> {
   try {
     // 現在ログインしているuserのidを取得。
@@ -58,11 +58,11 @@ export async function createMessage(recipientUserId: string, data: MessageSchema
 // 101 (Adding the read message feature)
 // 114 (Updating the count based on the event)
 
-// 特定の2人のユーザー間のメッセージスレッドを取得するためのserver action.
+// 特定の2人のユーザー間のメッセージスレッドを取得するためのserver actionです。.
 // recipientIdはチャットをしている相手のidです。
 export async function getMessageThread(recipientId: string) {
   try {
-    // 現在ののidを取得します。
+    // 現在のユーザーのidを取得します。
     const userId = await getAuthUserId();
 
     const messages = await prisma.message.findMany({
@@ -85,15 +85,16 @@ export async function getMessageThread(recipientId: string) {
 
     if (messages.length > 0) {
       const readMessagesIds = messages
-        // filter() で未読メッセージのarrayを作ります。
+        // filter() で未読メッセージの array を作ります。
         .filter(
+          // 以下に未読メッセージであるための条件を書きます。
           (message) =>
             // この条件により、既に読まれたメッセージを再度「既読」にする無駄な処理を避けられます。
             message.dateRead === null &&
-            // ユーザーは自分宛てのメッセージのみを「既読」にすべきです。
+            // 現在のユーザーは自分宛てのメッセージのみを「既読」にすべきです。
             // 他人宛てのメッセージを既読にすることは適切ではありません。
             message.recipient?.userId === userId &&
-            // ユーザーが特定の相手とのチャットを見ているときに、
+            // 現在のユーザーが特定の相手とのチャットを見ているときに、
             // そのチャットとは関係のない他の相手からのメッセージの状態が変わることを防ぎます。
             message.sender?.userId === recipientId,
         )
@@ -136,15 +137,28 @@ export async function getMessageThread(recipientId: string) {
 // container が提供されていなければ、 inbox(受信箱) であるとします。
 // cursor は、次のページの開始点を示す値です。この場合、メッセージの作成日時（created）をカーソルとして使用しています。
 // カーソルは「しおり」のようなものです。「前回ここまで読んだ」という位置を示します。
-export async function getMessagesByContainer(container?: string | null, cursor?: string, limit = 2) {
+export async function getMessagesByContainer(container?: string | null, cursor?: string, limit = 100) {
   try {
     const userId = await getAuthUserId();
     const isOutbox = container === 'outbox';
 
-    const conditions = {
-      [isOutbox ? 'senderId' : 'recipientId']: userId,
-      [isOutbox ? 'senderDeleted' : 'recipientDeleted']: false,
-    };
+    // const conditions = {
+    //   [isOutbox ? 'senderId' : 'recipientId']: userId,
+    //   [isOutbox ? 'senderDeleted' : 'recipientDeleted']: false,
+    // };
+
+    let conditions = {};
+
+    if (isOutbox) {
+      conditions = { senderId: userId, senderDeleted: false };
+    } else {
+      conditions = { recipientId: userId, recipientDeleted: false };
+    }
+
+    let dateCondition = {};
+    if (cursor) {
+      dateCondition = { created: { lte: new Date(cursor) } };
+    }
 
     const messages = await prisma.message.findMany({
       // Spread syntax (...) を使うことで、conditions に加えてさらに条件を指定できます。
@@ -153,7 +167,8 @@ export async function getMessagesByContainer(container?: string | null, cursor?:
       // cursor が undefined の場合, 追加の条件なし（全てのメッセージが対象になります)。
       where: {
         ...conditions,
-        ...(cursor ? { created: { lte: new Date(cursor) } } : {}),
+        ...dateCondition,
+        // ...(cursor ? { created: { lte: new Date(cursor) } } : {}),
       },
       // メッセージを作成日時の降順（最新のものから）でソートします。
       orderBy: { created: 'desc' },
@@ -197,10 +212,12 @@ export async function getMessagesByContainer(container?: string | null, cursor?:
 }
 
 // 93 (Adding the delete message action)
+
 // deleteMessage() は、メッセージの「論理削除」と「物理削除」を組み合わせて実装しています。
 // messageId: 削除するメッセージのID, isOutbox: 送信箱（outbox）からの削除かどうかを示すブール値
 export async function deleteMessage(messageId: string, isOutbox: boolean) {
-  // この行では、送信者と受信者のどちらの視点から削除するかを決定しています。
+  // outbox(送信リスト) でメッセージの削除が行われた場合、sender(送信者)    がメッセージを削除したということです。
+  // inbox (受信リスト) でメッセージの削除が行われた場合、recipient(受信者) がメッセージを削除したということです。
   const selector = isOutbox ? 'senderDeleted' : 'recipientDeleted';
 
   try {
@@ -213,6 +230,7 @@ export async function deleteMessage(messageId: string, isOutbox: boolean) {
 
     const messagesToDelete = await prisma.message.findMany({
       where: {
+        // OR: には配列を指定します。
         OR: [
           { senderId: userId, senderDeleted: true, recipientDeleted: true },
           { recipientId: userId, senderDeleted: true, recipientDeleted: true },
@@ -223,12 +241,8 @@ export async function deleteMessage(messageId: string, isOutbox: boolean) {
     // 両方のユーザーが削除したメッセージが存在する場合、それらをデータベースから完全に削除します。
     if (messagesToDelete.length > 0) {
       await prisma.message.deleteMany({
-        where: {
-          // このOR条件は、生成された id のリストのいずれかに一致するメッセージを削除することを指示します。
-          // 実質的に、「これらのIDのいずれかを持つメッセージを削除せよ」という命令になります。
-          // この方法により、複数のメッセージを1回のクエリで効率的に削除することができます。
-          OR: messagesToDelete.map((message) => ({ id: message.id })),
-        },
+        // where: { OR: messagesToDelete.map((message) => ({ id: message.id })) },
+        where: { id: {} },
       });
     }
   } catch (error) {
