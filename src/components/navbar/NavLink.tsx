@@ -23,8 +23,8 @@ const NavLink = ({ href, label }: Props) => {
   return (
     <NavbarItem isActive={pathname === href} as={Link} href={href}>
       <span>{label}</span>
-      {/* 'MESSAGES'　というリンクの横に、未読のメッセージの件数を表示します。*/}
-      {href === '/messages' && <span className={'ml-1'}>({unreadCount})</span>}
+      {/* 'MESSAGES' というリンクの横に、未読のメッセージの件数を表示します。*/}
+      {href === '/messages' && unreadCount > 0 && <span className={'ml-1'}>({unreadCount})</span>}
     </NavbarItem>
   );
 };

@@ -9,6 +9,7 @@ import FiltersWrapper from '@/components/navbar/FiltersWrapper';
 
 // 75 (Challenge Solution)
 // 158. Adding the role to the session data
+// 170. Updating the home page
 const TopNav = async () => {
   const session = await auth();
 
@@ -44,9 +45,7 @@ const TopNav = async () => {
           <span className={'font-bold font-mono text-3xl'}>NM</span>
         </NavbarBrand>
         <NavbarContent justify={'center'}>
-          {links.map((item) => (
-            <NavLink key={item.href} href={item.href} label={item.label} />
-          ))}
+          {session && links.map((item) => <NavLink key={item.href} href={item.href} label={item.label} />)}
         </NavbarContent>
         <NavbarContent justify={'end'}>
           {/* 34 (Adding a dropdown menu to the Nav bar) */}
