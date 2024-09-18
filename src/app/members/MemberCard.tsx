@@ -7,22 +7,37 @@ import Link from 'next/link';
 import { calculateAge } from '@/lib/util';
 import LikeButton from '@/components/LikeButton';
 import PresenceDot from '@/components/PresenceDot';
-
-type Props = {
-  member: Member;
-  likeIds: string[];
-};
+import { useState } from 'react';
+import { toggleLikeMember } from '@/app/actions/likeActions';
 
 // 43 (Creating cards for the members)
 // 44 (Styling the member cards)
 // 55 (Creating a like Button)
 // 56 (Fetching the likes)
 // 106 (Creating a presence indicator)
+// 174. Adding a spinner to the likes and deploying again
+
+type Props = {
+  member: Member;
+  likeIds: string[];
+};
 
 const MemberCard = ({ member, likeIds }: Props) => {
-  // member.userId が likeIds array に含まれている状態が、その member にいいねをしている状態です。
-  // member.userId が likeIds array に含まれていない状態が、その member にいいねをしていない状態です。
-  const hasLiked = likeIds.includes(member.userId);
+  const [hasLiked, setHasLiked] = useState(likeIds.includes(member.userId));
+  const [loading, setLoading] = useState(false);
+
+  async function toggleLike() {
+    setLoading(true);
+
+    try {
+      await toggleLikeMember(member.userId, hasLiked);
+      setHasLiked(!hasLiked);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoading(false);
+    }
+  }
 
   // 56 (Fetching the likes)
   const preventLikeAction = (e: React.MouseEvent) => {
@@ -42,7 +57,7 @@ const MemberCard = ({ member, likeIds }: Props) => {
       {/* 55 (Creating a like Button) */}
       <div onClick={preventLikeAction}>
         <div className={'absolute top-3 right-3 z-50'}>
-          <LikeButton targetId={member.userId} hasLiked={hasLiked} />
+          <LikeButton loading={loading} hasLiked={hasLiked} toggleLike={toggleLike} />
         </div>
         <div className={'absolute top-2 left-3 z-50'}>
           <PresenceDot member={member} />

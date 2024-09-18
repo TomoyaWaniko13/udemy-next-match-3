@@ -1,29 +1,38 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { toggleLikeMember } from '@/app/actions/likeActions';
 import { AiFillHeart, AiOutlineHeart } from 'react-icons/ai';
-
-type Props = {
-  targetId: string;
-  hasLiked: boolean;
-};
+import { PiSpinnerGap } from 'react-icons/pi';
 
 // 55 (Creating a like button)
-const LikeButton = ({ targetId, hasLiked }: Props) => {
+// 174. Adding a spinner to the likes and deploying again
+
+type Props = {
+  loading: boolean;
+  hasLiked: boolean;
+  toggleLike: () => void;
+};
+
+const LikeButton = ({ loading, toggleLike, hasLiked }: Props) => {
   const router = useRouter();
 
-  async function toggleLike() {
-    // toggleLikeMember()はhasLikeがtrueならいいねを取り消す、falseならいいねをつけるsever action
-    await toggleLikeMember(targetId, hasLiked);
-    router.refresh();
-  }
+  // async function toggleLike() {
+  //   // toggleLikeMember()はhasLikeがtrueならいいねを取り消す、falseならいいねをつけるsever action
+  //   await toggleLikeMember(targetId, hasLiked);
+  //   router.refresh();
+  // }
 
   return (
-    <div onClick={toggleLike} className={'relative hover:opacity-80 transition cursor-pointer'}>
-      <AiOutlineHeart size={28} className={'fill-white absolute -top-[2px] -right-[2px]'} />
-      <AiFillHeart size={24} className={hasLiked ? 'fill-rose-500' : 'fill-neutral-500/70'} />
-    </div>
+    <>
+      {!loading ? (
+        <div onClick={toggleLike} className={'relative hover:opacity-80 transition cursor-pointer'}>
+          <AiOutlineHeart size={28} className={'fill-white absolute -top-[2px] -right-[2px]'} />
+          <AiFillHeart size={24} className={hasLiked ? 'fill-rose-500' : 'fill-neutral-500/70'} />
+        </div>
+      ) : (
+        <PiSpinnerGap size={32} className={'fill-white animate-spin'} />
+      )}
+    </>
   );
 };
 
