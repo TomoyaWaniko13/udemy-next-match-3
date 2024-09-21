@@ -17,7 +17,7 @@ type Props = {
 // 101 (Adding the read message feature)
 // 107 (Displaying presence in other components)
 
-// members/[userId]/chat で使われる、メッセージに背景色を追加したBoxです。
+// members/[userId]/chat で使われる、スレッドのメッセージに背景色を追加したものです。
 const MessageBox = ({ message, currentUserId }: Props) => {
   // 現在のユーザーがメッセージの送信者かチェックします。
   const isCurrentUserSender = message.senderId === currentUserId;
@@ -35,7 +35,7 @@ const MessageBox = ({ message, currentUserId }: Props) => {
   // 非同期の性質：メッセージの追加やDOMの更新が非同期で行われる可能性があるため、それらが完了した後にスクロールを調整する必要があります。
   useEffect(() => {
     // useRef によって作成された ref オブジェクトの current プロパティは、その ref が参照している実際の DOM 要素を指します。
-    //　if (messageEndRef.current) のチェックは、DOM 要素が実際に存在することを確認しています。
+    // if (messageEndRef.current) のチェックは、DOM 要素が実際に存在することを確認しています。
     if (messageEndRef.current) {
       // scrollIntoView() メソッドは DOM API の一部で指定された要素が表示されるように、コンテナ（この場合はブラウザウィンドウ）をスクロールします。
       // { behavior: 'smooth' } オプションは、スクロールをスムーズなアニメーションで行うように指定しています。
@@ -67,7 +67,7 @@ const MessageBox = ({ message, currentUserId }: Props) => {
   const renderMessageHeader = () => {
     return (
       <div className={clsx('flex items-center w-full', { 'justify-between': isCurrentUserSender })}>
-        {/* 既読で,現在のユーザーが受信者でない場合、いつmessageが読まれたか表示します。。 */}
+        {/* 既読で,現在のユーザーが受信者でない場合、いつmessageが読まれたか表示します。 */}
         {message.dateRead && message.recipientId !== currentUserId ? (
           <span className={'text-xs text-black text-italic'}>(Read {timeAgo(message.dateRead)})</span>
         ) : (
@@ -87,9 +87,9 @@ const MessageBox = ({ message, currentUserId }: Props) => {
     return (
       // メッセージの背景色を変えます。
       <div className={messageContentClasses}>
-        {/*　メッセージが読まれた日時、送信者の名前、作成日時を表示します。　*/}
+        {/* メッセージが読まれた日時、送信者の名前、作成日時を表示します。　*/}
         {renderMessageHeader()}
-        {/*　メッセージの本文を表示します。　*/}
+        {/* メッセージの本文を表示します。　*/}
         <p className={'text-sm py-3 text-gray-900'}>{message.text}</p>
       </div>
     );
@@ -102,7 +102,7 @@ const MessageBox = ({ message, currentUserId }: Props) => {
         className={clsx('flex gap-2 mb-3', {
           // messageを送ったのが、ログインしているユーザーのである場合, つまり、messageを画面の右側に表示する。
           'justify-end text-right': isCurrentUserSender,
-          //　messageを送ったのが、ログインしているユーザーでない場合, messageを画面の左側に表示する。
+          // messageを送ったのが、ログインしているユーザーでない場合, messageを画面の左側に表示する。
           'justify-start': !isCurrentUserSender,
         })}
       >

@@ -9,8 +9,8 @@ import { Channel } from 'pusher-js';
 import useMessageStore from '@/hooks/useMessageStore';
 
 type Props = {
-  // readCountは既読になったメッセージの件数を表します。
-  // サーバーからgetMessageThread()でその件数を取得して、updateUnreadCount()に適用します。
+  // messages は スレッドに表示する messages です。
+  // readCount は 既読になった messages の件数です。
   initialMessages: { messages: MessageDto[]; readCount: number };
   currentUserId: string;
   chatId: string;
@@ -19,23 +19,26 @@ type Props = {
 // 99 (Receiving the live messages)
 // 101 (Adding the read message feature)
 // 114 (Updating the count based on the event)
+
 // 特定のユーザーとのメッセージのスレッドを表示します。
 // Pusherからの通知に応じて状態を変化させる必要があるので、client componentである必要があります。
 const MessageList = ({ initialMessages, currentUserId, chatId }: Props) => {
   // useEffect()をstrict modeで2回実行させないためのlogicです。
   const setReadCount = useRef(false);
 
+  // useState() でスレッドに表示するメッセージの状態を管理します。
+  // これにより、Pusherからの通知でメッセージを追加できます。
   const [messages, setMessages] = useState(initialMessages.messages);
 
-  // updateUnreadCount()で未読のメッセージの件数を更新します。それにより、画面にその更新を反映できます。
+  // store の updateUnreadCount() では、Pusher の通知に応じて未読のメッセージの件数を更新します。
+  // これにより、画面にその更新を反映できます。
   const { updateUnreadCount } = useMessageStore((state) => ({
     updateUnreadCount: state.updateUnreadCount,
   }));
 
   const channelRef = useRef<Channel | null>(null);
 
-  // 114 (Updating the count based on the event)
-  // 既読になったメッセージの件数だけ、現在未読のメッセージの件数から引きます。
+  // Pusher の event に応じて、既読になったメッセージの件数だけ、現在未読のメッセージの件数から引きます。
   useEffect(() => {
     // useEffect()をstrict modeで2回実行させないためのlogicです。
     if (!setReadCount.current) {
@@ -46,15 +49,24 @@ const MessageList = ({ initialMessages, currentUserId, chatId }: Props) => {
     }
   }, [initialMessages.readCount, updateUnreadCount]);
 
+  // server side で新しいメッセージがデータベースに記録された時、
+  // Pusher で通知が来るので、それに応じて client side で state を更新します。
   const handleNewMessage = useCallback((message: MessageDto) => {
     setMessages((prevState) => {
       return [...prevState, message];
     });
   }, []);
 
+  // server side でスレッドに表示する messages が取得された時、
+  // Pusher で通知が来るので、それに応じて client side で state を更新します。
   const handleReadMessages = useCallback((messageIds: string[]) => {
     setMessages((prevState) =>
-      // 配列の各要素を加工したいのでmapを使います。
+      // 配列の各要素を加工したいので map を使います。
+      prevState.map((message) =>
+        messageIds.includes(message.id) ? { ...message, dateRead: formatShortDateTime(new Date()) } : message,
+      ),
+    );
+    setMessages((prevState) =>
       prevState.map((message) =>
         messageIds.includes(message.id) ? { ...message, dateRead: formatShortDateTime(new Date()) } : message,
       ),

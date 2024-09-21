@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 
 // 103 (Adding a presence store)
+
 // usePresenceChannel() フックは usePresenceStore() を使用して、Pusher から受け取ったリアルタイムの更新をグローバルステートに反映させます。
 // usePresenceStore() で定義された set、add、remove メソッドは、usePresenceChannel 内でそれぞれ
 // handleSetMembers()、handleAddMember()、handleRemoveMember() 関数として使用されます。

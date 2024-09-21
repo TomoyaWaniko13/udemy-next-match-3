@@ -10,10 +10,12 @@ type Props = {
 };
 
 // 107 (Displaying presence in other components)
-// /members/[userId]/chat に表示するアバターです。
-// オンラインになっているユーザーを小さい緑色の丸で表現します。
+
+// /members/[userId]/chat などに表示するアバターです。
+// userId に関連づけられている user がオンラインになっているかを判断して、オンラインになっているユーザーを小さい緑色の丸で表現します。
 const PresenceAvatar = ({ userId, src }: Props) => {
-  // members は presence channelにsubscribeしている(=オンラインである)userのIDを含んでいる配列です。
+  // members は presence channelをsubscribeしている(=オンラインである)userのIDを含んでいる配列です。
+  // このIDの配列により、誰がオンラインか追跡できます。
   const { members } = usePresenceStore((state) => ({
     members: state.members,
   }));
@@ -22,8 +24,9 @@ const PresenceAvatar = ({ userId, src }: Props) => {
   const isOnline = userId && members.includes(userId);
 
   return (
-    // NextUIの<Badge/>の中身(今回は<Avatar/>)は自動的に<Badge/>の右上に配置されます。
+    // isInvisible によって、オンラインであるかを表示できます。
     <Badge content={''} color={'success'} shape={'circle'} isInvisible={!isOnline}>
+      {/* NextUIの<Badge/>の中身(今回は<Avatar/>)は自動的に<Badge/>の右上に配置されます。*/}
       <Avatar src={src || '/images/user.png'} alt={'User avatar'} />
     </Badge>
   );

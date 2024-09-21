@@ -16,8 +16,8 @@ type Props = {
 const LikeButton = ({ loading, toggleLike, hasLiked }: Props) => {
   const router = useRouter();
 
+  //// toggleLikeMember()はhasLikeがtrueならいいねを取り消す、falseならいいねをつけるsever action
   // async function toggleLike() {
-  //   // toggleLikeMember()はhasLikeがtrueならいいねを取り消す、falseならいいねをつけるsever action
   //   await toggleLikeMember(targetId, hasLiked);
   //   router.refresh();
   // }

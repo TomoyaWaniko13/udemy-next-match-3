@@ -59,10 +59,10 @@ export async function createMessage(recipientUserId: string, data: MessageSchema
 // 114 (Updating the count based on the event)
 
 // 特定の2人のユーザー間のメッセージスレッドを取得するためのserver actionです。.
-// recipientIdはチャットをしている相手のidです。
+// recipientId は現在のユーザーがチャットをしている相手の ID です。
 export async function getMessageThread(recipientId: string) {
   try {
-    // 現在のユーザーのidを取得します。
+    // 現在のユーザーのIDを取得します。
     const userId = await getAuthUserId();
 
     const messages = await prisma.message.findMany({
@@ -83,25 +83,19 @@ export async function getMessageThread(recipientId: string) {
     // 既読のメッセージの件数を表します。その件数を、未読メッセージの表示の件数から引きます。
     let readCount = 0;
 
+    // サーバーサイドで未読の messages を既読にするために、
+    // 未読の messages の ID を含んだ配列を作ります。
     if (messages.length > 0) {
       const readMessagesIds = messages
-        // filter() で未読メッセージの array を作ります。
         .filter(
           // 以下に未読メッセージであるための条件を書きます。
           (message) =>
-            // この条件により、既に読まれたメッセージを再度「既読」にする無駄な処理を避けられます。
-            message.dateRead === null &&
-            // 現在のユーザーは自分宛てのメッセージのみを「既読」にすべきです。
-            // 他人宛てのメッセージを既読にすることは適切ではありません。
-            message.recipient?.userId === userId &&
-            // 現在のユーザーが特定の相手とのチャットを見ているときに、
-            // そのチャットとは関係のない他の相手からのメッセージの状態が変わることを防ぎます。
-            message.sender?.userId === recipientId,
+            message.dateRead === null && message.recipient?.userId === userId && message.sender?.userId === recipientId,
         )
-        // 未読メッセージの配列から id のみを取り出して新しい配列を作成しています。
+        // 未読 messages の配列から ID のみを取り出して新しい配列を作成しています。
         .map((unreadMessage) => unreadMessage.id);
 
-      // 特定した未読メッセージのIDを使用して、データベース内のそれらのメッセージを一括で更新します。
+      // 特定した未読 messages のIDを使用して、データベース内のそれらのメッセージを一括で更新します。
       // dateReadフィールドに現在の日時を設定することで、これらのメッセージを既読にマークします。
       await prisma.message.updateMany({
         //  'id' が readMessagesIds 配列の中のいずれかの値と一致することを条件としています。
@@ -111,10 +105,11 @@ export async function getMessageThread(recipientId: string) {
 
       // 114 (Updating the count based on the event)
       // 既読になったのメッセージの件数を表します。その件数を、未読メッセージの表示の件数から引きます。
+
       readCount = readMessagesIds.length;
 
       // 'message:read' イベントを発火させ、既読になったメッセージのID配列を送信します。
-      // クライアントサイド(MessageList.tsx)では、このイベントを以下のように監視しています：
+      // クライアントサイド(MessageList.tsx) では、このイベントを以下のように監視しています：
       // channelRef.current.bind('message:read', handleReadMessages);
       await pusherServer.trigger(createChatId(recipientId, userId), 'messages:read', readMessagesIds);
     }
@@ -137,6 +132,7 @@ export async function getMessageThread(recipientId: string) {
 // container が提供されていなければ、 inbox(受信箱) であるとします。
 // cursor は、次のページの開始点を示す値です。この場合、メッセージの作成日時（created）をカーソルとして使用しています。
 // カーソルは「しおり」のようなものです。「前回ここまで読んだ」という位置を示します。
+
 export async function getMessagesByContainer(container?: string | null, cursor?: string, limit = 100) {
   try {
     const userId = await getAuthUserId();

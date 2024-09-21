@@ -6,6 +6,7 @@ import { ReactNode } from 'react';
 // 169. Adding an image modal
 
 type Props = {
+  // imageModal であれば、<Modal/> の中で body だけ表示します。
   imageModal?: boolean;
   isOpen: boolean;
   onClose: () => void;
@@ -36,6 +37,7 @@ const AppModal = ({ isOpen, onClose, header, body, footerButtons, imageModal }: 
     >
       <ModalContent>
         {!imageModal && <ModalHeader className={'flex flex-col gap-1'}>{header}</ModalHeader>}
+        {/* imageModal であれば、<Modal/> の中で body だけ表示します。 */}
         <ModalBody>{body}</ModalBody>
         {!imageModal && (
           <ModalFooter>
