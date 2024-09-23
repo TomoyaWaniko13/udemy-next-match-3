@@ -1,5 +1,4 @@
 import { Card, CardBody, CardFooter, CardHeader } from '@nextui-org/card';
-import { GiPadlock } from 'react-icons/gi';
 import { ReactNode } from 'react';
 import { IconType } from 'react-icons';
 import { Button } from '@nextui-org/react';
@@ -15,6 +14,7 @@ type Props = {
 };
 
 // 141 (Submitting the form)
+
 // <Card/> component を再利用できるようにしています。
 // headerIcon はそのままコンポーネントとなるので、大文字で始まる名前に変更します。
 const CardWrapper = ({ body, headerIcon: Icon, headerText, subHeaderText, action, actionLabel, footer }: Props) => {

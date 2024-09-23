@@ -5,12 +5,12 @@ import { NextResponse } from 'next/server';
 // 102 (Setting up presence)
 // https://pusher.com/docs/channels/server_api/authorizing-users/
 
-// プロセスの流れ:
-// a. クライアントがプライベート/プレゼンスチャンネルへの接続を試みる
-// b. Pusherライブラリがこの認証エンドポイントにリクエストを送信
-// c. サーバーが authorizeChannel() を呼び出して認証情報を生成
-// d. 生成された認証情報がクライアントに返される
-// e. クライアントが認証情報を使用してPusherサーバーに接続
+// 1. クライアントがプライベート/プレゼンスチャンネルへの接続を試みる
+// 2. Pusherライブラリがこの認証エンドポイントにリクエストを送信
+// 3. サーバーが authorizeChannel() を呼び出して認証情報を生成
+// 4. 生成された認証情報がクライアントに返される
+// 5. クライアントが認証情報を使用してPusherサーバーに接続
+
 export async function POST(request: Request) {
   try {
     // 現在のセッションを非同期で取得します。
@@ -19,9 +19,7 @@ export async function POST(request: Request) {
 
     // セッション や ユーザーID (session?.user?.id) が存在しない場合、つまり認証されていない場合、
     // 401 Unauthorizedレスポンスを返します。
-    if (!session?.user?.id) {
-      return new Response('Unauthorized', { status: 401 });
-    }
+    if (!session?.user?.id) return new Response('Unauthorized', { status: 401 });
 
     // request.formData() メソッドは Request オブジェクトの標準メソッドです。
     // リクエストボディの読み取りと解析には時間がかかる可能性があるので、
@@ -34,19 +32,19 @@ export async function POST(request: Request) {
     // なのでas stringでnull の可能性を排除します。
     const socketId = body.get('socket_id') as string;
     const channel = body.get('channel_name') as string;
+
     // ユーザーIDを含むデータオブジェクトを作成します。これは"チャンネル認証"
-    // ( = 特定のユーザーが特定のチャンネル（特にプライベートチャンネルやプレゼンスチャンネル）にアクセスする権限があるかを確認するプロセス)
-    // に使用されます。
+    // ( = 特定のユーザーが特定のチャンネル（特にプライベートチャンネルやプレゼンスチャンネル）
+    // にアクセスする権限があるかを確認するプロセス)に使用されます。
+
     // チャンネル認証に必要な要素：
-    // a. クライアントサイド：
+    // 1. クライアントサイド：
     // socket_id：クライアントの一意の識別子
     // channel_name：アクセスしようとしているチャンネルの名前
-    // b. サーバーサイド：
+    // 2. サーバーサイド：
     // ユーザーの認証情報（この場合、session.user.id）
     // Pusherアプリケーションの秘密鍵
-    const data = {
-      user_id: session.user.id,
-    };
+    const data = { user_id: session.user.id };
 
     // https://pusher.com/docs/channels/server_api/authorizing-users/
     // authorizeChannel() メソッドの主な目的は、特定のユーザーが特定のチャンネル

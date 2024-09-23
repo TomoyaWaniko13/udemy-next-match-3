@@ -67,13 +67,13 @@ const MessageBox = ({ message, currentUserId }: Props) => {
   const renderMessageHeader = () => {
     return (
       <div className={clsx('flex items-center w-full', { 'justify-between': isCurrentUserSender })}>
-        {/* 既読で,現在のユーザーが受信者でない場合、いつmessageが読まれたか表示します。 */}
+        {/* 既読で, 受信者が現在のユーザーでない場合、いつ message が読まれたか表示します。 */}
         {message.dateRead && message.recipientId !== currentUserId ? (
           <span className={'text-xs text-black text-italic'}>(Read {timeAgo(message.dateRead)})</span>
         ) : (
           <div></div>
         )}
-        {/*横並びにする。*/}
+        {/*横並びにします。*/}
         <div className={'flex'}>
           <span className={'text-sm font-semibold text-gray-900'}>{message.senderName}</span>
           <span className={'text-sm text-gray-500 ml-2'}>{message.created}</span>
@@ -82,7 +82,7 @@ const MessageBox = ({ message, currentUserId }: Props) => {
     );
   };
 
-  // メッセージBoxを表示します。
+  // メッセージを表示します。
   const renderMessageContent = () => {
     return (
       // メッセージの背景色を変えます。
@@ -96,20 +96,21 @@ const MessageBox = ({ message, currentUserId }: Props) => {
   };
 
   return (
+    // grid を使います。
     <div className={'grid grid-rows-1'}>
       {/* 'flex gap-2 mb-3' は常に適用される。 */}
       <div
         className={clsx('flex gap-2 mb-3', {
-          // messageを送ったのが、ログインしているユーザーのである場合, つまり、messageを画面の右側に表示する。
+          // message を送ったのが現在のユーザーのである場合、message を画面の右側に表示する。
           'justify-end text-right': isCurrentUserSender,
-          // messageを送ったのが、ログインしているユーザーでない場合, messageを画面の左側に表示する。
+          // message を送ったのが現在のユーザーでない場合, message を画面の左側に表示する。
           'justify-start': !isCurrentUserSender,
         })}
       >
-        {/* messageを送ったのが、ログインしているユーザーでない場合, メッセージの左側にアバターを表示 */}
+        {/* messageを送ったのが、ログインしているユーザーでない場合, メッセージの左側にアバターを表示します。 */}
         {!isCurrentUserSender && renderAvatar()}
         {renderMessageContent()}
-        {/* messageを送ったのが、ログインしているユーザーである場合, メッセージの右側にアバターを表示 */}
+        {/* messageを送ったのが、ログインしているユーザーである場合, メッセージの右側にアバターを表示します。 */}
         {isCurrentUserSender && renderAvatar()}
       </div>
       <div ref={messageEndRef} />
