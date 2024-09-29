@@ -13,6 +13,7 @@ import { useEffect } from 'react';
 // 81 (Creating a chat form)
 // 82 (Creating the send message action)
 // 87 (Improving the message box)
+
 // メッセージスレッドの入力欄を出力します。
 const ChatForm = () => {
   const router = useRouter();
@@ -52,14 +53,15 @@ const ChatForm = () => {
   // 実際には setFocus は通常変更されないので、この useEffect は基本的に初回レンダリング時にのみ実行されます。
 
   // useEffect を使用しない場合の問題:
-  // コンポーネントの本体で直接 setFocus('text') を呼び出すと、レンダリング中に副作用が発生し、予期しない動作やエラーを引き起こす可能性があります。
+  // コンポーネントの本体で直接 setFocus('text') を呼び出すと、レンダリング中に副作用が発生し、
+  // 予期しない動作やエラーを引き起こす可能性があります。
   useEffect(() => {
     setFocus('text');
   }, [setFocus]);
 
   const onSubmit = async (data: MessageSchema) => {
-    //formに入力されたメッセージをparams.userIdが示すuserに送る。
     const result = await createMessage(params.userId, data);
+
     if (result.status === 'error') {
       handleFormServerErrors(result, setError);
     } else {
@@ -84,20 +86,11 @@ const ChatForm = () => {
           isInvalid={!!errors.text}
           errorMessage={errors.text?.message}
         />
-        <Button
-          type={'submit'}
-          isIconOnly={true}
-          color={'secondary'}
-          radius={'full'}
-          isLoading={isSubmitting}
-          isDisabled={!isValid || isSubmitting}
-        >
+        <Button type={'submit'} isIconOnly={true} color={'secondary'} radius={'full'} isLoading={isSubmitting} isDisabled={!isValid || isSubmitting}>
           <HiPaperAirplane size={18} />
         </Button>
       </div>
-      <div className={'flex flex-col'}>
-        {errors.root?.serverError && <p className={'text-danger text-sm'}>{errors.root.serverError.message}</p>}
-      </div>
+      <div className={'flex flex-col'}>{errors.root?.serverError && <p className={'text-danger text-sm'}>{errors.root.serverError.message}</p>}</div>
     </form>
   );
 };

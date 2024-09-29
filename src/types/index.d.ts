@@ -7,25 +7,6 @@ type ActionResult<T> = { status: 'success'; data: T } | { status: 'error'; error
 // MessageWithSenderRecipient 型は、Prismaの型生成機能を利用して作成された型です。
 // Messageモデルに対して特定の選択（select）を行った結果の型を生成します。
 // Message modelのpropertyは全て選択されていないので,この MessageWithSenderRecipient 型を作ります。
-// この型定義により、以下のような構造を持つオブジェクトの型が生成されます：
-// {
-//   id: string;
-//   text: string;
-//   created: Date;
-//   dateRead: Date | null;
-//   sender: {
-//     userId: string;
-//     name: string;
-//     image: string | null;
-//   };
-//   recipient: {
-//     userId: string;
-//     name: string;
-//     image: string | null;
-//   };
-// }
-
-// Payloadは,データ通信においてヘッダーやメタデータなどの付随情報を除いた、核となる情報内容を表します.
 type MessageWithSenderRecipient = Prisma.MessageGetPayload<{
   select: {
     id: true;

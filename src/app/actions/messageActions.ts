@@ -55,19 +55,17 @@ export async function createMessage(recipientUserId: string, data: MessageSchema
 // 101 (Adding the read message feature)
 // 114 (Updating the count based on the event)
 
-// 特定の2人のユーザー間のメッセージスレッドを取得するためのserver actionです。.
+// 特定の2人のユーザー間のメッセージスレッドを取得するためのserver actionです。
 // recipientId は現在のユーザーがチャットをしている相手の ID です。
 export async function getMessageThread(recipientId: string) {
   try {
-    // 現在のユーザーのIDを取得します。
     const userId = await getAuthUserId();
 
     const messages = await prisma.message.findMany({
       where: {
+        // OR: には配列を指定します。
         OR: [
-          // 現在のユーザーが送信者で、チャットしている相手が受信者であるメッセージ
           { senderId: userId, recipientId, senderDeleted: false },
-          // チャットしている相手が受信者で、現在のユーザー（userId）が受信者であるメッセージ
           { senderId: recipientId, recipientId: userId, recipientDeleted: false },
         ],
       },
@@ -80,12 +78,11 @@ export async function getMessageThread(recipientId: string) {
     // 既読のメッセージの件数を表します。その件数を、未読メッセージの表示の件数から引きます。
     let readCount = 0;
 
-    // サーバーサイドで未読の messages を既読にするために、
-    // 未読の messages の ID を含んだ配列を作ります。
+    // サーバーサイドで未読の messages を既読にするために、未読の messages の ID を含んだ配列を作ります。
     if (messages.length > 0) {
       const readMessagesIds = messages
         .filter(
-          // 以下に未読メッセージであるための条件を書きます。
+          // 以下に考慮すべき未読メッセージであるための条件を書きます。
           (message) => message.dateRead === null && message.recipient?.userId === userId && message.sender?.userId === recipientId,
         )
         // 未読 messages の配列から ID のみを取り出して新しい配列を作成しています。
@@ -129,7 +126,7 @@ export async function getMessageThread(recipientId: string) {
 // cursor は、次のページの開始点を示す値です。この場合、メッセージの作成日時（created）をカーソルとして使用しています。
 // カーソルは「しおり」のようなものです。「前回ここまで読んだ」という位置を示します。
 
-export async function getMessagesByContainer(container?: string | null, cursor?: string, limit = 100) {
+export async function getMessagesByContainer(container?: string | null, cursor?: string, limit = 10) {
   try {
     const userId = await getAuthUserId();
     const isOutbox = container === 'outbox';
@@ -208,8 +205,6 @@ export async function getMessagesByContainer(container?: string | null, cursor?:
 // deleteMessage() は、メッセージの「論理削除」と「物理削除」を組み合わせて実装しています。
 // messageId: 削除するメッセージのID, isOutbox: 送信箱（outbox）からの削除かどうかを示すブール値
 export async function deleteMessage(messageId: string, isOutbox: boolean) {
-  // outbox(送信リスト) でメッセージの削除が行われた場合、sender(送信者)    がメッセージを削除したということです。
-  // inbox (受信リスト) でメッセージの削除が行われた場合、recipient(受信者) がメッセージを削除したということです。
   const selector = isOutbox ? 'senderDeleted' : 'recipientDeleted';
 
   try {
@@ -265,13 +260,12 @@ export async function getUnreadMessageCount() {
 }
 
 // 98 (Adding the live chat functionality)
+// senderDeleted と recipientDeleted は選択されません。
 const messageSelect = {
   id: true,
   text: true,
   created: true,
   dateRead: true,
-  // selectが使われているので、senderはobjectとして扱われる。
   sender: { select: { userId: true, name: true, image: true } },
-  // selectが使われているので、recipientはobjectとして扱われる。
   recipient: { select: { userId: true, name: true, image: true } },
 };

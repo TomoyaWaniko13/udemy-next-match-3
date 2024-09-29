@@ -10,7 +10,7 @@ export function calculateAge(dateOfBirth: Date) {
 
 // 84 (Creating a message DTO)
 export function formatShortDateTime(date: Date) {
-  // 18 Aug 24 3:30:PM というふうにformatされる。
+  // 18 Aug 24 3:30:PM というふうにフォーマットされます。
   return format(date, 'dd MMM yy h:mm:a');
 }
 
@@ -20,11 +20,7 @@ export function timeAgo(date: string) {
 }
 
 // 65 (Adding the server action to update the member)
-// この関数の主な目的は、サーバーサイドのバリデーションエラー（server actionで検知したバリデーションエラー）をクライアントサイドの
-// フォームエラーに変換することです。これにより、ユーザーに適切なフィードバックを提供し、どのフィールドに問題があるかを
-// 示すことができます。
-// TFieldValues はTypeScriptのジェネリック型パラメータです。この関数において、フォームのフィールド値の型を表します。
-// T はTypeScriptの慣習で、型パラメータを示すために使用されます。
+// TFieldValues は TypeScript のジェネリック型パラメータです。この関数において、フォームのフィールド値の型を表します。
 export function handleFormServerErrors<TFieldValues extends FieldValues>(
   errorResponse: { error: string | ZodIssue[] },
   // react-hook-form の setError を使用することで、エラーメッセージを form に表示できます。
