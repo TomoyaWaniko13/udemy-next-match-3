@@ -42,13 +42,7 @@ const CompleteProfileForm = () => {
               <ProfileForm />
               {errors.root?.serverError && <p className={'text-danger text-sm'}>{errors.root.serverError.message}</p>}
               <div className={'flex flex-row items-center gap-6'}>
-                <Button
-                  isLoading={isSubmitting}
-                  isDisabled={!isValid}
-                  fullWidth={true}
-                  color={'secondary'}
-                  type={'submit'}
-                >
+                <Button isLoading={isSubmitting} isDisabled={!isValid} fullWidth={true} color={'secondary'} type={'submit'}>
                   Submit
                 </Button>
               </div>

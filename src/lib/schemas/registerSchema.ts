@@ -5,9 +5,7 @@ import { calculateAge } from '@/lib/util';
 export const registerSchema = z.object({
   name: z.string().min(3),
   email: z.string().email(),
-  password: z.string().min(6, {
-    message: 'Password must be at least 6 characters',
-  }),
+  password: z.string().min(6, { message: 'Password must be at least 6 characters' }),
 });
 
 // 138 (Adding a Register wizard part 1)
@@ -21,15 +19,14 @@ export const profileSchema = z.object({
     .string()
     .min(1, { message: 'Date of birth is required' })
     // refine() で validation をカスタマイズできます。
+    // refine() には関数を渡します。
     .refine(
       (dateString) => {
         const age = calculateAge(new Date(dateString));
         return age >= 18;
       },
-      {
-        message: 'You must be at least 18 to use this app',
-      },
-    ), // end of refine()
+      { message: 'You must be at least 18 to use this app' },
+    ),
 });
 
 // 141 (Submitting the form)

@@ -24,6 +24,7 @@ type ActionResult<T> = { status: 'success'; data: T } | { status: 'error'; error
 //     image: string | null;
 //   };
 // }
+
 // Payloadは,データ通信においてヘッダーやメタデータなどの付随情報を除いた、核となる情報内容を表します.
 type MessageWithSenderRecipient = Prisma.MessageGetPayload<{
   select: {
@@ -42,7 +43,7 @@ type MessageDto = {
   text: string;
   created: string;
   dateRead: string | null;
-  // schema.prismaで sender と recipient を optional にしたので、
+  // schema.prisma file で sender と recipient を optional にしたので、
   // 以下の properties も optional にする必要がある。
   senderId?: string;
   senderName?: string;

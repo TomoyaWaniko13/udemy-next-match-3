@@ -310,9 +310,7 @@ export async function completeSocialLoginProfile(data: ProfileSchema): Promise<A
 
   try {
     const user = await prisma.user.update({
-      where: {
-        id: session.user.id,
-      },
+      where: { id: session.user.id },
       data: {
         // user の profileComplete を true にする必要があります。
         profileComplete: true,

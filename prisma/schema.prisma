@@ -147,30 +147,16 @@ model Like {
 // many to many type of relationship. One member can send many messages and also that member can receive many messages.
 model Message {
   id               String    @id @default(cuid())
-  // メッセージの本文
   text             String
-  // メッセージ作成日時。デフォルトで現在時刻が設定される。
   created          DateTime  @default(now())
-  // 送信者のユーザーID
   senderId         String?
-  // 受信者のユーザーID
   recipientId      String?
-  // Member? は、このリレーションがオプショナル（nullable）であることを示しています。
-  //         つまり、メッセージは必ずしも送信者や受信者を持つ必要がないということです。
-  // SetNull: Member レコードが削除されると、それに関連する Message レコードの senderId または recipientId フィールドが
-  //                 null に設定されます。この設定により、メンバーが削除されてもメッセージ自体は保持されます。
-  // senderId や recipientId が null になることで、そのメッセージの送信者や受信者が「不明」または
-  // 「削除されたユーザー」であることを示すことができます。
-  // sender と recipient は多対多の関係を示しているので、一人のメンバーが多くのメッセージを送信でき、また多くのメッセージを受信できます。
   sender           Member?   @relation("sender", fields: [senderId], references: [userId], onDelete: SetNull)
   recipient        Member?   @relation("recipient", fields: [recipientId], references: [userId], onDelete: SetNull)
-  // メッセージが読まれた日時。これにより、メッセージが既読か未読かを簡単に判断できます。
   dateRead         DateTime?
   // メッセージを物理的に削除せずに、senderDeleted または recipientDeleted を true に設定することで、各ユーザーの視点でメッセージを
   // 「削除」できます。クエリ時にこれらのフラグを確認することで、「削除された」メッセージを表示から除外できます。
-  // 送信者がメッセージを削除したかどうか。
   senderDeleted    Boolean   @default(false)
-  //  受信者がメッセージを削除したかどうか。
   recipientDeleted Boolean   @default(false)
 }
 

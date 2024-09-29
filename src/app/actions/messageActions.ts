@@ -16,12 +16,9 @@ import { createChatId } from '@/lib/util';
 // form で validation error を表示したいので、ActionResult を return type として使います。
 export async function createMessage(recipientUserId: string, data: MessageSchema): Promise<ActionResult<MessageDto>> {
   try {
-    // 現在ログインしているuserのidを取得。
     const userId = await getAuthUserId();
-
     const validated = messageSchema.safeParse(data);
     if (!validated.success) return { status: 'error', error: validated.error.errors };
-
     const { text } = validated.data;
 
     const message = await prisma.message.create({
@@ -89,8 +86,7 @@ export async function getMessageThread(recipientId: string) {
       const readMessagesIds = messages
         .filter(
           // 以下に未読メッセージであるための条件を書きます。
-          (message) =>
-            message.dateRead === null && message.recipient?.userId === userId && message.sender?.userId === recipientId,
+          (message) => message.dateRead === null && message.recipient?.userId === userId && message.sender?.userId === recipientId,
         )
         // 未読 messages の配列から ID のみを取り出して新しい配列を作成しています。
         .map((unreadMessage) => unreadMessage.id);
