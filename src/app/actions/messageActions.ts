@@ -17,26 +17,32 @@ import { createChatId } from '@/lib/util';
 export async function createMessage(recipientUserId: string, data: MessageSchema): Promise<ActionResult<MessageDto>> {
   try {
     const userId = await getAuthUserId();
+
+    // validation
     const validated = messageSchema.safeParse(data);
     if (!validated.success) return { status: 'error', error: validated.error.errors };
+
+    // extract the form data after the validation
     const { text } = validated.data;
 
     const message = await prisma.message.create({
       data: {
         text,
-        recipientId: recipientUserId,
+        // From the current user
         senderId: userId,
+        // To the recipient user
+        recipientId: recipientUserId,
       },
       select: messageSelect,
     });
 
     const messageDto = mapMessageToMessageDto(message);
 
-    // createChatId()はuserIdとrecipientUserIdを組み合わせてにchannelのIDを作っています。
-    // サーバーがこの関数を実行してメッセージを作成すると、Pusherを通じて'message:new'イベントが発火されます。
+    // サーバーがこの関数を実行してメッセージを作成すると、Pusher を通じて 'message:new' イベントが発火されます。
     // これは、クライアントサイド(MessageList.tsx)で以下のように監視されているイベントです：
     // channelRef.current.bind('message:new', handleNewMessage);
     await pusherServer.trigger(createChatId(userId, recipientUserId), 'message:new', messageDto);
+
     // メッセージの受信者(recipient)に対して「新しいメッセージが届きました」という通知を個人にリアルタイムで送ることができます。
     // private channelの名前は'private-'で始める必要があります。eventの名前に制約はありません。
     await pusherServer.trigger(`private-${recipientUserId}`, 'message:new', messageDto);
@@ -55,7 +61,7 @@ export async function createMessage(recipientUserId: string, data: MessageSchema
 // 101 (Adding the read message feature)
 // 114 (Updating the count based on the event)
 
-// 特定の2人のユーザー間のメッセージスレッドを取得するためのserver actionです。
+// 特定の2人のユーザー間のメッセージスレッドを取得するための server actionです。
 // recipientId は現在のユーザーがチャットをしている相手の ID です。
 export async function getMessageThread(recipientId: string) {
   try {
@@ -65,7 +71,9 @@ export async function getMessageThread(recipientId: string) {
       where: {
         // OR: には配列を指定します。
         OR: [
+          // From the current user To the recipient user
           { senderId: userId, recipientId, senderDeleted: false },
+          // From the recipient user To the current user
           { senderId: recipientId, recipientId: userId, recipientDeleted: false },
         ],
       },
@@ -81,11 +89,7 @@ export async function getMessageThread(recipientId: string) {
     // サーバーサイドで未読の messages を既読にするために、未読の messages の ID を含んだ配列を作ります。
     if (messages.length > 0) {
       const readMessagesIds = messages
-        .filter(
-          // 以下に考慮すべき未読メッセージであるための条件を書きます。
-          (message) => message.dateRead === null && message.recipient?.userId === userId && message.sender?.userId === recipientId,
-        )
-        // 未読 messages の配列から ID のみを取り出して新しい配列を作成しています。
+        .filter((message) => message.dateRead === null && message.recipient?.userId === userId && message.sender?.userId === recipientId)
         .map((unreadMessage) => unreadMessage.id);
 
       // 特定した未読 messages のIDを使用して、データベース内のそれらのメッセージを一括で更新します。
@@ -121,14 +125,10 @@ export async function getMessageThread(recipientId: string) {
 // 131 (Cursor based pagination)
 // 132 (Cursor based pagination Part 2)
 
-// この関数は、ユーザーの受信箱（inbox）または送信箱（outbox）のメッセージを取得するためのものです。
-// container が提供されていなければ、 inbox(受信箱) であるとします。
-// cursor は、次のページの開始点を示す値です。この場合、メッセージの作成日時（created）をカーソルとして使用しています。
-// カーソルは「しおり」のようなものです。「前回ここまで読んだ」という位置を示します。
-
 export async function getMessagesByContainer(container?: string | null, cursor?: string, limit = 10) {
   try {
     const userId = await getAuthUserId();
+    // from or to ?
     const isOutbox = container === 'outbox';
 
     // const conditions = {
@@ -138,16 +138,18 @@ export async function getMessagesByContainer(container?: string | null, cursor?:
 
     let conditions = {};
 
+    // from userId or to userId ?
     if (isOutbox) {
+      // from userId
       conditions = { senderId: userId, senderDeleted: false };
     } else {
+      // to userId
       conditions = { recipientId: userId, recipientDeleted: false };
     }
 
     let dateCondition = {};
-    if (cursor) {
-      dateCondition = { created: { lte: new Date(cursor) } };
-    }
+
+    if (cursor) dateCondition = { created: { lte: new Date(cursor) } };
 
     const messages = await prisma.message.findMany({
       // Spread syntax (...) を使うことで、conditions に加えてさらに条件を指定できます。
@@ -170,10 +172,8 @@ export async function getMessagesByContainer(container?: string | null, cursor?:
     let nextCursor: string | undefined;
 
     // データベースから limit + 1 個の, つまり messages.length 個の messages を取得しています。
-    // もし limit より多くの messages が取得できたなら、まだ次のページがあることを意味します。
+    // もし limit 個より多くの messages が取得できたなら、まだ次のページがあることを意味します。
     if (messages.length > limit) {
-      // 配列の最後の要素を取り除き、その要素を nextItem として保存します。
-      // これにより、現在のページに表示するメッセージ数を limit に調整します。
       const nextItem = messages.pop();
       // nextItem の作成日時を次の cursor として設定します。
       // これが次のページの開始点になります。
@@ -202,14 +202,16 @@ export async function getMessagesByContainer(container?: string | null, cursor?:
 
 // 93 (Adding the delete message action)
 
-// deleteMessage() は、メッセージの「論理削除」と「物理削除」を組み合わせて実装しています。
-// messageId: 削除するメッセージのID, isOutbox: 送信箱（outbox）からの削除かどうかを示すブール値
+// messageId: 削除するメッセージのID, isOutbox: 送信箱（outbox）からの削除かどうか。
 export async function deleteMessage(messageId: string, isOutbox: boolean) {
+  // From the current user or
+  // To the current user?
   const selector = isOutbox ? 'senderDeleted' : 'recipientDeleted';
 
   try {
     const userId = await getAuthUserId();
 
+    // 論理削除を行なっています。
     await prisma.message.update({
       where: { id: messageId },
       data: { [selector]: true },
@@ -219,7 +221,9 @@ export async function deleteMessage(messageId: string, isOutbox: boolean) {
       where: {
         // OR: には配列を指定します。
         OR: [
+          // From the current user
           { senderId: userId, senderDeleted: true, recipientDeleted: true },
+          // To the current user
           { recipientId: userId, senderDeleted: true, recipientDeleted: true },
         ],
       },
@@ -228,8 +232,9 @@ export async function deleteMessage(messageId: string, isOutbox: boolean) {
     // 両方のユーザーが削除したメッセージが存在する場合、それらをデータベースから完全に削除します。
     if (messagesToDelete.length > 0) {
       await prisma.message.deleteMany({
-        // where: { OR: messagesToDelete.map((message) => ({ id: message.id })) },
-        where: { id: {} },
+        // OR: には配列を指定します。
+        where: { OR: messagesToDelete.map((message) => ({ id: message.id })) },
+        // where: { id: {} },
       });
     }
   } catch (error) {
@@ -239,19 +244,15 @@ export async function deleteMessage(messageId: string, isOutbox: boolean) {
 }
 
 // 113 (Getting the unread message count)
-// この server action で取得できる未読のメッセージの件数を<Providers/>でstoreに保存することで、
+// この server action で取得できる未読のメッセージの件数を <Providers/> で store に保存することで、
 // どこからでも未読のメッセージの件数にアクセスできるようになります。
 export async function getUnreadMessageCount() {
   try {
     const userId = await getAuthUserId();
 
-    // 現在のユーザーが受け取って, 現在のユーザーが消去していない, 未読のmessageの個数を取得します。
     return prisma.message.count({
-      where: {
-        recipientId: userId,
-        recipientDeleted: false,
-        dateRead: null,
-      },
+      // To the current user
+      where: { recipientId: userId, recipientDeleted: false, dateRead: null },
     });
   } catch (error) {
     console.log(error);

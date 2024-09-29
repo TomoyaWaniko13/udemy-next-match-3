@@ -58,8 +58,7 @@ model User {
   // そのときに、emailVertified の値に現在の日時を設定します。
   emailVerified DateTime?
   // 150. Social Login part 1
-  // OAuth providers を使う場合、password は必要ないので、
-  // optional にします。
+  // OAuth providers を使う場合、password は必要ないので, optional にします。
   passwordHash  String?
 
   image           String?
