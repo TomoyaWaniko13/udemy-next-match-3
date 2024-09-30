@@ -32,28 +32,31 @@ const MemberCard = ({ member, likeIds }: Props) => {
     try {
       await toggleLikeMember(member.userId, hasLiked);
       setHasLiked(!hasLiked);
+      //
     } catch (error) {
       console.log(error);
+      //
     } finally {
       setLoading(false);
     }
   }
 
   // 56 (Fetching the likes)
+  // ユーザーが「いいね」ボタンをクリックすると、ページ遷移が起こらず、「いいね」の状態のみが変更されます。
+  // カード全体をクリックした場合は、通常通りプロフィールページに遷移します。
   const preventLikeAction = (e: React.MouseEvent) => {
+    // デフォルトのイベント動作をキャンセルします。
+    // この場合、<Card/> 全体がリンクになっているため、デフォルトのイベント動作をキャンセルします。
+    // これにより、「いいね」ボタンをクリックしてもプロフィールページに遷移しなくなります。
     e.preventDefault();
+    // イベントがDOMツリーを通じて親要素に伝播するのを停止します。
+    // これにより、「いいね」ボタンのクリックイベントが <Card/> 全体に伝わらないようにします。
     e.stopPropagation();
   };
 
   return (
     <Card fullWidth as={Link} href={`/members/${member.userId}`} isPressable={true}>
-      <Image
-        isZoomed={true}
-        alt={member.name}
-        width={300}
-        src={member.image || '/images/user.png'}
-        className={'aspect-square object-cover'}
-      />
+      <Image isZoomed={true} alt={member.name} width={300} src={member.image || '/images/user.png'} className={'aspect-square object-cover'} />
       {/* 55 (Creating a like Button) */}
       <div onClick={preventLikeAction}>
         <div className={'absolute top-3 right-3 z-50'}>

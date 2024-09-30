@@ -6,8 +6,7 @@ import { fetchCurrentUserLikeIds, fetchLikedMembers } from '@/app/actions/likeAc
 export const dynamic = 'force-dynamic';
 
 const ListsPage = async ({ searchParams }: { searchParams: { type: string } }) => {
-  const likeIds = await fetchCurrentUserLikeIds();
-  // 引数のquery parameter の値により、return する users の IDs の配列を変更します。
+  const likeIds: string[] = await fetchCurrentUserLikeIds();
   const members = await fetchLikedMembers(searchParams.type);
 
   return <ListsTab members={members} likeIds={likeIds} />;

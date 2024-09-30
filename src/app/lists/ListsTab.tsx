@@ -19,6 +19,7 @@ const ListsTab = ({ members, likeIds }: Props) => {
   const searchParams = new URLSearchParams();
   const router = useRouter();
   const pathname = usePathname();
+  // useTransition is a React Hook that lets you update the state without blocking the UI.
   const [isPending, startTransition] = useTransition();
 
   const tabs = [
@@ -27,30 +28,28 @@ const ListsTab = ({ members, likeIds }: Props) => {
     { id: 'mutual', label: 'Mutual likes' },
   ];
 
-  // この関数の主な目的は、選択されたタブに応じて URL のクエリパラメータを更新することです。
-  // key パラメータを受け取ります。これは選択されたタブの ID を表します。
-  function handleTabChange(key: Key) {
-    // startTransition()は、その中で行われる状態更新を非緊急（non-urgent）として扱うよう React に指示します。
-    // これにより、React はこの更新を他の緊急性の高いタスク（ユーザー入力への反応など）の後に処理することができます。
+  // この関数の主な目的は、選択された Tab に応じて, tabKey を取得して、
+  // URL のクエリパラメータを更新することです。
+  function handleTabChange(tabKey: Key) {
+    //
+    // 重い処理を低優先度の更新としてスケジュール
     startTransition(() => {
       const params = new URLSearchParams(searchParams);
       // 'type' パラメータを選択されたタブの ID に設定します。
-      params.set('type', key.toString());
-      // URL を更新します。新しい URL は現在のパス名（pathname）に、更新されたクエリパラメータ（params.toString()）を追加したものになります。
+      params.set('type', tabKey.toString());
       router.replace(`${pathname}?${params.toString()}`);
     });
+    //
   }
 
+  // NextUI の <Tabs/> の書き方に従って書きます。
+  // https://nextui.org/docs/components/tabs
   return (
     <div className={'flex w-full flex-col mt-10 gap-5'}>
-      <Tabs aria-label={'Like tabs'} items={tabs} color={'secondary'} onSelectionChange={(key) => handleTabChange(key)}>
-        {/* item は 上で定めたtabs 配列の各要素を表します */}
-        {(item) => (
+      <Tabs aria-label={'Like tabs'} items={tabs} color={'secondary'} onSelectionChange={(tabKey: Key) => handleTabChange(tabKey)}>
+        {(item: { id: string; label: string }) => (
           <Tab key={item.id} title={item.label}>
-            {/* isPending は真偽値で、トランジションが進行中かどうかを示します. true の場合、トランジションがまだ完了していないことを意味します。*/}
-            {isPending ? (
-              <LoadingComponent />
-            ) : (
+            {!isPending ? (
               <>
                 {members.length > 0 ? (
                   <div className={'grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-8'}>
@@ -62,6 +61,8 @@ const ListsTab = ({ members, likeIds }: Props) => {
                   <div>No members for this filter</div>
                 )}
               </>
+            ) : (
+              <LoadingComponent />
             )}
           </Tab>
         )}
