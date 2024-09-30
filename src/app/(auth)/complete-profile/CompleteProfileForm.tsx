@@ -12,6 +12,7 @@ import { signIn } from 'next-auth/react';
 
 // 153. Adding a complete profile form for social login
 const CompleteProfileForm = () => {
+  //
   const methods = useForm<ProfileSchema>({
     resolver: zodResolver(profileSchema),
     mode: 'onTouched',
@@ -25,9 +26,7 @@ const CompleteProfileForm = () => {
   const onSubmit = async (data: ProfileSchema) => {
     const result = await completeSocialLoginProfile(data);
 
-    if (result.status === 'success') {
-      signIn(result.data, { callbackUrl: '/members' });
-    }
+    if (result.status === 'success') signIn(result.data, { callbackUrl: '/members' });
   };
 
   return (

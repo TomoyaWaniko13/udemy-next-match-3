@@ -32,7 +32,7 @@ const ResetPasswordForm = () => {
 
   const onSubmit = async (data: ResetPasswordSchema) => {
     // resetPassword()で、 token が有効であれば新しいパスワードに更新します。
-    // result state の値が更新されます。パスワードの更新が成功か失敗を表す値です。
+    // また、result state の値が更新されます。パスワードの更新が成功か失敗を表す値です。
     setResult(await resetPassword(data.password, searchParams.get('token')));
     // フォームをリセットします。
     reset();

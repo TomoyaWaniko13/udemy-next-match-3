@@ -8,21 +8,34 @@ import { pusherServer } from '@/lib/pusher';
 // 116 (Challenge solution)
 
 // isLiked の値に基づいて、targetUser に対してのいいねをつける、もしくはいいねを取り消します。
-export async function toggleLikeMember(targetUserId: string, isLiked: boolean) {
+export async function toggleLikeMember(targetUserId: string, isLiked: boolean): Promise<void> {
   try {
     const userId = await getAuthUserId();
 
     // すでに現在のユーザーが targetUser に対していいねをしていたら、いいねを取り消します。
     if (isLiked) {
       await prisma.like.delete({
-        where: { sourceUserId_targetUserId: { sourceUserId: userId, targetUserId } },
+        where: {
+          sourceUserId_targetUserId: {
+            // From the current user
+            sourceUserId: userId,
+            // To the target user
+            targetUserId,
+          },
+        },
       });
+      //
       // 現在のユーザーが targetUser に対していいねをしていなかったら、いいねを追加します。
       // さらに、targetUser に toast で通知するために、
       // いいねを押した人、 つまり現在のユーザーの properties を select で取得します。
     } else {
       const newLike = await prisma.like.create({
-        data: { sourceUserId: userId, targetUserId },
+        data: {
+          // Form the current user
+          sourceUserId: userId,
+          // To the target user
+          targetUserId,
+        },
         select: { sourceMember: { select: { name: true, image: true, userId: true } } },
       });
 
@@ -41,19 +54,20 @@ export async function toggleLikeMember(targetUserId: string, isLiked: boolean) {
 }
 
 // 54 (Adding the like toggle function)
-// 現在のユーザーがいいねをした users の IDs を配列として return します。
-export async function fetchCurrentUserLikeIds() {
+// 現在のユーザーがいいねをした相手(targetUser)の ID 配列を返却します。
+export async function fetchCurrentUserLikeIds(): Promise<string[]> {
   try {
     const userId = await getAuthUserId();
 
-    // likeIds は 各要素がオブジェクトの配列です。
+    // likeIds は 各要素がオブジェクト { targetUserId: string } の配列です。
     const likeIds: { targetUserId: string }[] = await prisma.like.findMany({
       where: { sourceUserId: userId },
       select: { targetUserId: true },
     });
 
     // like は likeIds 配列の各要素のオブジェクトを表します。
-    return likeIds.map((like) => like.targetUserId);
+    return likeIds.map((like: { targetUserId: string }) => like.targetUserId);
+    //
   } catch (error) {
     console.log(error);
     throw error;
@@ -85,7 +99,7 @@ export async function fetchLikedMembers(type = 'source') {
 
 // 57 (Adding the list actions)
 
-// 現在のユーザーがいいねした members を配列として return します。
+// 現在のユーザーがいいねした member objects を配列として返却します。
 async function fetchSourceLikes(userId: string) {
   // sourceList は 各要素がオブジェクトの配列です。
   const sourceList = await prisma.like.findMany({

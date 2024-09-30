@@ -71,13 +71,13 @@ export async function getMessageThread(recipientId: string) {
       where: {
         // OR: には配列を指定します。
         OR: [
-          // From the current user To the recipient user
+          // From the current user, To the recipient user
           { senderId: userId, recipientId, senderDeleted: false },
-          // From the recipient user To the current user
+          // From the recipient user, To the current user
           { senderId: recipientId, recipientId: userId, recipientDeleted: false },
         ],
       },
-      // メッセージは作成日時の昇順で並べられます。
+      // メッセージは作成日時の昇順(古いものから新しいもの順)で並べられます。
       orderBy: { created: 'asc' },
       select: messageSelect,
     });
@@ -86,29 +86,35 @@ export async function getMessageThread(recipientId: string) {
     // 既読のメッセージの件数を表します。その件数を、未読メッセージの表示の件数から引きます。
     let readCount = 0;
 
-    // サーバーサイドで未読の messages を既読にするために、未読の messages の ID を含んだ配列を作ります。
+    // 取得した messages の中で未読の messages を探して、その messages の ID を配列にします。
     if (messages.length > 0) {
-      const readMessagesIds = messages
-        .filter((message) => message.dateRead === null && message.recipient?.userId === userId && message.sender?.userId === recipientId)
+      const unreadMessagesIds: string[] = messages
+        .filter(
+          (message) =>
+            // Unread
+            message.dateRead === null &&
+            // From the recipient user
+            message.sender?.userId === recipientId &&
+            // To the current user
+            message.recipient?.userId === userId,
+        )
         .map((unreadMessage) => unreadMessage.id);
 
-      // 特定した未読 messages のIDを使用して、データベース内のそれらのメッセージを一括で更新します。
-      // dateReadフィールドに現在の日時を設定することで、これらのメッセージを既読にマークします。
+      // dateRead フィールドに現在の日時を設定することで、unreadMessages を既読にマークします。
       await prisma.message.updateMany({
-        //  'id' が readMessagesIds 配列の中のいずれかの値と一致することを条件としています。
-        where: { id: { in: readMessagesIds } },
+        //  'id' が 'unreadMessagesIds' 配列の中の 'いずれか(in)' の値と一致することを条件としています。
+        where: { id: { in: unreadMessagesIds } },
         data: { dateRead: new Date() },
       });
 
       // 114 (Updating the count based on the event)
-      // 既読になったのメッセージの件数を表します。その件数を、未読メッセージの表示の件数から引きます。
-
-      readCount = readMessagesIds.length;
+      // 既読になったメッセージの件数を表します。その件数を、未読メッセージの表示の件数から引きます。
+      readCount = unreadMessagesIds.length;
 
       // 'message:read' イベントを発火させ、既読になったメッセージのID配列を送信します。
       // クライアントサイド(MessageList.tsx) では、このイベントを以下のように監視しています：
       // channelRef.current.bind('message:read', handleReadMessages);
-      await pusherServer.trigger(createChatId(recipientId, userId), 'messages:read', readMessagesIds);
+      await pusherServer.trigger(createChatId(recipientId, userId), 'messages:read', unreadMessagesIds);
     }
 
     const messagesToReturn = messages.map((message) => mapMessageToMessageDto(message));
@@ -128,7 +134,7 @@ export async function getMessageThread(recipientId: string) {
 export async function getMessagesByContainer(container?: string | null, cursor?: string, limit = 10) {
   try {
     const userId = await getAuthUserId();
-    // from or to ?
+    // From the current user or To the current user?
     const isOutbox = container === 'outbox';
 
     // const conditions = {
@@ -138,18 +144,16 @@ export async function getMessagesByContainer(container?: string | null, cursor?:
 
     let conditions = {};
 
-    // from userId or to userId ?
+    // From the current user or To the current user ?
     if (isOutbox) {
-      // from userId
+      // From the current user
       conditions = { senderId: userId, senderDeleted: false };
     } else {
-      // to userId
+      // To the current user
       conditions = { recipientId: userId, recipientDeleted: false };
     }
 
-    let dateCondition = {};
-
-    if (cursor) dateCondition = { created: { lte: new Date(cursor) } };
+    let dateCondition = cursor ? { created: { lte: new Date(cursor) } } : {};
 
     const messages = await prisma.message.findMany({
       // Spread syntax (...) を使うことで、conditions に加えてさらに条件を指定できます。

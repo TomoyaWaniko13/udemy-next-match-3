@@ -20,52 +20,19 @@ export function timeAgo(date: string) {
 }
 
 // 65 (Adding the server action to update the member)
-// TFieldValues は TypeScript のジェネリック型パラメータです。この関数において、フォームのフィールド値の型を表します。
 export function handleFormServerErrors<TFieldValues extends FieldValues>(
   errorResponse: { error: string | ZodIssue[] },
-  // react-hook-form の setError を使用することで、エラーメッセージを form に表示できます。
   setError: UseFormSetError<TFieldValues>,
 ) {
-  // まず、errorResponse.error が ZodIssue[] 配列かどうか、つまり form の validation が失敗したかどうかをチェックします。
+  //
   if (Array.isArray(errorResponse.error)) {
+    //
     errorResponse.error.forEach((e: any) => {
-      // e.path:
-      // これは通常、エラーが発生したフィールドのパスを表す配列です。
-      // 例えば、 ['name'] や ['address', 'city'] のようになります。
-
-      // .join('.'):
-      // この配列の要素を . で結合して文字列にします。
-      // 例えば、 ['address', 'city'] は 'address.city' になります。
-
-      // as Path<TFieldValues>:
-      // これは TypeScript の型アサーションです。
-      // 結果の文字列を Path<TFieldValues> 型として扱うよう TypeScript に指示しています。
-
-      // Path<TFieldValues>:
-      // これは React Hook Form の型で、フォームのフィールドパスを表します。
-      // TFieldValues はフォームの値の型です。
-
-      // フォームは、ネストされたオブジェクト構造を持つことがあります。例えば：
-      // {
-      //   name: string,
-      //   address: {
-      //     street: string,
-      //     city: string
-      //   }
-      // }
-      // サーバーサイドのバリデーションエラーは通常、このネスト構造を配列として表現します。
-      // 例: address.city のエラーは ['address', 'city'] として返される可能性があります。
-      // React Hook Form は、ネストされたフィールドを表すのにドット記法を使用します。
-      // つまり、address.city のようなフォーマットを期待しています。
-      // サーバーから返された配列形式のパス（例：['address', 'city']）を、
-      // React Hook Form が理解できるドット記法の文字列（例：'address.city'）に変換する必要があります。
-      const fieldName = e.path.join('.') as Path<TFieldValues>;
-      // setError を使用して、該当するフィールドにエラーメッセージを設定します。
-      setError(fieldName, { message: e.message });
+      const errorFieldName = e.path.join('.') as Path<TFieldValues>;
+      setError(errorFieldName, { message: e.message });
     });
+    //
   } else {
-    // エラーが文字列の場合、'root.serverError' というフィールドにエラーメッセージを設定します。
-    // これは通常、フォーム全体に関するエラーを表示するために使用されます。
     setError('root.serverError', { message: errorResponse.error });
   }
 }

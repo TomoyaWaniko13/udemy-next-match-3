@@ -14,8 +14,7 @@ import { getAuthUserId } from '@/app/actions/authActions';
 // 135 (Challenge solution)
 
 // Memberはプロフィール情報(gender, dateOfBrith, city, Photo[]など)を含むmodel
-// getMembers()はserver側で実行されるserver action
-// query stringを使うことで、server側でも状態の変化を検知して、それに基づいてmemberを取得できます。
+// query stringを使うことで、server 側でも状態の変化を検知して、それに基づいて member を取得できます。
 export async function getMembers({
   // default values
   ageRange = '18,100',
@@ -47,11 +46,7 @@ export async function getMembers({
   // 何個アイテムをスキップするか =  １ページ当たりのアイテム数 * (現在のページ - 1)
   const skip = limit * (page - 1);
 
-  let conditions: any[] = [
-    { dateOfBirth: { gte: minDob } },
-    { dateOfBirth: { lte: maxDob } },
-    { gender: { in: selectedGender } },
-  ];
+  let conditions: any[] = [{ dateOfBirth: { gte: minDob } }, { dateOfBirth: { lte: maxDob } }, { gender: { in: selectedGender } }];
 
   if (withPhoto === 'true') {
     conditions.push({ image: { not: null } });

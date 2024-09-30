@@ -32,7 +32,7 @@ const RegisterForm = () => {
   const currentValidationSchema = stepSchemas[activeStep];
 
   // この "methods" variable を, つまり useForm() の全てのメソッドを
-  // <FormProvider/> にパスする必要があります。
+  // <FormProvider/> に渡す必要があります。
   const methods = useForm<RegisterSchema>({
     // step(段階) によって、使う schema を変更します。
     resolver: zodResolver(currentValidationSchema),
@@ -76,12 +76,15 @@ const RegisterForm = () => {
   const onSubmit = async () => {
     // form の入力情報をもとに user を register(登録) します。
     const result = await registerUser(getValues());
+
     // 問題なくユーザー登録できれば、
     if (result.status === 'success') {
       // このページに移動します。
       router.push('/register/success');
+
+      // ユーザー登録に問題があれば、
     } else {
-      // ユーザー登録に問題があれば、handleFormServerErrors を使ってエラーメッセージを表示します。
+      // handleFormServerErrors 関数を使ってエラーメッセージを表示します。
       handleFormServerErrors(result, setError);
     }
   };

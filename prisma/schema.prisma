@@ -173,8 +173,7 @@ model Token {
   // これにより、同じトークンモデルを複数の目的（メール検証、パスワードリセットなど）に使用できます。
   type    TokenType
 
-  // Token は unique であるということです。
-  // つまり、1つの user は 1つの Token しか持てないということです。
+  // Token は unique であるということです。つまり、1つの user は 1つの Token しか持てないということです。
   // ([provider, providerAccountId]) は、provider と providerAccountId の組み合わせは、
   // テーブル内で一意でないといけない、ということです。
   @@unique([email, token])

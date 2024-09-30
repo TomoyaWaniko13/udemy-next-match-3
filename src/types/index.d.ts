@@ -1,6 +1,7 @@
 import { ZodIssue } from 'zod';
 import { Prisma } from '@prisma/client';
 
+// | (Union Type) は、複数の型のうちの1つを取りうることを示します。
 type ActionResult<T> = { status: 'success'; data: T } | { status: 'error'; error: string | ZodIssue[] };
 
 // 84 (Creating a message DTO)

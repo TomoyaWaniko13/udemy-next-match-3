@@ -92,26 +92,21 @@ export async function registerUser(data: RegisterSchema): Promise<ActionResult<U
     // combineRegisterSchema は2つの form に入力された情報を扱います。
     const validated = combineRegisterSchema.safeParse(data);
 
-    if (!validated.success) {
-      // ZodIssue[]
-      return { status: 'error', error: validated.error.errors };
-    }
+    // ZodIssue[]
+    if (!validated.success) return { status: 'error', error: validated.error.errors };
 
-    // form で入力された情報です。
+    // form に入力された情報の validation が OK ならば、form に入力された情報を取得します。
     const { name, email, password, gender, description, dateOfBirth, city, country } = validated.data;
-
-    // パスワードをデータベースに保存するときは hash() します。
-    const hashedPassword = await bcrypt.hash(password, 12);
 
     // すでに email が他のユーザーによって使われているか確認します。
     const existingUser = await prisma.user.findUnique({
       where: { email },
     });
 
-    //  すでに email が使われている場合、エラーメッセージを表示します。
-    if (existingUser) {
-      return { status: 'error', error: 'User already exists' };
-    }
+    //  すでに email が使われている場合、error を返却します。
+    if (existingUser) return { status: 'error', error: 'User already exists' };
+
+    const hashedPassword = await bcrypt.hash(password, 12);
 
     const user = await prisma.user.create({
       data: {
@@ -119,17 +114,7 @@ export async function registerUser(data: RegisterSchema): Promise<ActionResult<U
         email,
         passwordHash: hashedPassword,
         profileComplete: true,
-        // member のデータがプロファイル情報です。
-        member: {
-          create: {
-            name,
-            description,
-            city,
-            country,
-            dateOfBirth: new Date(dateOfBirth),
-            gender,
-          },
-        },
+        member: { create: { name, description, city, country, dateOfBirth: new Date(dateOfBirth), gender } },
       },
     });
 
@@ -157,17 +142,16 @@ export async function getUserById(id: string) {
 
 // 54 (Adding the like toggle function)
 
-// userId が複数回必要になるので、session をもとに userId を取得できるメソッドを
-// 作り、再利用できるようにします。
+// userId が複数回必要になるので、session をもとに
+// userId を取得できるメソッドを作り、ロジックを再利用できるようにします。
 export async function getAuthUserId() {
+  //
   const session = await auth();
   // auth.ts で id を設定しているので、session?.user?.id で
-  // ログインしているユーザーの userId が取得できる。
+  // 現在のユーザーの userId を取得できます。
   const userId = session?.user?.id;
 
-  if (!userId) {
-    throw new Error('Unauthorized');
-  }
+  if (!userId) throw new Error('Unauthorized');
 
   return userId;
 }
@@ -179,26 +163,20 @@ export async function verifyEmail(token: string): Promise<ActionResult<string>> 
     const existingToken = await getTokenByToken(token);
 
     // データベースに指定の token がなければ、その token は有効でありません。
-    if (!existingToken) {
-      return { status: 'error', error: 'Invalid token' };
-    }
+    if (!existingToken) return { status: 'error', error: 'Invalid token' };
 
     // データベースから取得した token が 有効期限内か確認します。
     const hasExpired = new Date() > existingToken.expires;
 
     // データベースから取得した token が 有効期限内でなければ、
     // その token は有効でありません。
-    if (hasExpired) {
-      return { status: 'error', error: 'Token has expired' };
-    }
+    if (hasExpired) return { status: 'error', error: 'Token has expired' };
 
     // トークンに関連付けられたメールアドレスでユーザーを検索します。
     const existingUser = await getUserByEmail(existingToken.email);
 
     // ユーザーが見つからない場合、エラーを返します。
-    if (!existingUser) {
-      return { status: 'error', error: 'User not found' };
-    }
+    if (!existingUser) return { status: 'error', error: 'User not found' };
 
     // token が有効ならば、データベースの User model の
     // emailVerified property を現在の日付で更新します。
@@ -277,12 +255,10 @@ export async function resetPassword(password: string, token: string | null): Pro
     // ユーザーが見つからない場合、その token は有効ではないので、エラーを返します。
     if (!existingUser) return { status: 'error', error: 'User not found' };
 
-    // token が有効であれば、password を更新します。
     const hashedPassword = await bcrypt.hash(password, 12);
 
     // token が有効であれば、password を更新します。
-    // existingUser.id で指定される user を検索して、
-    // その user に対して新しい password を更新します。
+    // existingUser.id で指定される user を検索して、その user に対して新しい password を更新します。
     await prisma.user.update({
       where: { id: existingUser.id },
       data: { passwordHash: hashedPassword },

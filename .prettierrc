@@ -3,5 +3,5 @@
   "singleQuote": true,
   "jsxSingleQuote": true,
   "endOfLine": "auto",
-  "printWidth": 160
+  "printWidth": 150
 }
