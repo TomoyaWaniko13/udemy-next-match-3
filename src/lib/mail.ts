@@ -7,7 +7,6 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
 
 // ユーザーのメールアドレスを検証するためのメールを送信します。
-// ユーザーのメールアドレスと検証用のトークンを引数として受け取ります。
 export async function sendVerificationEmail(email: string, token: string) {
   // 検証用のリンクを生成します。このリンクには、トークンがクエリパラメータとして含まれています。
   // この token がデータベースの token と同じであれば、email が verified されているとわかります。
@@ -28,7 +27,6 @@ export async function sendVerificationEmail(email: string, token: string) {
 
 // 146. Adding the forgot password functionality part 1
 // パスワードリセットのためのメールを送信するための非同期関数です。
-// ユーザーのメールアドレスと検証用のトークンを引数として受け取ります。
 export async function sendPasswordResetEmail(email: string, token: string) {
   // ユーザーは受け取ったメールのリンクをクリックすることで、パスワードリセットページに遷移できます。
   const link = `${baseUrl}/reset-password?token=${token}`;

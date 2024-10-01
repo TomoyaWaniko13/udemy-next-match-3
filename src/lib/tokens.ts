@@ -7,9 +7,7 @@ import { prisma } from '@/lib/prisma';
 // ユーザーが既存のトークンを持っているかどうかを確認するのに使用されます。
 export async function getTokenByEmail(email: string) {
   try {
-    return prisma.token.findFirst({
-      where: { email },
-    });
+    return prisma.token.findFirst({ where: { email } });
   } catch (error) {
     console.log(error);
     throw error;
@@ -20,9 +18,7 @@ export async function getTokenByEmail(email: string) {
 // 引数の token は、ランダムな文字列で Token model の property の1つです。
 export async function getTokenByToken(token: string) {
   try {
-    return prisma.token.findFirst({
-      where: { token },
-    });
+    return prisma.token.findFirst({ where: { token } });
   } catch (error) {
     console.log(error);
     throw error;
@@ -30,11 +26,10 @@ export async function getTokenByToken(token: string) {
 }
 
 // 143. Creating the token functions
-// 新しいトークンを生成し、そのトークンを email と関連付けてデータベースに保存します。
-export async function generateToken(email: string, type: TokenType) {
+export async function generateToken(associatedEmail: string, type: TokenType) {
   //
-  // ランダムな48バイトの16進数文字列としてトークンを生成します。
-  const token = randomBytes(48).toString('hex');
+  // ランダムな48バイトの16進数文字列として token: string を生成します。
+  const token: string = randomBytes(48).toString('hex');
 
   // トークンの有効期限を24時間に設定します。
   // 1秒 (*60)-> 1分 (*60)-> 1時間 (*24)-> 24時間
@@ -42,16 +37,9 @@ export async function generateToken(email: string, type: TokenType) {
 
   // 同じメールアドレスに対する既存のトークンがある場合、それを削除します。
   // 古いトークンを削除することで、アクティブなトークンが1つだけになることを保証します。
-  const existingToken = await getTokenByEmail(email);
-
-  if (existingToken) {
-    await prisma.token.delete({
-      where: { id: existingToken.id },
-    });
-  }
+  const fetchedTokenByEmail = await getTokenByEmail(associatedEmail);
+  if (fetchedTokenByEmail) await prisma.token.delete({ where: { id: fetchedTokenByEmail.id } });
 
   // 新しいトークンをデータベースに保存します。
-  return prisma.token.create({
-    data: { email, token, expires, type },
-  });
+  return prisma.token.create({ data: { email: associatedEmail, token, expires, type } });
 }

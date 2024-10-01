@@ -7,18 +7,17 @@ type Props = {
 };
 
 // 106 (Creating a presence indicator)
-// 受け取った member　がオンラインかどうかを確認して、そうであれば
+// 受け取った member がオンラインかどうかを確認して、そうであれば
 // 小さいDotでオンラインであると表現します。
-// この<PresenceDot/>を配置すれば、どこでもそのユーザーのがオンラインであるか表示できます。
+// この <PresenceDot/> を配置すれば、どこでもそのユーザーのがオンラインであるか表示できます。
 const PresenceDot = ({ member }: Props) => {
-  // membersは現在presence channelにsubscribeしている(=オンラインである)userのIDを含んでいる配列です。
+  // members 変数は現在 presence channel を subscribeしている、
+  // つまりオンラインである user の ID 配列です。
   // state は store のすべての状態を含んでいます。
   const { members } = usePresenceStore((state) => ({
     members: state.members,
   }));
 
-  //　オンラインのuserIdの配列に、受け取ったmemberのuserIdが含まれているか確認します。
-  //　つまり、受け取った member　がオンラインかどうかを確認します。
   // const isOnline = members.indexOf(member.userId) !== -1;
   const isOnline = members.includes(member.userId);
 

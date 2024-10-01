@@ -22,11 +22,11 @@ export const profileSchema = z.object({
     // refine() には関数を渡します。
     .refine(
       (dateString) => {
-        const age = calculateAge(new Date(dateString));
+        const age: number = calculateAge(new Date(dateString));
         return age >= 18;
-      },
+      }, // end of arrow function
       { message: 'You must be at least 18 to use this app' },
-    ),
+    ), // end of refine()
 });
 
 // 141 (Submitting the form)
