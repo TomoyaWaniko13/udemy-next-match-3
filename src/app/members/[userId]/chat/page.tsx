@@ -4,6 +4,7 @@ import { getMessageThread } from '@/app/actions/messageActions';
 import { getAuthUserId } from '@/app/actions/authActions';
 import MessageList from '@/app/members/[userId]/chat/MessageList';
 import { createChatId } from '@/lib/util';
+import { MessageDto } from '@/types';
 
 // 48 (Creating the Member detailed content)
 // 81 (Creating a chat form)
@@ -14,7 +15,7 @@ import { createChatId } from '@/lib/util';
 
 const ChatPage = async ({ params }: { params: { userId: string } }) => {
   const userId = await getAuthUserId();
-  const messages = await getMessageThread(params.userId);
+  const messages: { messages: MessageDto[]; readCount: number } = await getMessageThread(params.userId);
   const chatId = createChatId(userId, params.userId);
 
   return (

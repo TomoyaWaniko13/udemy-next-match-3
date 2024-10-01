@@ -9,24 +9,27 @@ import { Button } from '@nextui-org/react';
 import ProfileForm from '@/app/(auth)/register/ProfileForm';
 import { completeSocialLoginProfile } from '@/app/actions/authActions';
 import { signIn } from 'next-auth/react';
+import { handleFormServerErrors } from '@/lib/util';
 
 // 153. Adding a complete profile form for social login
 const CompleteProfileForm = () => {
   //
-  const methods = useForm<ProfileSchema>({
-    resolver: zodResolver(profileSchema),
-    mode: 'onTouched',
-  });
+  const useFormMethods = useForm<ProfileSchema>({ resolver: zodResolver(profileSchema), mode: 'onTouched' });
 
   const {
     handleSubmit,
+    setError,
     formState: { errors, isSubmitting, isValid },
-  } = methods;
+  } = useFormMethods;
 
   const onSubmit = async (data: ProfileSchema) => {
     const result = await completeSocialLoginProfile(data);
-
-    if (result.status === 'success') signIn(result.data, { callbackUrl: '/members' });
+    // result.data には どの provider を使っているかの情報が含まれています。
+    if (result.status === 'success') {
+      signIn(result.data, { callbackUrl: '/members' });
+    } else {
+      handleFormServerErrors(result, setError);
+    }
   };
 
   return (
@@ -35,7 +38,7 @@ const CompleteProfileForm = () => {
       subHeaderText={'Please complete your profile to continue to the app'}
       headerIcon={RiProfileLine}
       body={
-        <FormProvider {...methods}>
+        <FormProvider {...useFormMethods}>
           <form onSubmit={handleSubmit(onSubmit)}>
             <div className={'space-y-4'}>
               <ProfileForm />

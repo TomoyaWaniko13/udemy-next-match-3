@@ -19,7 +19,7 @@ const ChatForm = () => {
   const router = useRouter();
   // useParams は Next.js のフックの1つです。このフックを使用すると、現在のURLのダイナミックルートパラメータにアクセスできます。
   // userIdはdirectoryの名前と一致している必要があります。
-  const params = useParams<{ userId: string }>();
+  const params: { userId: string } = useParams<{ userId: string }>();
 
   const {
     register,

@@ -1,23 +1,22 @@
-import { Card, CardBody, CardFooter, CardHeader } from '@nextui-org/card';
 import { ReactNode } from 'react';
 import { IconType } from 'react-icons';
-import { Button } from '@nextui-org/react';
+import { Button, Card, CardBody, CardFooter, CardHeader } from '@nextui-org/react';
 
 type Props = {
   headerIcon: IconType;
   headerText: string;
   subHeaderText?: string;
   body?: ReactNode;
+  footer?: ReactNode;
   action?: () => void;
   actionLabel?: string;
-  footer?: ReactNode;
 };
 
 // 141 (Submitting the form)
 
 // <Card/> component を再利用できるようにしています。
 // headerIcon はそのままコンポーネントとなるので、大文字で始まる名前に変更します。
-const CardWrapper = ({ body, headerIcon: Icon, headerText, subHeaderText, action, actionLabel, footer }: Props) => {
+const CardWrapper = ({ headerIcon: Icon, headerText, subHeaderText, body, footer, action, actionLabel }: Props) => {
   return (
     <div className={'flex items-center justify-center h-screen'}>
       <Card className={'w-3/5 mx-auto p-5'}>

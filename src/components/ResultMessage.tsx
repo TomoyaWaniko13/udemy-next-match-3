@@ -12,7 +12,6 @@ const ResultMessage = ({ result }: Props) => {
   if (!result) return null;
 
   return (
-    // server action により、result.status の値が設定されます。
     <div
       className={clsx('p-3 rounded-xl w-full flex items-center justify-center gap-x-2 text-sm', {
         'text-danger-800 bg-danger-50': result.status === 'error',

@@ -10,21 +10,19 @@ import { cloudinary } from '@/lib/cloudinary';
 // 65 (Adding the server action to update the member)
 // 75 (Challenge solution)
 
-// EditForm.tsxからのデータをvalidateしてMemberの情報を更新するserver action.
-// 引数の nameUpdated により、form で name を変更した時に、その変更を user table に保存します。
-// これにより、下の getUserInfoForNav() で変更された name を user table から取得して、
+// <EditForm/> からのデータを validation して Member の情報を更新する server action.
+// <EditForm/> で name を変更した時に、つまり引数の nameUpdated が true の時、その変更を user model に保存します。
+// これにより、下で定義されている getUserInfoForNav() で変更された name を データベースから取得して、
 // <TopNav/> に最新の情報を反映されることができます。
 export async function updateMemberProfile(data: MemberEditSchema, nameUpdated: boolean): Promise<ActionResult<Member>> {
   try {
-    const userId = await getAuthUserId();
-
     const validated = memberEditSchema.safeParse(data);
-
     if (!validated.success) return { status: 'error', error: validated.error.errors };
 
     const { name, description, city, country } = validated.data;
 
-    // 75で追加。
+    const userId = await getAuthUserId();
+
     if (nameUpdated) {
       await prisma.user.update({
         where: { id: userId },
@@ -32,7 +30,7 @@ export async function updateMemberProfile(data: MemberEditSchema, nameUpdated: b
       });
     }
 
-    // Member modelの全てのpropertiesを更新しなくても良い。
+    //  name, description, city, country だけを更新します。
     const member = await prisma.member.update({
       where: { userId },
       data: { name, description, city, country },
@@ -41,7 +39,6 @@ export async function updateMemberProfile(data: MemberEditSchema, nameUpdated: b
     return { status: 'success', data: member };
   } catch (error) {
     console.log(error);
-
     return { status: 'error', error: 'Something went wrong' };
   }
 }
@@ -58,6 +55,7 @@ export async function addImage(url: string, publicId: string) {
       where: { userId },
       data: { photos: { create: [{ url, publicId }] } },
     });
+    //
   } catch (error) {
     console.log(error);
     throw error;
@@ -116,12 +114,10 @@ export async function deleteImage(photo: Photo) {
 
 // 75 (Challenge solution)
 
-// main の写真を変更した時、<TopNav/> で写真の表示を変更するために使います。
-// server side から session cookie を編集して session cookie の
-// name と image を変更できないため、client side から session cookieを
-// 利用して、変更された name と image を取得することはできません。
-// なので、getUserInfoForNav() <TopNav/> で使用される、
-// name と image を return する必要があります。
+// main の写真を変更した時、<TopNav/> で写真の表示を変更するために使います。サーバーサイドから session cookie を
+// 編集して session cookie の name と image を変更できないため、クライアントサイドから session cookie の
+// 変更された name と image を取得することはできません。なので、getUserInfoForNav() によって、 <TopNav/> で使用される、
+// 更新された name と image を データベースから返却する必要があります。
 export async function getUserInfoForNav() {
   try {
     const userId = await getAuthUserId();
@@ -131,6 +127,7 @@ export async function getUserInfoForNav() {
       where: { id: userId },
       select: { name: true, image: true },
     });
+    //
   } catch (error) {
     console.log(error);
     throw error;

@@ -18,11 +18,10 @@ export async function createMessage(recipientUserId: string, data: MessageSchema
   try {
     const userId = await getAuthUserId();
 
-    // validation
+    // validation が失敗したら、error を返却します。
     const validated = messageSchema.safeParse(data);
     if (!validated.success) return { status: 'error', error: validated.error.errors };
 
-    // extract the form data after the validation
     const { text } = validated.data;
 
     const message = await prisma.message.create({
@@ -38,8 +37,7 @@ export async function createMessage(recipientUserId: string, data: MessageSchema
 
     const messageDto = mapMessageToMessageDto(message);
 
-    // サーバーがこの関数を実行してメッセージを作成すると、Pusher を通じて 'message:new' イベントが発火されます。
-    // これは、クライアントサイド(MessageList.tsx)で以下のように監視されているイベントです：
+    // クライアントサイド(MessageList.tsx)で以下のように監視されているイベントです：
     // channelRef.current.bind('message:new', handleNewMessage);
     await pusherServer.trigger(createChatId(userId, recipientUserId), 'message:new', messageDto);
 
@@ -208,8 +206,7 @@ export async function getMessagesByContainer(container?: string | null, cursor?:
 
 // messageId: 削除するメッセージのID, isOutbox: 送信箱（outbox）からの削除かどうか。
 export async function deleteMessage(messageId: string, isOutbox: boolean) {
-  // From the current user or
-  // To the current user?
+  // From the current user or To the current user?
   const selector = isOutbox ? 'senderDeleted' : 'recipientDeleted';
 
   try {

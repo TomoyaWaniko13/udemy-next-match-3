@@ -21,19 +21,18 @@ export function timeAgo(date: string) {
 
 // 65 (Adding the server action to update the member)
 export function handleFormServerErrors<TFieldValues extends FieldValues>(
-  errorResponse: { error: string | ZodIssue[] },
+  errorResponse: { error: ZodIssue[] | string },
   setError: UseFormSetError<TFieldValues>,
 ) {
   //
   if (Array.isArray(errorResponse.error)) {
-    //
     errorResponse.error.forEach((e: any) => {
       const errorFieldName = e.path.join('.') as Path<TFieldValues>;
       setError(errorFieldName, { message: e.message });
     });
     //
   } else {
-    setError('root.serverError', { message: errorResponse.error });
+    setError('root.serverError', { message: errorResponse.error as string });
   }
 }
 

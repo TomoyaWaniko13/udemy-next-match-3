@@ -26,23 +26,17 @@ const MessageList = ({ initialMessages, currentUserId, chatId }: Props) => {
   // useEffect()をstrict modeで2回実行させないためのlogicです。
   const setReadCount = useRef(false);
 
-  // useState() でスレッドに表示するメッセージの状態を管理します。
-  // これにより、Pusherからの通知でメッセージを追加できます。
   const [messages, setMessages] = useState(initialMessages.messages);
 
-  // store の updateUnreadCount() では、Pusher の通知に応じて未読のメッセージの件数を更新します。
-  // これにより、画面にその更新を反映できます。
   const { updateUnreadCount } = useMessageStore((state) => ({
     updateUnreadCount: state.updateUnreadCount,
   }));
 
   const channelRef = useRef<Channel | null>(null);
 
-  // Pusher の event に応じて、既読になったメッセージの件数だけ、現在未読のメッセージの件数から引きます。
   useEffect(() => {
     // useEffect()をstrict modeで2回実行させないためのlogicです。
     if (!setReadCount.current) {
-      // 既読になったメッセージの件数だけ、現在未読のメッセージの件数から引きます。
       updateUnreadCount(-initialMessages.readCount);
       // useEffect()をstrict modeで2回実行させないためのlogicです。
       setReadCount.current = true;
@@ -62,14 +56,10 @@ const MessageList = ({ initialMessages, currentUserId, chatId }: Props) => {
   const handleReadMessages = useCallback((messageIds: string[]) => {
     setMessages((prevState) =>
       // 配列の各要素を加工したいので map を使います。
-      prevState.map((message) =>
-        messageIds.includes(message.id) ? { ...message, dateRead: formatShortDateTime(new Date()) } : message,
-      ),
+      prevState.map((message) => (messageIds.includes(message.id) ? { ...message, dateRead: formatShortDateTime(new Date()) } : message)),
     );
     setMessages((prevState) =>
-      prevState.map((message) =>
-        messageIds.includes(message.id) ? { ...message, dateRead: formatShortDateTime(new Date()) } : message,
-      ),
+      prevState.map((message) => (messageIds.includes(message.id) ? { ...message, dateRead: formatShortDateTime(new Date()) } : message)),
     );
   }, []);
 

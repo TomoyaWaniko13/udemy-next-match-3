@@ -27,7 +27,6 @@ const RegisterForm = () => {
 
   // form は 2段階(2 steps) あるので、その状態を管理します。 0から始めます。
   const [activeStep, setActiveStep] = useState(0);
-
   // step(段階) によって、使う schema を変更します。
   const currentValidationSchema = stepSchemas[activeStep];
 
@@ -74,17 +73,11 @@ const RegisterForm = () => {
 
   // onNext() で使われます。
   const onSubmit = async () => {
-    // form の入力情報をもとに user を register(登録) します。
     const result = await registerUser(getValues());
 
-    // 問題なくユーザー登録できれば、
     if (result.status === 'success') {
-      // このページに移動します。
       router.push('/register/success');
-
-      // ユーザー登録に問題があれば、
     } else {
-      // handleFormServerErrors 関数を使ってエラーメッセージを表示します。
       handleFormServerErrors(result, setError);
     }
   };
@@ -107,7 +100,6 @@ const RegisterForm = () => {
             <div className={'space-y-4'}>
               {/* step(段階) によって、使う form を変更します。*/}
               {getStepContent(activeStep)}
-              {/* 29 (Handling errors in the form Part 2) */}
               {errors.root?.serverError && <p className={'text-danger text-sm'}>{errors.root.serverError.message}</p>}
               {/* <Button/> などを横並びにします。 */}
               <div className={'flex flex-row items-center gap-6'}>
