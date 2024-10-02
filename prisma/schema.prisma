@@ -51,20 +51,18 @@ model Account {
 model User {
   // 33 (Usign NextAuth callbacks)
   // token の sub field がこの id の値と同じである。
-  id            String    @id @default(cuid())
-  name          String?
-  email         String?   @unique
+  id              String    @id @default(cuid())
+  name            String?
+  email           String?   @unique
   // email に関連づけられた Token が有効であれば、その email は認証されます。
   // そのときに、emailVertified の値に現在の日時を設定します。
-  emailVerified DateTime?
+  emailVerified   DateTime?
   // 150. Social Login part 1
   // OAuth providers を使う場合、password は必要ないので, optional にします。
-  passwordHash  String?
-
+  passwordHash    String?
   image           String?
   // 142 (Setting up tokens and resetting the Database)
-  // gender, dateOfBirth など、フィルターに
-  // 必要な情報をユーザーが入力したかを表します。
+  // gender, dateOfBirth など、フィルターに必要な情報をユーザーが入力したかを表します。
   profileComplete Boolean   @default(false)
   // 157. Adding the roles to Prisma
   role            Role      @default(MEMBER)
@@ -77,35 +75,31 @@ model User {
 // Member は profile 情報(gender, dateOfBrith, city, Photo[]など) を含む model
 // 1つの Member は1つの User と relationship を持つ。
 model Member {
-  id          String   @id @default(cuid())
+  id                String    @id @default(cuid())
   // foregin key
-  userId      String   @unique
-  name        String
-  gender      String
-  dateOfBirth DateTime
-  created     DateTime @default(now())
-  updated     DateTime @default(now())
-  description String
-  city        String
-  country     String
+  userId            String    @unique
+  name              String
+  gender            String
+  dateOfBirth       DateTime
+  created           DateTime  @default(now())
+  updated           DateTime  @default(now())
+  description       String
+  city              String
+  country           String
   // main imageのurl
-  image       String?
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  image             String?
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   // 対多（one-to-many）の関係を表現しています：
   // 1人のMember が複数のPhoto を持つことができます。
   // 逆に言えば、各Photo は1人のMember にのみ属します。
-  photos      Photo[]
-
+  photos            Photo[]
   // 53 (Updating the Prisma schema for a many to many relationship)
-
   // このメンバーが「いいね」をした他のメンバーのリストを表します。
   // つまり、このメンバーが「いいね」の送信元（source）となるケースです。
-  sourceLikes Like[] @relation("source")
-
+  sourceLikes       Like[]    @relation("source")
   // このメンバーが他のメンバーから「いいね」をされたリストを表します。
   // つまり、このメンバーが「いいね」の対象（target）となるケースです。
-  targetLikes Like[] @relation("target")
-
+  targetLikes       Like[]    @relation("target")
   // 80 (Setting up Prisma for messages)
   senderMessages    Message[] @relation("sender")
   recipientMessages Message[] @relation("recipient")

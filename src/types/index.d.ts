@@ -6,8 +6,7 @@ type ActionResult<T> = { status: 'success'; data: T } | { status: 'error'; error
 
 // 84 (Creating a message DTO)
 // MessageWithSenderRecipient 型は、Prismaの型生成機能を利用して作成された型です。
-// Messageモデルに対して特定の選択（select）を行った結果の型を生成します。
-// Message modelのpropertyは全て選択されていないので,この MessageWithSenderRecipient 型を作ります。
+// messageActions.ts において、Messageモデルに対して特定の選択（select）を行った結果の型を生成します。
 type MessageWithSenderRecipient = Prisma.MessageGetPayload<{
   select: {
     id: true;
