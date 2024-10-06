@@ -27,6 +27,7 @@ const RegisterForm = () => {
 
   // form は 2段階(2 steps) あるので、その状態を管理します。 0から始めます。
   const [activeStep, setActiveStep] = useState(0);
+
   // step(段階) によって、使う schema を変更します。
   const currentValidationSchema = stepSchemas[activeStep];
 
@@ -93,7 +94,7 @@ const RegisterForm = () => {
       </CardHeader>
 
       <CardBody>
-        {/* react hook form の <FromProvider/> で囲むことにより、状態を共有できるようになります。*/}
+        {/* react hook form の <FormProvider/> で囲むことにより、状態を共有できるようになります。*/}
         {/* <FormProvider/> は useForm() の全てのメソッドが必要なので、{...methods} で渡します。*/}
         <FormProvider {...methods}>
           <form onSubmit={handleSubmit(onNext)}>

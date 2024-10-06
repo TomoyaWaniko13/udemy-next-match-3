@@ -14,18 +14,19 @@ import { handleFormServerErrors } from '@/lib/util';
 // 153. Adding a complete profile form for social login
 const CompleteProfileForm = () => {
   //
-  const useFormMethods = useForm<ProfileSchema>({ resolver: zodResolver(profileSchema), mode: 'onTouched' });
+  const methods = useForm<ProfileSchema>({ resolver: zodResolver(profileSchema), mode: 'onTouched' });
 
   const {
     handleSubmit,
     setError,
     formState: { errors, isSubmitting, isValid },
-  } = useFormMethods;
+  } = methods;
 
   const onSubmit = async (data: ProfileSchema) => {
     const result = await completeSocialLoginProfile(data);
-    // result.data には どの provider を使っているかの情報が含まれています。
+
     if (result.status === 'success') {
+      // result.data には どの provider を使っているかの情報が含まれています。
       signIn(result.data, { callbackUrl: '/members' });
     } else {
       handleFormServerErrors(result, setError);
@@ -38,7 +39,7 @@ const CompleteProfileForm = () => {
       subHeaderText={'Please complete your profile to continue to the app'}
       headerIcon={RiProfileLine}
       body={
-        <FormProvider {...useFormMethods}>
+        <FormProvider {...methods}>
           <form onSubmit={handleSubmit(onSubmit)}>
             <div className={'space-y-4'}>
               <ProfileForm />

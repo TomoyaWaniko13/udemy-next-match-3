@@ -15,7 +15,7 @@ const ProfileForm = () => {
     formState: { errors },
   } = useFormContext();
 
-  const genderList = [
+  const genderList: { label: string; value: string }[] = [
     { label: 'Male', value: 'male' },
     { label: 'Female', value: 'female' },
   ];
