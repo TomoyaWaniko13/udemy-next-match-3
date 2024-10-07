@@ -28,11 +28,6 @@ const MessageBox = ({ message, currentUserId }: Props) => {
   // messageEndRefは、メッセージリストの最後に配置された空のdiv要素を参照します。
   const messageEndRef = useRef<HTMLDivElement>(null);
 
-  // レンダリングプロセス中にDOMを直接操作すると、Reactの差分計算や更新プロセスと競合する可能性があります。
-  // これにより、予期しない動作や、パフォーマンスの低下、さらにはエラーが発生する可能性があります。
-  // なので、DOMの操作（ここではスクロール）はレンダリング完了後に行う必要があります。
-  // useEffectは、コンポーネントがレンダリングされた後に実行されます.
-  // 非同期の性質：メッセージの追加やDOMの更新が非同期で行われる可能性があるため、それらが完了した後にスクロールを調整する必要があります。
   useEffect(() => {
     // useRef によって作成された ref オブジェクトの current プロパティは、その ref が参照している実際の DOM 要素を指します。
     // if (messageEndRef.current) のチェックは、DOM 要素が実際に存在することを確認しています。
@@ -41,7 +36,7 @@ const MessageBox = ({ message, currentUserId }: Props) => {
       // { behavior: 'smooth' } オプションは、スクロールをスムーズなアニメーションで行うように指定しています。
       messageEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
-  }, [messageEndRef]);
+  }, []);
 
   // メッセージを送ったユーザーがオンラインかどうか表示します。
   const renderAvatar = () => {
