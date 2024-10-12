@@ -13,8 +13,7 @@ import { useFilters } from '@/hooks/useFilters';
 const Filters = () => {
   // この component で使うロジックの部分を、useFilters() custom hook から取得します。
   // filters は FilterStore から取得しています。
-  const { genderList, orderByList, filters, selectAge, selectGender, selectOrder, selectWithPhoto, isPending } =
-    useFilters();
+  const { genderList, orderByList, filters, selectAge, selectGender, selectOrder, selectWithPhoto, isPending } = useFilters();
 
   return (
     <div className={'shadow-md py-2'}>
@@ -28,12 +27,7 @@ const Filters = () => {
         <div className={'flex gap-2 items-center'}>
           <div>Gender:</div>
           {genderList.map(({ value, icon: Icon }) => (
-            <Button
-              key={value}
-              size={'sm'}
-              color={filters.gender.includes(value) ? 'secondary' : 'default'}
-              onClick={() => selectGender(value)}
-            >
+            <Button key={value} size={'sm'} color={filters.gender.includes(value) ? 'secondary' : 'default'} onClick={() => selectGender(value)}>
               <Icon size={24} />
             </Button>
           ))}
@@ -59,7 +53,7 @@ const Filters = () => {
           <Switch color={'secondary'} defaultSelected={true} size={'sm'} onChange={selectWithPhoto} />
         </div>
 
-        {/*　<Select/> が width の 1/4を占めるようにします。　*/}
+        {/* <Select/> が width の 1/4を占めるようにします。　*/}
         <div className={'w-1/4'}>
           {/* NextUIの<Select/>について: */}
           {/* https://nextui.org/docs/components/select */}

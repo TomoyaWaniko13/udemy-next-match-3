@@ -1,8 +1,7 @@
 'use client';
 
 import { Member } from '@prisma/client';
-import { Card, Image } from '@nextui-org/react';
-import { CardFooter } from '@nextui-org/card';
+import { Card, CardFooter, Image } from '@nextui-org/react';
 import Link from 'next/link';
 import { calculateAge } from '@/lib/util';
 import LikeButton from '@/components/LikeButton';
@@ -44,6 +43,7 @@ const MemberCard = ({ member, likeIds }: Props) => {
   // 56 (Fetching the likes)
   // ユーザーが「いいね」ボタンをクリックすると、ページ遷移が起こらず、「いいね」の状態のみが変更されます。
   // カード全体をクリックした場合は、通常通りプロフィールページに遷移します。
+
   const preventLikeAction = (e: React.MouseEvent) => {
     // デフォルトのイベント動作をキャンセルします。
     // この場合、<Card/> 全体がリンクになっているため、デフォルトのイベント動作をキャンセルします。
@@ -55,8 +55,8 @@ const MemberCard = ({ member, likeIds }: Props) => {
   };
 
   return (
-    <Card fullWidth as={Link} href={`/members/${member.userId}`} isPressable={true}>
-      <Image isZoomed={true} alt={member.name} width={300} src={member.image || '/images/user.png'} className={'aspect-square object-cover'} />
+    <Card fullWidth as={Link} href={`/members/${member.userId}`} isPressable>
+      <Image isZoomed alt={member.name} width={300} src={member.image || '/images/user.png'} className={'aspect-square object-cover'} />
       {/* 55 (Creating a like Button) */}
       <div onClick={preventLikeAction}>
         <div className={'absolute top-3 right-3 z-50'}>

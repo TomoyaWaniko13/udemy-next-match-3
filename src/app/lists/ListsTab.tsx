@@ -31,7 +31,6 @@ const ListsTab = ({ members, likeIds }: Props) => {
   // この関数の主な目的は、選択された Tab に応じて, tabKey を取得して、
   // URL のクエリパラメータを更新することです。
   function handleTabChange(tabKey: Key) {
-    //
     // 重い処理を低優先度の更新としてスケジュール
     startTransition(() => {
       const params = new URLSearchParams(searchParams);

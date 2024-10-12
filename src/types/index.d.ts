@@ -47,7 +47,6 @@ type UserFilters = {
 };
 
 // 128 (Adding a pagination store)
-// これらの値が query parameter として設定されます。?pageSize=3&pageNumber=1
 type PagingParams = {
   // 1ページに表示するアイテムの数です。
   pageSize: number;

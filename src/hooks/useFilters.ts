@@ -14,13 +14,11 @@ import usePaginationStore from '@/hooks/usePaginationStore';
 // Filters.tsx で使うロジックをここに記述しています。
 export const useFilters = () => {
   const genderList = [
-    // value を key として扱います。
     { value: 'male', icon: FaMale },
     { value: 'female', icon: FaFemale },
   ];
 
   const orderByList = [
-    // value を key として扱います。
     { value: 'updated', label: 'Last active' },
     { value: 'created', label: 'Newest members' },
   ];
@@ -35,16 +33,16 @@ export const useFilters = () => {
   // これにより、別のページに移動しても query parameter の状態を保持できます。
   const { filters, setFilters } = useFilterStore();
 
+  // これらの変数は、<Filters/> で変更できる query parameter の状態を管理するための store で管理されています。
+  // これにより、別のページに移動しても query parameter の状態を保持できます。
+  const { gender, ageRange, orderBy, withPhoto } = filters;
+
   // pagination に基づいて query parameter を変更するために、usePaginationStore() を使います。
   const { pageNumber, pageSize, setPage } = usePaginationStore((state) => ({
     pageNumber: state.pagination.pageNumber,
     pageSize: state.pagination.pageSize,
     setPage: state.setPageNumber,
   }));
-
-  // これらの変数は、<Filters/> で変更できる query parameter の状態を管理するための store で管理されています。
-  // これにより、別のページに移動しても query parameter の状態を保持できます。
-  const { gender, ageRange, orderBy, withPhoto } = filters;
 
   // 130 (Adding the pagination functionality)
   useEffect(() => {
@@ -56,18 +54,13 @@ export const useFilters = () => {
   }, [gender, ageRange, orderBy, setPage, withPhoto]);
 
   useEffect(() => {
-    // URLの更新のような非緊急の状態更新を低優先度のタスクとしてマークします。
-    // これにより、より重要なUIの更新（例：ユーザー入力への即時反応）が遅延しないようにします。
-    // フィルターが変更されるたびにURLが更新されますが、useTransition()を使用することで、
-    // この更新処理中もUIは反応的で操作可能な状態を保ちます。
-    // さらに、isPendingフラグを提供し、更新プロセスの進行中であることをUIに示すことができます。
-    // これにより、ユーザーに視覚的なフィードバックを与えることが可能になります。
     startTransition(() => {
       const searchParams = new URLSearchParams();
 
       // query parameter を更新します。
       // %2C is the URL encoded version of a comma.
       if (gender) searchParams.set('gender', gender.join(','));
+
       // ageRangeは、[37, 65] というふうに取得されます。toString() を適用すると、'37,65' となります。
       if (ageRange) searchParams.set('ageRange', ageRange.toString());
       if (orderBy) searchParams.set('orderBy', orderBy);
@@ -101,10 +94,10 @@ export const useFilters = () => {
     setFilters('ageRange', ageRangeValue);
   };
 
-  // <Select/>　で選ばれた値をもとにして、FilterStore で管理されている値  を更新します。
+  // <Select/> で選ばれた値をもとにして、FilterStore で管理されている値を更新します。
   // NextUI の Selection を引数にとります。
   const handleOrderSelect = (orderByValue: Selection) => {
-    // Selection = 'all' | Set<Key>　ですが、今回は 'all' は使われません。
+    // Selection = 'all' | Set<Key> ですが、今回は 'all' は使われません。
     // なので、Set<Key> である場合に処理を開始します。
     if (orderByValue instanceof Set) {
       const params = new URLSearchParams(searchParams);

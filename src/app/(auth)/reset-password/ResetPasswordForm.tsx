@@ -13,6 +13,7 @@ import { ResetPasswordSchema, resetPasswordSchema } from '@/lib/schemas/resetPas
 import { useSearchParams } from 'next/navigation';
 
 // 148. Adding the forgot password functionality part 3
+
 // mail.ts の sendPasswordResetEmail() により、token 文字列を query parameter に設定したリンクが、
 // パスワードをリセットしたいユーザーに送られます。 そのリンクをクリックすると、この form が表示されます。
 // この form にパスワードを入力すると、resetPassword() により新しいパスワードを設定できます。
