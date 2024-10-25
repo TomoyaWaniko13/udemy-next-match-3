@@ -25,26 +25,21 @@ export default auth((req) => {
   //     これは二重否定演算子です。JavaScriptでは、値を真偽値（boolean）に変換するためによく使用されます。
   const isLoggedIn = !!req.auth;
 
+  // req.auth は Session オブジェクトです。なので、user.profileCompleteを取得できます。
+  const isProfileComplete = req.auth?.user.profileComplete;
+
+  // req.auth は Session オブジェクトです。なので、user.role を取得できます。
+  const isAdmin = req.auth?.user.role === 'ADMIN';
+
   // nextUrl.pathname:
   // Given a request to /home, pathname is /home
   const isPublic = publicRoutes.includes(nextUrl.pathname);
   const isAuthRoute = authRoutes.includes(nextUrl.pathname);
-
-  // req.auth は Session オブジェクトです。
-  // なので、user.profileCompleteを取得できます。
-  const isProfileComplete = req.auth?.user.profileComplete;
-
-  // req.auth は Session オブジェクトです。
-  const isAdmin = req.auth?.user.role === 'ADMIN';
   const isAdminRoute = nextUrl.pathname.startsWith('/admin');
 
-  if (isPublic || isAdmin) {
-    return NextResponse.next();
-  }
+  if (isPublic || isAdmin) return NextResponse.next();
 
-  if (isAdminRoute && !isAdmin) {
-    return NextResponse.redirect(new URL('/', nextUrl));
-  }
+  if (isAdminRoute && !isAdmin) return NextResponse.redirect(new URL('/', nextUrl));
 
   if (isAuthRoute) {
     if (isLoggedIn) {
@@ -53,13 +48,10 @@ export default auth((req) => {
     return NextResponse.next();
   }
 
-  if (!isPublic && !isLoggedIn) {
-    return NextResponse.redirect(new URL('/login', nextUrl));
-  }
+  if (!isPublic && !isLoggedIn) return NextResponse.redirect(new URL('/login', nextUrl));
 
   // (Social login を利用するとこのケースが発生します)
-  // ログインしているが、プロフィール情報を入力していなくて、
-  // プロフィール情報入力ページ以外にアクセスしようとした場合、
+  // ログインしているが、プロフィール情報を入力していなくて、プロフィール情報入力ページ以外にアクセスしようとした場合
   if (isLoggedIn && !isProfileComplete && nextUrl.pathname !== '/complete-profile') {
     return NextResponse.redirect(new URL('/complete-profile', nextUrl));
   }

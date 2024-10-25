@@ -16,6 +16,8 @@ import { ZodIssue } from 'zod';
 // 143. Creating the token functions
 // 144. Adding an email provider
 
+// documentation に従ってかきます:
+// https://nextjs.org/docs/app/building-your-application/authentication#implementing-authentication
 // Auth.js の signIn を使って、<LoginForm/> の入力情報の email, password をもとにログインします。
 export async function signInUser(data: LoginSchema): Promise<ActionResult<string>> {
   const userByEmail = await getUserByEmail(data.email);

@@ -31,10 +31,8 @@ const MemberCard = ({ member, likeIds }: Props) => {
     try {
       await toggleLikeMember(member.userId, hasLiked);
       setHasLiked(!hasLiked);
-      //
     } catch (error) {
       console.log(error);
-      //
     } finally {
       setLoading(false);
     }

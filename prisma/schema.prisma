@@ -40,7 +40,8 @@ model Account {
   id_token          String? @db.Text
   // セッション状態情報（一部のプロバイダーで使用）
   session_state     String?
-  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
 }
@@ -50,71 +51,63 @@ model Account {
 // https://authjs.dev/getting-started/adapters/prisma
 model User {
   // 33 (Usign NextAuth callbacks)
-  // token の sub field がこの id の値と同じである。
+  // token の sub field がこの id の値と同じです。
   id              String    @id @default(cuid())
   name            String?
   email           String?   @unique
-  // email に関連づけられた Token が有効であれば、その email は認証されます。
-  // そのときに、emailVertified の値に現在の日時を設定します。
+  // email に関連づけられた Token が有効であれば、その email は認証されます。そのときに、emailVertified の値に現在の日時を設定します。
   emailVerified   DateTime?
-  // 150. Social Login part 1
   // OAuth providers を使う場合、password は必要ないので, optional にします。
   passwordHash    String?
   image           String?
-  // 142 (Setting up tokens and resetting the Database)
   // gender, dateOfBirth など、フィルターに必要な情報をユーザーが入力したかを表します。
   profileComplete Boolean   @default(false)
   // 157. Adding the roles to Prisma
   role            Role      @default(MEMBER)
-  // 対多（one-to-many）の関係を表現しています：
-  accounts        Account[]
-  member          Member?
+
+  member   Member?
+  accounts Account[]
 }
 
 // 40 (Updating the prisma schema)
-// Member は profile 情報(gender, dateOfBrith, city, Photo[]など) を含む model
-// 1つの Member は1つの User と relationship を持つ。
+// 53 (Updating the Prisma schema for a many to many relationship)
+// 80 (Setting up Prisma for messages)
+
+// Member は profile 情報(gender, dateOfBrith, city, Photo[]など) を含む model です。
 model Member {
-  id                String    @id @default(cuid())
+  id          String   @id @default(cuid())
   // foregin key
-  userId            String    @unique
-  name              String
-  gender            String
-  dateOfBirth       DateTime
-  created           DateTime  @default(now())
-  updated           DateTime  @default(now())
-  description       String
-  city              String
-  country           String
+  userId      String   @unique
+  name        String
+  gender      String
+  dateOfBirth DateTime
+  created     DateTime @default(now())
+  updated     DateTime @default(now())
+  description String
+  city        String
+  country     String
   // main imageのurl
-  image             String?
+  image       String?
+
   user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  // 対多（one-to-many）の関係を表現しています：
-  // 1人のMember が複数のPhoto を持つことができます。
-  // 逆に言えば、各Photo は1人のMember にのみ属します。
   photos            Photo[]
-  // 53 (Updating the Prisma schema for a many to many relationship)
-  // このメンバーが「いいね」をした他のメンバーのリストを表します。
-  // つまり、このメンバーが「いいね」の送信元（source）となるケースです。
+  // このメンバーが「いいね」をした他のメンバーのリストを表します。つまり、このメンバーが「いいね」の送信元（source）となるケースです。
   sourceLikes       Like[]    @relation("source")
-  // このメンバーが他のメンバーから「いいね」をされたリストを表します。
-  // つまり、このメンバーが「いいね」の対象（target）となるケースです。
+  // このメンバーが他のメンバーから「いいね」をされたリストを表します。つまり、このメンバーが「いいね」の対象（target）となるケースです。
   targetLikes       Like[]    @relation("target")
-  // 80 (Setting up Prisma for messages)
   senderMessages    Message[] @relation("sender")
   recipientMessages Message[] @relation("recipient")
 }
 
 // 40 (Updating the prisma schema)
+// 70. Adding an image upload button
+// 161. Adding the photo moderation functionality part 1
 model Photo {
   id         String  @id @default(cuid())
   url        String
-  // 70. Adding an image upload button
-  // publicId は ユニークなstring と
-  // Cloudinary上で保存されるフォルダ一の名前を組み合わせたものです。
+  // publicId は ユニークな string と Cloudinary 上で保存されるフォルダ一の名前を組み合わせたものです。
   // publicId が null であれば、その Photo は file system 上の Photo です。
   publicId   String?
-  // 161. Adding the photo moderation functionality part 1
   isApproved Boolean @default(false)
 
   memberId String
@@ -142,15 +135,16 @@ model Message {
   id               String    @id @default(cuid())
   text             String
   created          DateTime  @default(now())
-  senderId         String?
-  recipientId      String?
-  sender           Member?   @relation("sender", fields: [senderId], references: [userId], onDelete: SetNull)
-  recipient        Member?   @relation("recipient", fields: [recipientId], references: [userId], onDelete: SetNull)
   dateRead         DateTime?
   // メッセージを物理的に削除せずに、senderDeleted または recipientDeleted を true に設定することで、各ユーザーの視点でメッセージを
   // 「削除」できます。クエリ時にこれらのフラグを確認することで、「削除された」メッセージを表示から除外できます。
   senderDeleted    Boolean   @default(false)
   recipientDeleted Boolean   @default(false)
+
+  senderId    String?
+  recipientId String?
+  sender      Member? @relation("sender", fields: [senderId], references: [userId], onDelete: SetNull)
+  recipient   Member? @relation("recipient", fields: [recipientId], references: [userId], onDelete: SetNull)
 }
 
 // 142 (Setting up tokens and resetting the Database)
